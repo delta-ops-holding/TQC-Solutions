@@ -25,7 +25,7 @@ namespace RestAPI.Data.DB
         {
             lock (_lock)
             {
-                if (string.IsNullOrEmpty(_connectionString)) _connectionString = $"Server=localhost; Database=tqcdb; Integrated Security=true;";
+                if (string.IsNullOrEmpty(_connectionString)) _connectionString = @"Server=VIOLURREOT\DEVELOPMENT; Database=tqcdb; Integrated Security=true;";
 
                 if (_sqlConnection == null) _sqlConnection = new SqlConnection(_connectionString);
             }
