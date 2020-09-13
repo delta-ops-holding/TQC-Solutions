@@ -8,7 +8,7 @@ namespace RestAPI.Data.Interfaces
     /// <summary>
     /// Functionality for Databases.
     /// </summary>
-    public interface IDatabase
+    public interface IDataAccess
     {
         public void OpenConnection();
 

@@ -1,4 +1,4 @@
-﻿using RestAPI.Data.DB;
+﻿using RestAPI.Data.DataAccess;
 using RestAPI.Data.Interfaces;
 using RestAPI.Data.Objects;
 using System;
@@ -19,20 +19,20 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_news_delete",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             newsCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             newsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public IEnumerable<News> GetAll()
@@ -42,11 +42,11 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_news_all",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader newsDataReader = newsCommand.ExecuteReader();
@@ -88,14 +88,14 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_news_get",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             newsCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader newsDataReader = newsCommand.ExecuteReader();
@@ -132,7 +132,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_news_insert",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -141,13 +141,13 @@ namespace RestAPI.Data
             newsCommand.Parameters.AddWithValue("@content", obj.Content);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             newsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public void Update(News obj)
@@ -157,7 +157,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_news_update",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -167,13 +167,13 @@ namespace RestAPI.Data
             newsCommand.Parameters.AddWithValue("@content", obj.Content);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             newsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
     }
 }

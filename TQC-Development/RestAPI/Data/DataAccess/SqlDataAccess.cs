@@ -6,14 +6,15 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RestAPI.Data.DB
+namespace RestAPI.Data.DataAccess
 {
     /// <summary>
     /// Handles connection to the database, implements <see cref="IDatabase"/>
     /// </summary>
-    public class Database : IDatabase
+    public class SqlDataAccess : IDataAccess, IDisposable
+
     {
-        private static Database _instance = null;
+        private static SqlDataAccess _instance = null;
         private static SqlConnection _sqlConnection = null;
         private static readonly object _lock = new object();
         private static string _connectionString = string.Empty;
@@ -21,7 +22,7 @@ namespace RestAPI.Data.DB
         /// <summary>
         /// Contructor for the Database, initializes new SqlConnection uppon creation, and applies connection string.
         /// </summary>
-        private Database()
+        private SqlDataAccess()
         {
             lock (_lock)
             {
@@ -34,13 +35,13 @@ namespace RestAPI.Data.DB
         /// <summary>
         /// Instance of the database.
         /// </summary>
-        public static Database Instance
+        public static SqlDataAccess Instance
         {
             get
             {
                 lock (_lock)
                 {
-                    if (_instance == null) _instance = new Database();
+                    if (_instance == null) _instance = new SqlDataAccess();
 
                     return _instance;
                 }
@@ -94,6 +95,11 @@ namespace RestAPI.Data.DB
             {
                 throw;
             }
+        }
+
+        public void Dispose()
+        {
+            ((IDisposable)_instance).Dispose();
         }
     }
 }

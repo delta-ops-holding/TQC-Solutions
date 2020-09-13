@@ -1,4 +1,4 @@
-﻿using RestAPI.Data.DB;
+﻿using RestAPI.Data.DataAccess;
 using RestAPI.Data.Interfaces;
 using RestAPI.Data.Objects;
 using System;
@@ -19,20 +19,20 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_aboutus_delete",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             aboutUsCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             aboutUsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public IEnumerable<AboutUs> GetAll()
@@ -42,11 +42,11 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_aboutus_all",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader aboutUsDataReader = aboutUsCommand.ExecuteReader();
@@ -88,14 +88,14 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_aboutus_get",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             aboutUsCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader aboutUsDataReader = aboutUsCommand.ExecuteReader();
@@ -132,7 +132,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_aboutus_insert",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -141,13 +141,13 @@ namespace RestAPI.Data
             aboutUsCommand.Parameters.AddWithValue("@vision", obj.Vision);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             aboutUsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public void Update(AboutUs obj)
@@ -157,7 +157,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_aboutus_update",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -167,13 +167,13 @@ namespace RestAPI.Data
             aboutUsCommand.Parameters.AddWithValue("@vision", obj.Vision);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             aboutUsCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
     }
 }

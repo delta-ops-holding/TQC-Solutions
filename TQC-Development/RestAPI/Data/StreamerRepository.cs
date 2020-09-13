@@ -1,4 +1,4 @@
-﻿using RestAPI.Data.DB;
+﻿using RestAPI.Data.DataAccess;
 using RestAPI.Data.Interfaces;
 using RestAPI.Data.Objects;
 using System;
@@ -19,20 +19,20 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_streamer_delete",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             streamerCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             streamerCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public IEnumerable<Streamer> GetAll()
@@ -42,11 +42,11 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_streamer_all",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader streamerDataReader = streamerCommand.ExecuteReader();
@@ -86,14 +86,14 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_streamer_get",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
             streamerCommand.Parameters.AddWithValue("@id", id);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Initialzie new data reader.
             using SqlDataReader streamerDataReader = streamerCommand.ExecuteReader();
@@ -128,7 +128,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_streamer_insert",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -137,13 +137,13 @@ namespace RestAPI.Data
             streamerCommand.Parameters.AddWithValue("@streamerImageURL", obj.StreamerImageURL);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             streamerCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
 
         public void Update(Streamer obj)
@@ -153,7 +153,7 @@ namespace RestAPI.Data
             {
                 CommandText = "proc_streamer_update",
                 CommandType = CommandType.StoredProcedure,
-                Connection = Database.Instance.GetSqlConnection
+                Connection = SqlDataAccess.Instance.GetSqlConnection
             };
 
             // Define input parameters.
@@ -163,13 +163,13 @@ namespace RestAPI.Data
             streamerCommand.Parameters.AddWithValue("@streamerImageURL", obj.StreamerImageURL);
 
             // Open connection to database.
-            Database.Instance.OpenConnection();
+            SqlDataAccess.Instance.OpenConnection();
 
             // Execute news command.
             streamerCommand.ExecuteNonQuery();
 
             // Close connection to database.
-            Database.Instance.CloseConnection();
+            SqlDataAccess.Instance.CloseConnection();
         }
     }
 }
