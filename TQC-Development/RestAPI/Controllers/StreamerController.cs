@@ -11,7 +11,7 @@ using RestAPI.Data.Objects;
 
 namespace RestAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class StreamerController : ControllerBase
     {
@@ -19,9 +19,9 @@ namespace RestAPI.Controllers
 
         // GET: api/<AboutUsController>
         [HttpGet]
-        public ActionResult<List<Streamer>> Get()
+        public async Task<ActionResult<List<Streamer>>> Get()
         {
-            IEnumerable<Streamer> streamers = Repository.GetAll();
+            IEnumerable<Streamer> streamers = await Repository.GetAll();
 
             if (streamers == null) return NotFound();
 
@@ -30,11 +30,11 @@ namespace RestAPI.Controllers
 
         // GET api/<AboutUsController>/5
         [HttpGet("{id}")]
-        public ActionResult<Streamer> Get(int id)
+        public async Task<ActionResult<Streamer>> Get(int id)
         {
             if (id == 0) return NotFound();
 
-            Streamer data = Repository.GetById(id);
+            Streamer data = await Repository.GetById(id);
 
             if (data == null) return NotFound();
 

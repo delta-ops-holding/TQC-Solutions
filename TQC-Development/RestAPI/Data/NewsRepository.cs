@@ -35,7 +35,7 @@ namespace RestAPI.Data
             SqlDataAccess.Instance.CloseConnection();
         }
 
-        public IEnumerable<News> GetAll()
+        public async Task<IEnumerable<News>> GetAll()
         {
             // Initialzie new command obj.
             using SqlCommand newsCommand = new SqlCommand()
@@ -61,7 +61,7 @@ namespace RestAPI.Data
                 newsList = new List<News>();
 
                 // Read data.
-                while (newsDataReader.Read())
+                while (await newsDataReader.ReadAsync())
                 {
                     newsList.Add(
                         new News()
@@ -81,7 +81,7 @@ namespace RestAPI.Data
             return newsList;
         }
 
-        public News GetById(int id)
+        public async Task<News> GetById(int id)
         {
             // Initialzie new command obj.
             using SqlCommand newsCommand = new SqlCommand()
@@ -107,7 +107,7 @@ namespace RestAPI.Data
             if (newsDataReader.HasRows)
             {
                 // Read data.
-                while (newsDataReader.Read())
+                while (await newsDataReader.ReadAsync())
                 {
                     newsObj = new News()
                     {

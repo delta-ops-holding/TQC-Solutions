@@ -35,7 +35,7 @@ namespace RestAPI.Data
             SqlDataAccess.Instance.CloseConnection();
         }
 
-        public IEnumerable<AboutUs> GetAll()
+        public async Task<IEnumerable<AboutUs>> GetAll()
         {
             // Initialzie new command obj.
             using SqlCommand aboutUsCommand = new SqlCommand()
@@ -52,16 +52,13 @@ namespace RestAPI.Data
             using SqlDataReader aboutUsDataReader = aboutUsCommand.ExecuteReader();
 
             // Define temporary type.
-            List<AboutUs> aboutUsList = null;
+            IList<AboutUs> aboutUsList = new List<AboutUs>();
 
             // Check if any rows.
             if (aboutUsDataReader.HasRows)
             {
-                // Initialize new list of abouts.
-                aboutUsList = new List<AboutUs>();
-
                 // Read data.
-                while (aboutUsDataReader.Read())
+                while (await aboutUsDataReader.ReadAsync())
                 {
                     aboutUsList.Add(
                         new AboutUs()
@@ -81,7 +78,7 @@ namespace RestAPI.Data
             return aboutUsList;
         }
 
-        public AboutUs GetById(int id)
+        public async Task<AboutUs> GetById(int id)
         {
             // Initialzie new command obj.
             using SqlCommand aboutUsCommand = new SqlCommand()
@@ -107,7 +104,7 @@ namespace RestAPI.Data
             if (aboutUsDataReader.HasRows)
             {
                 // Read data.
-                while (aboutUsDataReader.Read())
+                while (await aboutUsDataReader.ReadAsync())
                 {
                     aboutUsObj = new AboutUs()
                     {

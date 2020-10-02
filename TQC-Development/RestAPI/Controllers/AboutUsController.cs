@@ -11,7 +11,7 @@ using RestAPI.Data.Objects;
 
 namespace RestAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class AboutUsController : ControllerBase
     {
@@ -19,9 +19,9 @@ namespace RestAPI.Controllers
 
         // GET: api/<AboutUsController>
         [HttpGet]
-        public ActionResult<List<AboutUs>> Get()
+        public async Task<ActionResult<IEnumerable<AboutUs>>> Get()
         {
-            IEnumerable<AboutUs> abouts = Repository.GetAll();
+            IEnumerable<AboutUs> abouts = await Repository.GetAll();
 
             if (abouts == null) return NotFound();
 
@@ -30,11 +30,11 @@ namespace RestAPI.Controllers
 
         // GET api/<AboutUsController>/5
         [HttpGet("{id}")]
-        public ActionResult<AboutUs> Get(int id)
+        public async Task<ActionResult<AboutUs>> Get(int id)
         {
             if (id == 0) return NotFound();
 
-            AboutUs data = Repository.GetById(id);
+            AboutUs data = await Repository.GetById(id);
 
             if (data == null) return NotFound();
 

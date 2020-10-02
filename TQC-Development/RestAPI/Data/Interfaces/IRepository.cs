@@ -14,32 +14,32 @@ namespace RestAPI.Data.Interfaces
         /// <summary>
         /// Inserts a new type.
         /// </summary>
-        /// <param name="obj">The type of the object to insert.</param>
-        public void Insert(T obj);
+        /// <param name="insert">The type of the object to insert.</param>
+        void Insert(T insert);
 
         /// <summary>
         /// Updates an existing type.
         /// </summary>
-        /// <param name="obj">Defines the data to update.</param>
-        public void Update(T obj);
+        /// <param name="update">Defines the data to update.</param>
+        void Update(T update);
 
         /// <summary>
         /// Deletes a type by id.
         /// </summary>
         /// <param name="id">Used to identify the type to delete.</param>
-        public void Delete(int id);
+        void Delete(int id);
 
         /// <summary>
         /// Get a type by id.
         /// </summary>
         /// <param name="id">Used to identify the type to get.</param>
         /// <returns>A type.</returns>
-        public T GetById(int id);
+        Task<T> GetById(int id);
 
         /// <summary>
         /// Get all types.
         /// </summary>
         /// <returns>An <see cref="IEnumerable{T}"/>.</returns>
-        public IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAll();
     }
 }

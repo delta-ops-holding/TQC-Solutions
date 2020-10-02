@@ -35,7 +35,7 @@ namespace RestAPI.Data
             SqlDataAccess.Instance.CloseConnection();
         }
 
-        public IEnumerable<Streamer> GetAll()
+        public async Task<IEnumerable<Streamer>> GetAll()
         {
             // Initialzie new command obj.
             using SqlCommand streamerCommand = new SqlCommand()
@@ -61,7 +61,7 @@ namespace RestAPI.Data
                 streamersList = new List<Streamer>();
 
                 // Read data.
-                while (streamerDataReader.Read())
+                while (await streamerDataReader.ReadAsync())
                 {
                     streamersList.Add(
                         new Streamer()
@@ -79,7 +79,7 @@ namespace RestAPI.Data
             return streamersList;
         }
 
-        public Streamer GetById(int id)
+        public async Task<Streamer> GetById(int id)
         {
             // Initialzie new command obj.
             using SqlCommand streamerCommand = new SqlCommand()
@@ -105,7 +105,7 @@ namespace RestAPI.Data
             if (streamerDataReader.HasRows)
             {
                 // Read data.
-                while (streamerDataReader.Read())
+                while (await streamerDataReader.ReadAsync())
                 {
                     streamerObj = new Streamer()
                     {

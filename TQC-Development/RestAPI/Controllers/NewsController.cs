@@ -10,7 +10,7 @@ using RestAPI.Data.Objects;
 
 namespace RestAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class NewsController : ControllerBase
     {
@@ -18,9 +18,9 @@ namespace RestAPI.Controllers
 
         // GET: api/News
         [HttpGet]
-        public ActionResult<List<News>> Get()
+        public async Task<ActionResult<List<News>>> Get()
         {
-            IEnumerable<News> news = Repository.GetAll();
+            IEnumerable<News> news = await Repository.GetAll();
 
             if (news == null) return NotFound();
 
@@ -29,11 +29,11 @@ namespace RestAPI.Controllers
 
         // GET: api/News/5
         [HttpGet("{id}")]
-        public ActionResult<News> Get(int id)
+        public async Task<ActionResult<News>> Get(int id)
         {
             if (id == 0) return NotFound();
 
-            News data = Repository.GetById(id);
+            News data = await Repository.GetById(id);
 
             if (data == null) return NotFound();
 
