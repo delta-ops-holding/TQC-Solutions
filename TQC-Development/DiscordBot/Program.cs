@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordBot.Services;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace DiscordBot
         private const string DiscordToken = "DiscordToken";
         private DiscordSocketClient _client;
         private DiscordSocketConfig _config;
+        private IService _service;
 
         public async Task MainAsync()
         {
@@ -28,6 +30,7 @@ namespace DiscordBot
 
             // Client assignment.
             _client = new DiscordSocketClient(_config);
+            _service = new EventService(_client);
 
             // Events.
             _client.ReactionAdded += ReactionAdded;
@@ -51,32 +54,9 @@ namespace DiscordBot
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            Console.WriteLine($"Reaction Fired!");
-
             var message = await arg1.GetOrDownloadAsync();
 
-            if (arg3.MessageId == 761705280781811712)
-            {
-                if (arg3.Emote is Emote emote)
-                {
-                    switch (emote.Name)
-                    {
-                        case "PanWoah":
-                            Console.WriteLine($"Test");
-                            await arg3.User.GetValueOrDefault().SendMessageAsync($"Test");
-
-                            ulong channelId = 761715122736463904;
-                            var channel = _client.GetChannel(channelId) as IMessageChannel;
-                            await channel.SendMessageAsync($"Test to server channel.");
-
-                            await message.RemoveReactionAsync(emote, arg3.UserId);                            
-                            break;
-                        default:
-                            Console.WriteLine($"No Work.");
-                            break;
-                    }
-                }
-            }
+            await _service.ReactionAddedAsync(message, arg2, arg3);
 
             await Task.CompletedTask;
         }
