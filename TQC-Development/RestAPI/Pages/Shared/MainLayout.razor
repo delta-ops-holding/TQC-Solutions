@@ -4,29 +4,45 @@
 
 @inherits LayoutComponentBase
 
-<section id="navigation">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="#">The Queens' Court</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarText">
-                <ul class="navbar-nav mr-auto">
-
-                </ul>
-                <span class="navbar-text">
-                    Smart and intelligent API for the community.
-                </span>
-            </div>
+<section id="menu">
+    <nav class="navbar navbar-dark">
+        <div class="text-center">
+            <a class="navbar-brand">Docs</a>
         </div>
     </nav>
+
+    <section id="docs">
+        <nav class="nav nav-pills flex-column px-2 py-1">
+            <NavLink class="flex-sm-fill text-sm-left text-lg-center nav-link" href="#ClanDocs" Match="NavLinkMatch.Prefix">Clan</NavLink>
+            <NavLink class="flex-sm-fill text-sm-left text-lg-center nav-link" href="#AboutUsDocs" Match="NavLinkMatch.Prefix">About Us</NavLink>
+            <NavLink class="flex-sm-fill text-sm-left text-lg-center nav-link" href="#NewsDocs" Match="NavLinkMatch.Prefix">News</NavLink>
+            <NavLink class="flex-sm-fill text-sm-left text-lg-center nav-link" href="#TqcStreamersDocs" Match="NavLinkMatch.Prefix">TQC Streamers</NavLink>
+        </nav>
+    </section>
 </section>
 
 <section id="main">
-    <main class="container">
-        @Body
-    </main>
+    <section id="navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">The Queens' Court</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <span class="navbar-text ml-auto">
+                        Smart and intelligent API for the community.
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <section id="content">
+        <div class="container-fluid">
+            @Body
+        </div>
+    </section>
 </section>
 
 @code {
