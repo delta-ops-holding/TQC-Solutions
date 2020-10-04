@@ -96,6 +96,7 @@
     </Compile>
     <Compile Include="Managers\AboutUsService.cs" />
     <Compile Include="Managers\ClanService.cs" />
+    <Compile Include="Managers\Data\DataAccessManager.cs" />
     <Compile Include="Managers\Data\SqlDataAccess.cs" />
     <Compile Include="Managers\NewsService.cs" />
     <Compile Include="Managers\TwitchStreamService.cs" />

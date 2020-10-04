@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ApiEmily.Managers.Data;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -25,7 +26,7 @@ namespace ApiEmily.Models.Data
         {
             lock (_lock)
             {
-                if (string.IsNullOrEmpty(_connectionString)) _connectionString = @"Server=VIOLURREOT\DEVELOPMENT; Database=tqcdb; Integrated Security=true;";
+                if (string.IsNullOrEmpty(_connectionString)) _connectionString = DataAccessManager.GetDatabaseConfigurationString("TqcDb");
 
                 if (_sqlConnection == null) _sqlConnection = new SqlConnection(_connectionString);
             }
