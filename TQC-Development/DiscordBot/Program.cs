@@ -12,7 +12,10 @@ namespace DiscordBot
     public class Program
     {
         public static void Main(string[] args)
-            => new Program().MainAsync().GetAwaiter().GetResult();
+            => new Program()
+            .MainAsync()
+            .GetAwaiter()
+            .GetResult();
 
         private const string DiscordToken = "DiscordToken";
         private DiscordSocketClient _client;
@@ -30,7 +33,7 @@ namespace DiscordBot
 
             // Client assignment.
             _client = new DiscordSocketClient(_config);
-            _service = new EventService(_client);
+            _service = new ReactionService(_client);
 
             // Events.
             _client.ReactionAdded += ReactionAdded;
@@ -46,7 +49,7 @@ namespace DiscordBot
 
             await _client.StartAsync();
 
-            
+
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
