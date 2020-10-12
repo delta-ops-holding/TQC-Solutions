@@ -55,13 +55,11 @@ namespace DiscordBot
             await Task.Delay(-1);
         }
 
-        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> userMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
-            var message = await arg1.GetOrDownloadAsync();
+            var message = await userMessage.GetOrDownloadAsync();
 
-            await _service.ReactionAddedAsync(message, arg2, arg3);
-
-            await Task.CompletedTask;
+            await _service.ReactionAddedAsync(message, socketReaction);
         }
 
         private Task Log(LogMessage logMsg)

@@ -9,7 +9,14 @@ namespace DiscordBot.Services
 {
     public class ReactionService : IService
     {
-        private readonly ulong _channelId = 761715122736463904;
+        private readonly ulong _messageIdForSteamClanReactions = 0;
+        private readonly ulong _messageIdForPsnClanReactions = 0;
+        private readonly ulong _messageIdForXboxClanReactions = 0;
+
+        private readonly ulong _channeIdForSteamClanRegistrations = 761715122736463904;
+        private readonly ulong _channeIdForPsnClanRegistrations = 761715122736463904;
+        private readonly ulong _channeIdForXboxClanRegistrations = 761715122736463904;
+
         private readonly DiscordSocketClient _client;
 
         public ReactionService(DiscordSocketClient client)
@@ -17,52 +24,126 @@ namespace DiscordBot.Services
             _client = client;
         }
 
-        public async Task ReactionAddedAsync(IUserMessage userMessage, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        public async Task ReactionAddedAsync(IUserMessage userMessage, SocketReaction reaction)
         {
-            Console.WriteLine($"Service Works!");
-
-            // Get Correct Message.
-            if (reaction.MessageId == 761705280781811712)
+            // Check for different message channels.
+            switch (reaction.MessageId)
             {
-                // Make sure it's an emote.
-                if (reaction.Emote is Emote reactedEmote)
-                {
-                    // Send Messages.
-                    await SendConfirmationMessages(reaction, reactedEmote);
-
-                    // Remove User Reaction after confirmed.
-                    await userMessage.RemoveReactionAsync(reactedEmote, reaction.UserId);
-                }
+                case 1: // Debug Message
+                    await GetClanName(reaction, (Emote)reaction.Emote, 1);
+                    break;
+                case 2:
+                    await GetClanName(reaction, (Emote)reaction.Emote, 2);
+                    break;
+                case 3:
+                    await GetClanName(reaction, (Emote)reaction.Emote, 3);
+                    break;
+                default:
+                    await Task.CompletedTask;
+                    break;
             }
 
-            await Task.CompletedTask;
+            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }
 
-        private async Task SendConfirmationMessages(SocketReaction reaction, Emote emote)
+        private async Task GetClanName(SocketReaction reaction, Emote emote, byte platformNumber)
         {
-            // Get the Channel for the admin server.
-            var channel = _client.GetChannel(_channelId) as IMessageChannel;
-
-            // Define empty message.
-            var message = string.Empty;
+            // Define empty clan name.
+            var clanName = string.Empty;
 
             // Switch on emotes being reacted on.
             switch (emote.Id)
             {
-                case 653026889769943060: // Pike Emote
-                    message = $"Pika Emoji Confirmed.";
+                case 653026889769943060: // Pika Emote
+                    clanName = $"{ClanNames.TRΔNSIENT}";
+                    break;
+                case 2:
+                    clanName = $"{ClanNames.TENΔCITY}";
+                    break;
+                case 3:
+                    clanName = $"{ClanNames.ΔEGIS}";
+                    break;
+                case 4:
+                    clanName = $"{ClanNames.ETHEREΔL}";
+                    break;
+                case 5:
+                    clanName = $"{ClanNames.CELESTIΔL}";
+                    break;
+                case 6:
+                    clanName = $"{ClanNames.DEFIΔNCE}";
+                    break;
+                case 7:
+                    clanName = $"{ClanNames.VIGILΔNT}";
+                    break;
+                case 8:
+                    clanName = $"{ClanNames.TRΔNQUILITY}";
+                    break;
+                case 9:
+                    clanName = $"{ClanNames.ETERNΔL}";
+                    break;
+                case 10:
+                    clanName = $"{ClanNames.EPHEMERΔ}";
+                    break;
+                case 11:
+                    clanName = $"{ClanNames.SHΔDOW}";
+                    break;
+            }
+
+            if (!String.IsNullOrEmpty(clanName))
+            {
+                await NotifyUserAsync(reaction.User.Value, clanName);
+                await NotifyAdminAsync(platformNumber, reaction.User.Value, clanName);
+            }
+            else
+                await reaction.User.Value.SendMessageAsync($"Could not find the Clan. Contact an admin or try again later.");
+        }
+
+        private async Task NotifyUserAsync(IUser user, string clanName)
+        {
+            await user.SendMessageAsync($"Hello Guardian. You're successfully signed up for the clan, {clanName}. Please await patiently for an admin to proceed your request.");
+        }
+
+        private async Task NotifyAdminAsync(byte platformId, IUser user, string clanName)
+        {
+            ulong channelId = 0;
+
+            var embed = new EmbedBuilder()
+            {
+                Title = "Clan Registration!",
+                Description = $"{user.Mention}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian."
+            };
+
+            // Switch on platform id.
+            switch (platformId)
+            {
+                case 1:
+                    channelId = _channeIdForSteamClanRegistrations;
+                    embed.Color = Color.LightGrey;
+                    embed.WithFooter(clanName, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/240px-Steam_icon_logo.svg.png").WithCurrentTimestamp();
+                    break;
+                case 2:
+                    channelId = _channeIdForPsnClanRegistrations;
+                    embed.Color = Color.Blue;
+                    embed.WithFooter(clanName, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/240px-Steam_icon_logo.svg.png").WithCurrentTimestamp();
+                    break;
+                case 3:
+                    channelId = _channeIdForXboxClanRegistrations;
+                    embed.Color = Color.Green;
+                    embed.WithFooter(clanName, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/240px-Steam_icon_logo.svg.png").WithCurrentTimestamp();
                     break;
                 default:
                     break;
             }
 
-            // Send Confirmation message to user who reacted.
-            await reaction.User.Value.SendMessageAsync(message);
+            var channel = _client.GetChannel(channelId) as IMessageChannel;
+            await channel.SendMessageAsync(embed: embed.Build());
+        }
 
-            // Send Confirmation message to admin channel, about what user reacted and to what clan.
-            await channel.SendMessageAsync($"{message} by <@{reaction.User.Value.Id}>");
-
-            await Task.CompletedTask;
+        public enum ClanNames
+        {
+            TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL,
+            DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL,
+            EPHEMERΔ, SHΔDOW
         }
     }
 }

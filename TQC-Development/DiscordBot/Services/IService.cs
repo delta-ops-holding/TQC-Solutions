@@ -9,6 +9,6 @@ namespace DiscordBot.Services
 {
     public interface IService
     {
-        Task ReactionAddedAsync(IUserMessage userMessage, ISocketMessageChannel messageChannel, SocketReaction reaction);
+        Task ReactionAddedAsync(IUserMessage userMessage, SocketReaction reaction);
     }
 }
