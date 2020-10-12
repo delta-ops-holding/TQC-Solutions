@@ -33,7 +33,7 @@ namespace DiscordBot
 
             // Client assignment.
             _client = new DiscordSocketClient(_config);
-            _service = new ReactionService(_client);
+            _service = new ReactionService(_client);    
 
             // Events.
             _client.ReactionAdded += ReactionAdded;
@@ -48,8 +48,6 @@ namespace DiscordBot
                 Environment.GetEnvironmentVariable(DiscordToken));
 
             await _client.StartAsync();
-
-
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
