@@ -351,3 +351,4 @@ MigrationBackup/
 *.config
 TQC-Development/ApiEmily/Web.config
 TQC-Development/DiscordBot/Properties/launchSettings.json
+*.json

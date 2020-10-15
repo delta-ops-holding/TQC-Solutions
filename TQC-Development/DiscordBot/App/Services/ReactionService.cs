@@ -24,23 +24,21 @@ namespace DiscordBot.Services
                 // Steam / PC | pc-clans
                 case 765277945194348544:
                     await GetClanName(reaction, (Emote)reaction.Emote, 1);
+                    await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
                     break;
 
                 // Playstation | ps4-clans
                 case 765277969278042132:
                     await GetClanName(reaction, (Emote)reaction.Emote, 2);
+                    await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
                     break;
 
                 // Xbox | xbox-clans
                 case 765277993454534667:
                     await GetClanName(reaction, (Emote)reaction.Emote, 3);
-                    break;
-
-                default:
+                    await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
                     break;
             }
-
-            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }
 
         private async Task GetClanName(SocketReaction reaction, Emote emote, byte platformNumber)
