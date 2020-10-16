@@ -106,7 +106,7 @@ namespace DiscordBot.Services
             var embed = new EmbedBuilder()
             {
                 Title = "New Clan Application Arrived!",
-                Description = $"<@{user.Id}>, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian."
+                Description = $"{user.Username}#{user.DiscriminatorValue}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian."
             };
 
             // Switch on platform id.
