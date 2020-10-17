@@ -79,7 +79,7 @@ namespace DiscordBot.Services
                 case 765283634247893002:
                     clanName = ClanNames.EPHEMERΔ;
                     break;
-                case 0:
+                case 767090159211905054:
                     clanName = ClanNames.SHΔDOW;
                     break;
             }
@@ -100,7 +100,10 @@ namespace DiscordBot.Services
 
         private async Task NotifyAdminAsync(byte platformId, IUser user, ClanNames clanName)
         {
+            // The Channel which the clan is registered to.
             ulong channelId = 0;
+
+            // Pings the associated Role.
             string pingMessage = string.Empty;
 
             var embed = new EmbedBuilder()
@@ -173,6 +176,10 @@ namespace DiscordBot.Services
                         case ClanNames.EPHEMERΔ:
                             pingMessage = "<@&694675786111647814>!";
                             channelId = 694238798892236800;
+                            break;
+                        case ClanNames.SHΔDOW:
+                            pingMessage = "<@&725837886427234354>!";
+                            channelId = 767091602794872902;
                             break;
                     }
 
