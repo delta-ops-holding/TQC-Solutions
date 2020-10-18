@@ -102,6 +102,7 @@ namespace DiscordBot.Services
         {
             // The Channel which the clan is registered to.
             ulong channelId = 0;
+            ulong mainChannelId = 767474913308835880;
 
             // Pings the associated Role.
             string pingMessage = string.Empty;
@@ -192,7 +193,7 @@ namespace DiscordBot.Services
 
             if (channelId != 0)
             {
-                var channel = _client.GetChannel(channelId) as IMessageChannel;
+                var channel = _client.GetChannel(mainChannelId) as IMessageChannel;
                 await channel.SendMessageAsync(text: pingMessage, embed: embed.Build());
             }
         }
