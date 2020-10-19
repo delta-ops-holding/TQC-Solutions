@@ -39,6 +39,8 @@ namespace DiscordBot.Services
                     await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
                     break;
             }
+
+            await Task.CompletedTask;
         }
 
         private async Task GetClanName(SocketReaction reaction, Emote emote, byte platformNumber)
@@ -91,11 +93,14 @@ namespace DiscordBot.Services
             }
             else
                 await reaction.User.Value.SendMessageAsync($"Could not find the Clan. Contact an admin or try again later.");
+
+            await Task.CompletedTask;
         }
 
         private async Task NotifyUserAsync(IUser user, ClanNames clanName)
         {
             await user.SendMessageAsync($"Hello Guardian. You're successfully signed up for the clan, {clanName}. Please await patiently for an admin to proceed your request.");
+            await Task.CompletedTask;
         }
 
         private async Task NotifyAdminAsync(byte platformId, IUser user, ClanNames clanName)
@@ -196,6 +201,8 @@ namespace DiscordBot.Services
                 var channel = _client.GetChannel(mainChannelId) as IMessageChannel;
                 await channel.SendMessageAsync(text: pingMessage, embed: embed.Build());
             }
+
+            await Task.CompletedTask;
         }
 
         public enum ClanNames
