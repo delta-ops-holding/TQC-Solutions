@@ -16,7 +16,9 @@ namespace DiscordBot.Interfaces
         /// <returns>An enumerable of <see cref="Name.ClanNames"/>.</returns>
         public static Name.ClanNames GetClanName(IEmote emote)
         {
-            return ((Emote)emote).Id switch
+            var e = emote as Emote;
+
+            return e.Id switch
             {
                 765283689957294121 => Name.ClanNames.TRΔNSIENT,
                 765283671455825962 => Name.ClanNames.TENΔCITY,
