@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Interfaces
 {
-    public class ReactionService : IService
+    public class ReactionService : IReactable
     {
         private readonly DiscordSocketClient _client;
 
