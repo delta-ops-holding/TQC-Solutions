@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordBot.Interfaces;
 using DiscordBot.Models;
 using System;
 using System.Collections.Generic;
@@ -7,16 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Interfaces
+namespace DiscordBot.Services
 {
-    public class TestService : IReactable
+    public class ReactionServiceV2 : IReactable
     {
         private const uint DelayTimerInHours = 24;
         private static Stack<User> _temporaryRuntimeUsers = new Stack<User>(20);
         private readonly INotifiable _notifiable;
         private readonly ILoggable _loggable;
-        
-        public TestService(
+
+        public ReactionServiceV2(
             INotifiable notificationService,
             ILoggable logService
         )

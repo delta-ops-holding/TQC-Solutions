@@ -18,7 +18,6 @@ namespace DiscordBot
             .GetAwaiter()
             .GetResult();
 
-        private const string DiscordToken = "DiscordToken";
         private DiscordSocketClient _client;
         private DiscordSocketConfig _config;
         private IReactable _reactable;
@@ -38,10 +37,13 @@ namespace DiscordBot
             _client = new DiscordSocketClient(_config);
 
             // Service Injections.
-            //_service = new ReactionService(_client);
             _loggable = new LogService();
             _notifiable = new NotificationService(_client);
-            _reactable = new TestService(_notifiable, _loggable);
+
+            //_service = new ReactionService(_client);                  // V1
+            _reactable = new ReactionServiceV2(_notifiable, _loggable); // V2
+
+            //_reactable = new TestService(_notifiable, _loggable);     // Debugging for testing new service.
 
             // Events.
             _client.ReactionAdded += ReactionAdded;
