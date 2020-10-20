@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Interfaces;
 using DiscordBot.Models;
@@ -36,7 +37,14 @@ namespace DiscordBot.Services
                     u.UserId == reaction.UserId &&
                     (startTime - u.Date).TotalHours <= DelayTimerInHours))
             {
-                await reaction.User.Value.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining a delta clan.");
+                try
+                {
+                    await reaction.User.Value.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining a delta clan.");
+                }
+                catch (HttpException)
+                {
+                    await _loggable.Log(new LogMessage(LogSeverity.Error, "Reaction Added", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                }
                 await _loggable.Log(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
             }
             else

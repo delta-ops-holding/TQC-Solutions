@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Models;
 using System;
@@ -11,10 +12,12 @@ namespace DiscordBot.Interfaces
     public class NotificationService : INotifiable
     {
         private readonly DiscordSocketClient _client;
+        private readonly ILoggable _loggable;
 
-        public NotificationService(DiscordSocketClient client)
+        public NotificationService(DiscordSocketClient client, ILoggable loggable)
         {
             _client = client;
+            _loggable = loggable;
         }
 
         public async Task NotifyAdminAsync(byte platformId, IUser discordUser, Name.ClanNames clanName)
@@ -58,7 +61,14 @@ namespace DiscordBot.Interfaces
 
         public async Task NotifyUserAsync(IUser discordUser, Name.ClanNames clanName)
         {
-            await discordUser.SendMessageAsync($"Hello Guardian. You're successfully signed up for the clan, {clanName}. Please await patiently for an admin to proceed your request.");
+            try
+            {
+                await discordUser.SendMessageAsync($"Hello Guardian. You're successfully signed up for the clan, {clanName}. Please await patiently for an admin to proceed your request.");
+            }
+            catch (HttpException)
+            {
+                await _loggable.Log(new LogMessage(LogSeverity.Error, "Reaction Added", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+            }
         }
     }
 }
