@@ -12,12 +12,14 @@ namespace DiscordBot.Interfaces
     public class NotificationService : INotifiable
     {
         private readonly DiscordSocketClient _client;
+        private readonly DataService _dataService;
         private readonly ILoggable _loggable;
 
-        public NotificationService(DiscordSocketClient client, ILoggable loggable)
+        public NotificationService(DiscordSocketClient client, ILoggable loggable, DataService dataService)
         {
             _client = client;
             _loggable = loggable;
+            _dataService = dataService;
         }
 
         public async Task NotifyAdminAsync(byte platformId, IUser discordUser, Name.ClanNames clanName)
@@ -27,7 +29,7 @@ namespace DiscordBot.Interfaces
             ulong mainChannelId = 767474913308835880; // Channel on the admin server to post in.
             ulong debugChannelId = 768014874289766402; // Dev Server, to test bot.
 
-            var pingRole = DataService.GetPingRole(clanName);
+            var pingRole = _dataService.GetPingRole(clanName);
             var messageChannel = _client.GetChannel(mainChannelId) as IMessageChannel;
 
             var embedMessage = new EmbedBuilder()

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace DiscordBot.Interfaces
 {
-    public static class DataService
+    public class DataService
     {
         /// <summary>
         /// Gets the clan name, by a given emote.
@@ -14,7 +14,7 @@ namespace DiscordBot.Interfaces
         /// <remarks>Returns Undefined, if no emotes is matched.</remarks>
         /// <param name="emote"></param>
         /// <returns>An enumerable of <see cref="Name.ClanNames"/>.</returns>
-        public static Name.ClanNames GetClanName(IEmote emote)
+        public Name.ClanNames GetClanName(IEmote emote)
         {
             var e = emote as Emote;
 
@@ -33,9 +33,25 @@ namespace DiscordBot.Interfaces
                 767090159211905054 => Name.ClanNames.SHΔDOW,
                 _ => Name.ClanNames.Undefined,
             };
+
+            //return e.Name switch
+            //{
+            //    "transient" => Name.ClanNames.TRΔNSIENT,
+            //    "tenacity" => Name.ClanNames.TENΔCITY,
+            //    "aegis" => Name.ClanNames.ΔEGIS,
+            //    "ethereal" => Name.ClanNames.ETHEREΔL,
+            //    "celestial" => Name.ClanNames.CELESTIΔL,
+            //    "defiance" => Name.ClanNames.DEFIΔNCE,
+            //    "vigilant" => Name.ClanNames.VIGILΔNT,
+            //    "tranquility" => Name.ClanNames.TRΔNQUILITY,
+            //    "eternal" => Name.ClanNames.ETERNΔL,
+            //    "ephemera" => Name.ClanNames.EPHEMERΔ,
+            //    "shadow" => Name.ClanNames.SHΔDOW,
+            //    _ => Name.ClanNames.Undefined,
+            //};
         }
 
-        public static string GetPingRole(Name.ClanNames clanName)
+        public string GetPingRole(Name.ClanNames clanName)
         {
             return clanName switch
             {

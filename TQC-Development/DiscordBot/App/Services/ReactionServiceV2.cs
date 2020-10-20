@@ -15,22 +15,25 @@ namespace DiscordBot.Services
     {
         private const uint DelayTimerInHours = 24;
         private static Stack<User> _temporaryRuntimeUsers = new Stack<User>(20);
+        private readonly DataService _dataService;
         private readonly INotifiable _notifiable;
         private readonly ILoggable _loggable;
 
         public ReactionServiceV2(
             INotifiable notificationService,
-            ILoggable logService
+            ILoggable logService,
+            DataService dataService
         )
         {
             _notifiable = notificationService;
             _loggable = logService;
+            _dataService = dataService;
         }
 
         public async Task ReactionAddedAsync(IUserMessage userMessage, SocketReaction reaction)
         {
             var startTime = DateTimeOffset.UtcNow;
-            var clanName = DataService.GetClanName(reaction.Emote);
+            var clanName = _dataService.GetClanName(reaction.Emote);
 
             if (_temporaryRuntimeUsers.Any(
                 u =>
@@ -72,10 +75,10 @@ namespace DiscordBot.Services
                         await _notifiable.NotifyAdminAsync(3, reaction.User.Value, clanName);
                         break;
 
-                    // Debug Default.
-                    default:
-                        await _notifiable.NotifyAdminAsync(1, reaction.User.Value, clanName);
-                        break;
+                        // Debug Default.
+                        //default:
+                        //    await _notifiable.NotifyAdminAsync(1, reaction.User.Value, clanName);
+                        //    break;
                 }
             }
 
