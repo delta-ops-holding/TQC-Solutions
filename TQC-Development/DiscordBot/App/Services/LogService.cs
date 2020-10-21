@@ -9,6 +9,11 @@ namespace DiscordBot.Services
 {
     public class LogService : ILoggable
     {
+        /// <summary>
+        /// Log to Console.
+        /// </summary>
+        /// <param name="logMessage">The message to log.</param>
+        /// <returns>A Completed Task.</returns>
         public Task Log(LogMessage logMessage)
         {
             Console.WriteLine(logMessage.ToString(padSource: 25));

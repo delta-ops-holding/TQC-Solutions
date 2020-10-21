@@ -16,7 +16,7 @@ namespace DiscordBot.Interfaces
             _client = client;
         }
 
-        public async Task ReactionAddedAsync(IUserMessage userMessage, SocketReaction reaction)
+        public async Task ClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
             // Switch on different channels.
             switch (reaction.Channel.Id)

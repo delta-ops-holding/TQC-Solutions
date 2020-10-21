@@ -33,24 +33,13 @@ namespace DiscordBot.Interfaces
                 767090159211905054 => Name.ClanNames.SHΔDOW,
                 _ => Name.ClanNames.Undefined,
             };
-
-            //return e.Name switch
-            //{
-            //    "transient" => Name.ClanNames.TRΔNSIENT,
-            //    "tenacity" => Name.ClanNames.TENΔCITY,
-            //    "aegis" => Name.ClanNames.ΔEGIS,
-            //    "ethereal" => Name.ClanNames.ETHEREΔL,
-            //    "celestial" => Name.ClanNames.CELESTIΔL,
-            //    "defiance" => Name.ClanNames.DEFIΔNCE,
-            //    "vigilant" => Name.ClanNames.VIGILΔNT,
-            //    "tranquility" => Name.ClanNames.TRΔNQUILITY,
-            //    "eternal" => Name.ClanNames.ETERNΔL,
-            //    "ephemera" => Name.ClanNames.EPHEMERΔ,
-            //    "shadow" => Name.ClanNames.SHΔDOW,
-            //    _ => Name.ClanNames.Undefined,
-            //};
         }
 
+        /// <summary>
+        /// Gets the role to ping, by given clan name.
+        /// </summary>
+        /// <param name="clanName">Used to identify the pinged role.</param>
+        /// <returns>A role to ping.</returns>
         public string GetPingRole(Name.ClanNames clanName)
         {
             return clanName switch

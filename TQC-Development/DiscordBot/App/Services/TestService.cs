@@ -25,10 +25,12 @@ namespace DiscordBot.Interfaces
             _loggable = logService;
         }
 
-        public async Task ReactionAddedAsync(IUserMessage userMessage, SocketReaction reaction)
+        public async Task ClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
+            DataService d = new DataService();
+
             var startTime = DateTimeOffset.UtcNow;
-            var clanName = DataService.GetClanName(reaction.Emote);
+            var clanName = d.GetClanName(reaction.Emote);
 
             if (_temporaryRuntimeUsers.Any(
                 u =>

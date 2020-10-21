@@ -6,6 +6,9 @@ namespace DiscordBot.Models
 {
     public static class Name
     {
+        /// <summary>
+        /// Supported clans available.
+        /// </summary>
         public enum ClanNames
         {
             Undefined,
