@@ -15,7 +15,7 @@ namespace DiscordBot
 {
     public class Program
     {
-        private const string DiscordToken = "NzY1Mjk3Mzk0NjQ4MjE5Njc4.X4SwvQ.r1iHC89xr5wTQUusEtvZOdXw0ig";
+        private const string DiscordToken = "Insert Token Here";
 
         public static void Main(string[] args)
             => new Program()
