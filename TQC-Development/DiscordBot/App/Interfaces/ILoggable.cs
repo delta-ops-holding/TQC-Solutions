@@ -15,7 +15,6 @@ namespace DiscordBot.Interfaces
         /// Logs a message.
         /// </summary>
         /// <param name="logMessage">Used to provide the message to log.</param>
-        /// <returns>A Completed Task.</returns>
         Task Log(LogMessage logMessage);
     }
 }

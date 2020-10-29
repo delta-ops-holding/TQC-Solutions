@@ -17,7 +17,6 @@ namespace DiscordBot.Interfaces
         /// </summary>
         /// <param name="userMessage">The reaction message.</param>
         /// <param name="reaction">Used to identity the reaction data.</param>
-        /// <returns>A Completed Task.</returns>
-        Task ClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction);
+        void SendClanApplication(IUserMessage userMessage, SocketReaction reaction);
     }
 }

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Interfaces
 {
-    public class ReactionService : IReactable
-    {
+    public class ReactionService// : IReactable
+    {/*
         private readonly DiscordSocketClient _client;
 
         public ReactionService(DiscordSocketClient client)
@@ -211,6 +211,6 @@ namespace DiscordBot.Interfaces
             TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL,
             DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL,
             EPHEMERΔ, SHΔDOW
-        }
+        }*/
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DiscordBot.Models
 {
-    public static class Name
+    public abstract class Name
     {
         /// <summary>
         /// Supported clans available.

@@ -33,13 +33,57 @@ namespace DiscordBot.Services
             _dataService = dataService;
         }
 
+        public async void SendClanApplication(IUserMessage userMessage, SocketReaction reaction)
+        {
+            DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+            Name.ClanNames clanName = _dataService.GetClanName(reaction.Emote);
+
+            if (!_temporaryRuntimeUsers.Any(u => u.UserId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours))
+            {
+                _temporaryRuntimeUsers.Push(new User() { UserId = reaction.UserId, Date = DateTimeOffset.UtcNow });
+                _notifiable.NotifyUserAsync(reaction.User.Value, clanName);
+
+                switch (reaction.Channel.Id)
+                {
+                    // Steam / PC | pc-clans
+                    case 765277945194348544:
+                        _notifiable.NotifyAdminAsync(1, reaction.User.Value, clanName);
+                        break;
+
+                    // Playstation | ps4-clans
+                    case 765277969278042132:
+                        _notifiable.NotifyAdminAsync(2, reaction.User.Value, clanName);
+                        break;
+
+                    // Xbox | xbox-clans
+                    case 765277993454534667:
+                        _notifiable.NotifyAdminAsync(3, reaction.User.Value, clanName);
+                        break;
+                }
+                await _loggable.Log(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
+            }
+            else
+            {
+                try
+                {
+                    await reaction.User.Value.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining a delta clan.");
+                }
+                catch (HttpException)
+                {
+                    await _loggable.Log(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                }
+                await _loggable.Log(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+            }
+            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
+        }
+
         /// <summary>
         /// Assigns a user to a clan application, a user can only react once per 24 hours.
         /// </summary>
         /// <param name="userMessage">Used to remove the user's reaction, when request is complete.</param>
         /// <param name="reaction">Used to identify the reaction given by the user.</param>
         /// <returns></returns>
-        public async Task ClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
+        /*public async Task ClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
             var currentDateTime = DateTimeOffset.UtcNow;
             var clanName = _dataService.GetClanName(reaction.Emote);
@@ -67,7 +111,7 @@ namespace DiscordBot.Services
                 _temporaryRuntimeUsers.Push(new User() { UserId = reaction.UserId, Date = DateTimeOffset.UtcNow });
 
                 // Notify user with the clan assignment.
-                await _notifiable.NotifyUserAsync(reaction.User.Value, clanName);
+                _notifiable.NotifyUserAsync(reaction.User.Value, clanName);
 
                 // Log Message, user has assigned to a delta clan.
                 await _loggable.Log(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
@@ -77,17 +121,17 @@ namespace DiscordBot.Services
                 {
                     // Steam / PC | pc-clans
                     case 765277945194348544:
-                        await _notifiable.NotifyAdminAsync(1, reaction.User.Value, clanName);
+                        _notifiable.NotifyAdminAsync(1, reaction.User.Value, clanName);
                         break;
 
                     // Playstation | ps4-clans
                     case 765277969278042132:
-                        await _notifiable.NotifyAdminAsync(2, reaction.User.Value, clanName);
+                        _notifiable.NotifyAdminAsync(2, reaction.User.Value, clanName);
                         break;
 
                     // Xbox | xbox-clans
                     case 765277993454534667:
-                        await _notifiable.NotifyAdminAsync(3, reaction.User.Value, clanName);
+                        _notifiable.NotifyAdminAsync(3, reaction.User.Value, clanName);
                         break;
 
                         // Debug Default.
@@ -99,6 +143,6 @@ namespace DiscordBot.Services
 
             // Remove User's reaction regardless if they are assigned, or tried to do multiple assignments.
             await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
-        }
+        }*/
     }
 }

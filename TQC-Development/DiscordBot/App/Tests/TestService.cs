@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using DiscordBot.Models;
+using DiscordBot.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Interfaces
 {
-    public class TestService : IReactable
-    {
+    public class TestService// : IReactable
+    {/*
         private const uint DelayTimerInHours = 24;
         private static Stack<User> _temporaryRuntimeUsers = new Stack<User>(20);
         private readonly INotifiable _notifiable;
@@ -73,6 +74,6 @@ namespace DiscordBot.Interfaces
             }
 
             await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
-        }
+        }*/
     }
 }

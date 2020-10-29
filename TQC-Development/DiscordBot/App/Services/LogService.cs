@@ -16,7 +16,7 @@ namespace DiscordBot.Services
         /// <returns>A Completed Task.</returns>
         public Task Log(LogMessage logMessage)
         {
-            Console.WriteLine(logMessage.ToString(padSource: 25));
+            Console.WriteLine(logMessage);
 
             return Task.CompletedTask;
         }
