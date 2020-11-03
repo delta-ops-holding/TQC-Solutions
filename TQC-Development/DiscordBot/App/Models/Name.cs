@@ -12,8 +12,8 @@ namespace DiscordBot.Models
         public enum ClanNames
         {
             Undefined,
-            TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL,
-            DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL,
+            TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL, MΔJESTIC,
+            DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL, IMMORTΔL,
             EPHEMERΔ, SHΔDOW
         }
     }

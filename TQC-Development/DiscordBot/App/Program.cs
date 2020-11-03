@@ -71,7 +71,7 @@ namespace DiscordBot
 
         private Task DownloadGuildUsers()
         {
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 Console.WriteLine("Loading Guilds..");
                 await Task.WhenAll(_client.Guilds.Select(g => g.DownloadUsersAsync()));
@@ -82,32 +82,36 @@ namespace DiscordBot
             return Task.CompletedTask;
         }
 
-        private async Task GuildAvailable(SocketGuild arg)
+        private Task GuildAvailable(SocketGuild arg)
         {
-            await _loggable.Log(new LogMessage(LogSeverity.Info, "Event", $"Guild is available {arg.Name}"));
+            _ = Task.Run(async () =>
+           {
+               await _loggable.Log(new LogMessage(LogSeverity.Info, "Event", $"Guild is available {arg.Name}"));
+           });
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
-            IUserMessage userMessage = cacheUserMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-
-            //Check if the reaction is from the corrects channels. (e.g.Steam, Xbox, Psn)
-            if (socketReaction.Channel.Id == 765277945194348544 || socketReaction.Channel.Id == 765277993454534667 || socketReaction.Channel.Id == 765277969278042132 || socketReaction.Channel.Id == 761687188341522492)
+            _ = Task.Run(() =>
             {
+                IUserMessage userMessage = cacheUserMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
 
-                if (socketReaction.User.IsSpecified)
+                //Check if the reaction is from the corrects channels. (e.g.Steam, Xbox, Psn)
+                if (socketReaction.Channel.Id == 765277945194348544 || socketReaction.Channel.Id == 765277993454534667 || socketReaction.Channel.Id == 765277969278042132 || socketReaction.Channel.Id == 761687188341522492)
                 {
-                    SendClanApplication(userMessage, socketReaction);
 
-                    return Task.CompletedTask;
+                    if (socketReaction.User.IsSpecified)
+                    {
+                        SendClanApplication(userMessage, socketReaction);
+                    }
+                    else
+                    {
+                        _loggable.Log(new LogMessage(LogSeverity.Info, "Reaction Added", $"User was not found i cache <{socketReaction.UserId}>"));
+                    }
                 }
-                else
-                {
-                    _loggable.Log(new LogMessage(LogSeverity.Info, "Reaction Added", $"User was not found i cache <{socketReaction.UserId}>"));
-                }
-            }
+            });
             return Task.CompletedTask;
         }
 
