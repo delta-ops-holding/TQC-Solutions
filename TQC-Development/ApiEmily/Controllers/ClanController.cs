@@ -1,88 +1,156 @@
 ﻿using ApiEmily.Managers;
+using ApiEmily.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace ApiEmily.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ClanController : ApiController
     {
-        private ClanService Service { get; set; } = new ClanService();
+        private const string API_VERSION = "v1";
 
-        [Route("v1/clan")]
+        private ClanService Service { get; } = new ClanService();
+
+        [Route(API_VERSION + "/clan")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllClans()
         {
-            var result = await Service.GetAllClans();
+            try
+            {
+                var result = await Service.GetClansAsync();
 
-            if (result.Count() == 0)
-                return NotFound();
+                if (result.Count() == 0)
+                    return NotFound();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception("Something went wrong while handling the request."));
+            }
         }
 
-        [Route("v1/clan/{id:int}")]
+        [Route(API_VERSION + "/clan/{id:uint}")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetClan(int id)
+        public async Task<IHttpActionResult> GetClan(uint id)
         {
-            var result = await Service.GetClanById(id);
+            try
+            {
+                if (id == 0) return BadRequest($"Parameter cannot be zero.");
 
-            if (result == null)
-                return NotFound();
+                if (uint.TryParse(id.ToString(), out uint identifier))
+                {
+                    Clan clan = await Service.GetClanAsync(identifier);
 
-            return Ok(result);
+                    if (clan == null) return NotFound();
+
+                    return Ok(clan);
+                }
+                else
+                    return BadRequest($"Parameter was in wrong data format.");
+
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+            }
         }
 
-        [Route("v1/clan/authority")]
+        [Route(API_VERSION + "/clan/authority")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllAuthorities()
         {
-            var result = await Service.GetAllAuthorities();
+            try
+            {
+                var result = await Service.GetMembersAsync();
 
-            if (result.Count() == 0)
-                return NotFound();
+                if (result.Count() == 0) return NotFound();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception("Something went wrong while handling the request."));
+            }
         }
 
-        [Route("v1/clan/authority/{id:int}")]
+        [Route(API_VERSION + "/clan/authority/{id:uint}")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetAuthority(int id)
+        public async Task<IHttpActionResult> GetAuthority(uint id)
         {
-            var result = await Service.GetAuthoritiesById(id);
+            try
+            {
+                if (id == 0) return BadRequest($"Parameter cannot be zero.");
 
-            if (result == null)
-                return NotFound();
+                if (uint.TryParse(id.ToString(), out uint identifier))
+                {
+                    IEnumerable<Member> members = await Service.GetMembersAsync(identifier);
 
-            return Ok(result);
+                    if (members == null) return NotFound();
+
+                    if (members.Count().Equals(0)) return NotFound();
+
+                    return Ok(members);
+                }
+                else
+                    return BadRequest($"Parameter was in wrong data format.");
+
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+            }
         }
 
-        [Route("v1/clan/platform")]
+        [Route(API_VERSION + "/clan/platform")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllPlatforms()
         {
-            var result = await Service.GetAllPlatforms();
+            try
+            {
+                IEnumerable<ClanPlatform> platforms = await Service.GetClanPlatformsAsync();
 
-            if (result.Count() == 0)
-                return NotFound();
+                if (platforms == null) return NotFound();
 
-            return Ok(result);
+                if (platforms.Count() == 0) return NotFound();
+
+                return Ok(platforms);
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception("Something went wrong while handling the request."));
+            }
         }
 
-        [Route("v1/clan/platform/{id:int}")]
+        [Route(API_VERSION + "/clan/platform/{id:int}")]
         [HttpGet]
         public async Task<IHttpActionResult> GetPlatform(int id)
         {
-            var result = await Service.GetPlatformById(id);
+            try
+            {
+                if (id == 0) return BadRequest($"Parameter cannot be zero.");
 
-            if (result == null)
-                return NotFound();
+                if (uint.TryParse(id.ToString(), out uint identifier))
+                {
+                    ClanPlatform platform = await Service.GetClanPlatformAsync(identifier);
 
-            return Ok(result);
+                    if (platform == null) return NotFound();
+
+                    return Ok(platform);
+                }
+                else
+                    return BadRequest($"Parameter was in wrong data format.");
+
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+            }
         }
     }
 }
