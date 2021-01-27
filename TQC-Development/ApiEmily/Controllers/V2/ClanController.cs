@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
-namespace ApiEmily.Controllers
+namespace ApiEmily.Controllers.V2
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ClanController : ApiController
     {
-        private const string API_VERSION = "v1";
+        private const string API_VERSION = "v2";
 
         private ClanService Service { get; } = new ClanService();
 
