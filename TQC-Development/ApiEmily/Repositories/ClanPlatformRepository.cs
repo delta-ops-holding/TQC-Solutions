@@ -80,7 +80,7 @@ namespace ApiEmily.Repositories
                 Connection = db.GetConnection()
             };
 
-            c.Parameters.AddWithValue("@clanPlatformId", identifier);
+            c.Parameters.AddWithValue("@clanPlatformId", int.Parse(identifier.ToString()));
 
             try
             {

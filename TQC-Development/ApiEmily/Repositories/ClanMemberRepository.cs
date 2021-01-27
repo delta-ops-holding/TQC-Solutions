@@ -89,7 +89,7 @@ namespace ApiEmily.Repositories
                 Connection = db.GetConnection()
             };
 
-            c.Parameters.AddWithValue("@clanId", identifier);
+            c.Parameters.AddWithValue("@clanId", int.Parse(identifier.ToString()));
 
             try
             {
@@ -109,7 +109,7 @@ namespace ApiEmily.Repositories
                             {
                                 try
                                 {
-                                    clanMembers.Add(new ClanMember(r.GetBoolean(2), r.GetString(1), (uint)r.GetInt32(0)));
+                                    clanMembers.Add(new ClanMember(r.GetBoolean(2), r.GetString(1), uint.Parse(r.GetInt32(0).ToString())));
                                 }
                                 catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                             }

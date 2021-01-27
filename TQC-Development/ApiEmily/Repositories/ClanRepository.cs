@@ -120,7 +120,7 @@ namespace ApiEmily.Repositories
                 Connection = db.GetConnection()
             };
 
-            c.Parameters.AddWithValue("@clanId", identifier);
+            c.Parameters.AddWithValue("@clanId", int.Parse(identifier.ToString()));
 
             try
             {

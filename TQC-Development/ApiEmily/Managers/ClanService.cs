@@ -36,7 +36,7 @@ namespace ApiEmily.Managers
 
         public async Task<Clan> GetClanAsync(uint identifier)
         {
-            var result = await ((IClanRepository)new ClanMemberRepository()).GetAsync(identifier);
+            var result = await ((IClanRepository)new ClanRepository()).GetAsync(identifier);
 
             return result;
         }

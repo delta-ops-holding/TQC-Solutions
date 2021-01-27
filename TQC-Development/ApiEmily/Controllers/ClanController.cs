@@ -35,9 +35,9 @@ namespace ApiEmily.Controllers
             }
         }
 
-        [Route(API_VERSION + "/clan/{id:uint}")]
+        [Route(API_VERSION + "/clan/{id:int}")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetClan(uint id)
+        public async Task<IHttpActionResult> GetClan(int id)
         {
             try
             {
@@ -79,9 +79,9 @@ namespace ApiEmily.Controllers
             }
         }
 
-        [Route(API_VERSION + "/clan/authority/{id:uint}")]
+        [Route(API_VERSION + "/clan/authority/{id:int}")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetAuthority(uint id)
+        public async Task<IHttpActionResult> GetAuthority(int id)
         {
             try
             {
