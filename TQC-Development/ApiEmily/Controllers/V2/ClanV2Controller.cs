@@ -10,13 +10,12 @@ using System.Web.Http.Cors;
 namespace ApiEmily.Controllers.V2
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class ClanController : ApiController
+    [RoutePrefix("v2/clan")]
+    public class ClanV2Controller : ApiController
     {
-        private const string API_VERSION = "v2";
-
         private ClanService Service { get; } = new ClanService();
 
-        [Route(API_VERSION + "/clan")]
+        [Route("")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllClans()
         {
@@ -31,11 +30,12 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception("Something went wrong while handling the request."));
+                //return InternalServerError(ex);
+                return InternalServerError(new Exception("Something went wrong while processing the request.") { Source = "Attempting to get clan information." });
             }
         }
 
-        [Route(API_VERSION + "/clan/{id:int}")]
+        [Route("{id:int:min(1)}")]
         [HttpGet]
         public async Task<IHttpActionResult> GetClan(int id)
         {
@@ -57,11 +57,11 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+                return InternalServerError(new Exception($"Something went wrong while processing the request."));
             }
         }
 
-        [Route(API_VERSION + "/clan/authority")]
+        [Route("authority")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllAuthorities()
         {
@@ -75,11 +75,11 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception("Something went wrong while handling the request."));
+                return InternalServerError(new Exception("Something went wrong while processing the request."));
             }
         }
 
-        [Route(API_VERSION + "/clan/authority/{id:int}")]
+        [Route("authority/{id:int:min(1)}")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAuthority(int id)
         {
@@ -103,11 +103,11 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+                return InternalServerError(new Exception($"Something went wrong while processing the request."));
             }
         }
 
-        [Route(API_VERSION + "/clan/platform")]
+        [Route("platform")]
         [HttpGet]
         public async Task<IHttpActionResult> GetAllPlatforms()
         {
@@ -123,11 +123,11 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception("Something went wrong while handling the request."));
+                return InternalServerError(new Exception("Something went wrong while processing the request.") { Source = "" } );
             }
         }
 
-        [Route(API_VERSION + "/clan/platform/{id:int}")]
+        [Route("platform/{id:int:min(1)}")]
         [HttpGet]
         public async Task<IHttpActionResult> GetPlatform(int id)
         {
@@ -149,7 +149,7 @@ namespace ApiEmily.Controllers.V2
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception($"Something went wrong while handling the request."));
+                return InternalServerError(new Exception($"Something went wrong while processing the request."));
             }
         }
     }

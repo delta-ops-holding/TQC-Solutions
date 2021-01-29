@@ -92,7 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\V2\ClanController.cs" />
+    <Compile Include="Controllers\V1\ClanV1Controller.cs" />
+    <Compile Include="Controllers\V2\ClanV2Controller.cs" />
     <Compile Include="Database\Interfaces\IDatabase.cs" />
     <Compile Include="Database\SqlDatabase.cs" />
     <Compile Include="Global.asax.cs">

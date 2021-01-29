@@ -4,6 +4,7 @@ using System;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Routing;
 
 namespace ApiEmily
 {
@@ -21,9 +22,15 @@ namespace ApiEmily
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "v1/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                name: "v1.0-api",
+                routeTemplate: "{version}/{controller}/{id}",
+                defaults: new { controller = "ClanV1", id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "v2.0-api",
+                routeTemplate: "{version}/{controller}/{id}",
+                defaults: new { controller = "ClanV2", id = RouteParameter.Optional }
             );
         }
     }
