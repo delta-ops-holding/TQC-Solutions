@@ -9,7 +9,7 @@ namespace DiscordBot.Interfaces
     /// <summary>
     /// Able to Log messages to the console.
     /// </summary>
-    public interface ILoggable
+    public interface ILogger
     {
         /// <summary>
         /// Logs a message.

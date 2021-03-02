@@ -17,46 +17,38 @@ namespace DiscordBot
     {
         private const string DiscordToken = "Insert Token Here";
 
-        public static void Main(string[] args)
-            => new Program()
-                .InitBotAsync().GetAwaiter().GetResult();
-
         private DiscordSocketClient _client;
         private DiscordSocketConfig _config;
         private DataService _dataService;
-        private IReactable _reactable;
-        private INotifiable _notifiable;
-        private ILoggable _loggable;
+        private Interfaces.IApplication _applicationService;
+        private INotifier _notifier;
+        private ILogger _logger;
 
-        public async Task InitBotAsync()
+        public async Task Main(string[] args)
         {
-            // Configuration.
-            _config = new DiscordSocketConfig()                                         // Set DiscordSocket Configuration.
+            _config = new DiscordSocketConfig()
             {
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100
             };
 
-            // Client assignment.
-            _client = new DiscordSocketClient(_config);                                 // Initialize new Discord Client with Configuration.
+            _client = new DiscordSocketClient(_config);
+            _dataService = new DataService();
+            _logger = new LogService();
 
-            // Service Injections.
-            _dataService = new DataService();                                           // Initialize new Data Service.
-            _loggable = new LogService();                                               // Initialize new Log Service.
-            _notifiable = new NotificationService(_client, _loggable, _dataService);    // Inject Notification Service.
+            _notifier = new NotificationService(_client, _logger, _dataService);
+            _applicationService = new ClanApplicationService(_notifier, _logger, _dataService);
 
-            //_service = new ReactionService(_client);                                  // V1 - Reaction Service.
-            _reactable = new ReactionServiceV2(_notifiable, _loggable, _dataService);   // V2 - Reaction Service with Dependencies.
+            await InitBotAsync();
+        }
 
-            //_reactable = new TestService(_notifiable, _loggable);                     // Debugging for testing new service.
-
+        public async Task InitBotAsync()
+        {
             // Events.       
-            _client.Log += _loggable.Log;
-            _client.Ready += () =>
+            _client.Log += _logger.Log;
+            _client.Ready += async () =>
             {
-                Thread.Sleep(2000);
-                DownloadGuildUsers();
-                return Task.CompletedTask;
+                await DownloadGuildUsers();
             };
 
             _client.GuildAvailable += GuildAvailable;
@@ -73,10 +65,12 @@ namespace DiscordBot
         {
             _ = Task.Run(async () =>
             {
-                Console.WriteLine("Loading Guilds..");
+                await _logger.Log(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", "Loading Guilds.."));
+
                 await Task.WhenAll(_client.Guilds.Select(g => g.DownloadUsersAsync()));
                 int count = _client.Guilds.Sum(g => g.Users.Count);
-                Console.WriteLine($"Done downloading. Cached -> {count} users.");
+
+                await _logger.Log(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", $"Finished Download. Cached => {count} users."));
             });
 
             return Task.CompletedTask;
@@ -86,7 +80,7 @@ namespace DiscordBot
         {
             _ = Task.Run(async () =>
            {
-               await _loggable.Log(new LogMessage(LogSeverity.Info, "Event", $"Guild is available {arg.Name}"));
+               await _logger.Log(new LogMessage(LogSeverity.Info, "Event", $"Guild is available {arg.Name}"));
            });
 
             return Task.CompletedTask;
@@ -94,46 +88,92 @@ namespace DiscordBot
 
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                IUserMessage userMessage = cacheUserMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+                IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
 
                 //Check if the reaction is from the corrects channels. (e.g.Steam, Xbox, Psn)
-                if (socketReaction.Channel.Id == 765277945194348544 || socketReaction.Channel.Id == 765277993454534667 || socketReaction.Channel.Id == 765277969278042132 || socketReaction.Channel.Id == 761687188341522492)
-                {
+                if (!CheckChannelReaction(socketReaction)) return;
 
-                    if (socketReaction.User.IsSpecified)
-                    {
-                        SendClanApplication(userMessage, socketReaction);
-                    }
-                    else
-                    {
-                        _loggable.Log(new LogMessage(LogSeverity.Info, "Reaction Added", $"User was not found i cache <{socketReaction.UserId}>"));
-                    }
-                }
+                await ValidateUserSpecifiedAsync(socketReaction, userMessage);
             });
+
             return Task.CompletedTask;
         }
 
-        private async void SendClanApplication(IUserMessage userMessage, SocketReaction socketReaction)
+        /// <summary>
+        /// Validates if a user is specified in the reaction message.
+        /// </summary>
+        /// <param name="socketReaction"></param>
+        /// <param name="userMessage"></param>
+        /// <returns>An asyncronous process containing the Task.</returns>
+        private async Task ValidateUserSpecifiedAsync(SocketReaction socketReaction, IUserMessage userMessage)
+        {
+            if (socketReaction.User.IsSpecified)
+            {
+                await CreateClanApplicationAsync(userMessage, socketReaction);
+
+                return;
+            }
+
+            await _logger.Log(new LogMessage(LogSeverity.Info, "Reaction Added", $"User was not found i cache <{socketReaction.UserId}>"));
+        }
+
+        /// <summary>
+        /// Checks if the reaction is in the right channel.
+        /// </summary>
+        /// <param name="socketReaction">The </param>
+        /// <returns>True if the channel is correct.</returns>
+        private static bool CheckChannelReaction(SocketReaction socketReaction)
+        {
+            return socketReaction.Channel.Id == 765277945194348544
+                   || socketReaction.Channel.Id == 765277993454534667
+                   || socketReaction.Channel.Id == 765277969278042132
+                   || socketReaction.Channel.Id == 761687188341522492;
+        }
+
+        /// <summary>
+        /// Sends a clan application.
+        /// </summary>
+        /// <param name="userMessage"></param>
+        /// <param name="socketReaction"></param>
+        /// <returns>An asyncronous process containing the Task.</returns>
+        private async Task CreateClanApplicationAsync(IUserMessage userMessage, SocketReaction socketReaction)
         {
             //Check if the admin tries to react.
             if (socketReaction.User.Value is SocketGuildUser user)
             {
                 //Check if the user is from the leadership role, or is the owner of the guild.
-                if (user.Roles.Any(r => r.Name == "Leadership"))
-                    await _loggable.Log(
-                        new LogMessage(
-                            LogSeverity.Info,
-                            "Clan Application", $"Admin <{user.Id}> added reaction emote <{socketReaction.Emote.Name}> to message"));
-                else
-                {
-                    //Assign user to clan.
-                    _reactable.SendClanApplication(
-                        userMessage,
-                        socketReaction);
-                }
+                await ValidateUserRoleAsync(userMessage, socketReaction, user);
             }
+        }
+
+        /// <summary>
+        /// Check if the user is not an admin.
+        /// </summary>
+        /// <param name="userMessage"></param>
+        /// <param name="socketReaction"></param>
+        /// <param name="user"></param>
+        /// <returns>An asyncronous process containing the Task.</returns>
+        private async Task ValidateUserRoleAsync(IUserMessage userMessage, SocketReaction socketReaction, SocketGuildUser user)
+        {
+            // Check the user role.
+            // If user is from leadership.
+            if (user.Roles.Any(r => r.Name == "Leadership"))
+            {
+                await _logger
+                    .Log(
+                    new LogMessage(
+                        LogSeverity.Info,
+                        "Clan Application",
+                        $"Admin <{user.Id}> added reaction emote <{socketReaction.Emote.Name}> to message"
+                        ));
+
+                return;
+            }
+
+            // Create clan application for user.
+            await _applicationService.CreateClanApplicationAsync(userMessage, socketReaction);
         }
     }
 }

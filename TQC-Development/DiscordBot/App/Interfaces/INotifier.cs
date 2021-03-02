@@ -10,14 +10,14 @@ namespace DiscordBot.Interfaces
     /// <summary>
     /// Provides the ability to notifiy.
     /// </summary>
-    public interface INotifiable
+    public interface INotifier
     {
         /// <summary>
         /// Notifies a user as direct message.
         /// </summary>
         /// <param name="discordUser">The user to direct message.</param>
         /// <param name="clanName">The name of the clan.</param>
-        void NotifyUserAsync(IUser discordUser, Name.ClanNames clanName);
+        Task NotifyUserAsync(IUser discordUser, Enums.ClanNames clanName);
 
         /// <summary>
         /// Notifies an admin role.
@@ -25,6 +25,6 @@ namespace DiscordBot.Interfaces
         /// <param name="platformId">Used to identify the admin for a platform.</param>
         /// <param name="discordUser">The user which invoked the notification.</param>
         /// <param name="clanName">The name of the clan.</param>
-        void NotifyAdminAsync(byte platformId, IUser discordUser, Name.ClanNames clanName);
+        Task NotifyAdminAsync(byte platformId, IUser discordUser, Enums.ClanNames clanName);
     }
 }

@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Interfaces
 {
-    public class NotificationService : INotifiable
+    public class NotificationService : INotifier
     {
         private readonly DiscordSocketClient _client;
         private readonly DataService _dataService;
-        private readonly ILoggable _loggable;
+        private readonly ILogger _loggable;
 
         /// <summary>
         /// Notification Service with required dependencies.
@@ -22,7 +22,7 @@ namespace DiscordBot.Interfaces
         /// <param name="client">Used to identify the client to use.</param>
         /// <param name="loggable">Used to log data.</param>
         /// <param name="dataService">To proceed the request, with the right data.</param>
-        public NotificationService(DiscordSocketClient client, ILoggable loggable, DataService dataService)
+        public NotificationService(DiscordSocketClient client, ILogger loggable, DataService dataService)
         {
             _client = client;
             _loggable = loggable;
@@ -35,7 +35,7 @@ namespace DiscordBot.Interfaces
         /// <param name="platformId">The platform identifier for which the notification should appear in.</param>
         /// <param name="discordUser">The user who is assigned to the notification.</param>
         /// <param name="clanName">Used to identify the assigned clan.</param>
-        public async void NotifyAdminAsync(byte platformId, IUser discordUser, Name.ClanNames clanName)
+        public async void NotifyAdminAsync(byte platformId, IUser discordUser, Enums.ClanNames clanName)
         {
             // Channel to post to.
             //ulong channelId = 0; // To give a default value to catch on.
@@ -82,7 +82,7 @@ namespace DiscordBot.Interfaces
         /// </summary>
         /// <param name="discordUser">The User to direct message.</param>
         /// <param name="clanName">The clan name the user assigned to.</param>
-        public async void NotifyUserAsync(IUser discordUser, Name.ClanNames clanName)
+        public async void NotifyUserAsync(IUser discordUser, Enums.ClanNames clanName)
         {
             try
             {

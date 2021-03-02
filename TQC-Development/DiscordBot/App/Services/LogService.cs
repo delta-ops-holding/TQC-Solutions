@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class LogService : ILoggable
+    public class LogService : ILogger
     {
         /// <summary>
         /// Log to Console.

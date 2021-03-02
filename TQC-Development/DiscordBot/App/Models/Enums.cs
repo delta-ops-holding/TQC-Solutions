@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DiscordBot.Models
 {
-    public abstract class Name
+    public abstract class Enums
     {
         /// <summary>
         /// Supported clans available.
@@ -15,6 +15,14 @@ namespace DiscordBot.Models
             TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL, MΔJESTIC,
             DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL, IMMORTΔL,
             EPHEMERΔ, SHΔDOW
+        }
+
+        public enum ClanPlatforms
+        {
+            Undefined,
+            PC,
+            PSN,
+            XBOX
         }
     }
 }
