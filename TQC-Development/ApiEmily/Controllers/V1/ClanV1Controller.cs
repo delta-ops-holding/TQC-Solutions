@@ -12,10 +12,46 @@ namespace ApiEmily.Controllers.V1
     [RoutePrefix("v1/clan")]
     public class ClanV1Controller : ApiController
     {
-        [Route]
-        public IHttpActionResult ObsoleteController()
+        [Route("")]
+        [HttpGet]
+        public IHttpActionResult ObsoleteClanRequestController()
         {
-            return BadRequest("Controller is deprecated. Please use a newer version.");
+            return BadRequest("This Feature is no longer supported.");
+        }
+
+        [Route("{id:int:min(1)}")]
+        [HttpGet]
+        public IHttpActionResult GetClan(int id)
+        {
+            return BadRequest("This Feature is no longer supported.");
+        }
+
+        [Route("authority")]
+        [HttpGet]
+        public IHttpActionResult GetAllAuthorities()
+        {
+            return BadRequest("This Feature is no longer supported.");
+        }
+
+        [Route("authority/{id:int:min(1)}")]
+        [HttpGet]
+        public IHttpActionResult GetAuthority(int id)
+        {
+            return BadRequest("This Feature is no longer supported.");
+        }
+
+        [Route("platform")]
+        [HttpGet]
+        public IHttpActionResult GetAllPlatforms()
+        {
+            return BadRequest("This Feature is no longer supported.");
+        }
+
+        [Route("platform/{id:int:min(1)}")]
+        [HttpGet]
+        public IHttpActionResult GetPlatform(int id)
+        {
+            return BadRequest("This Feature is no longer supported.");
         }
     }
 }

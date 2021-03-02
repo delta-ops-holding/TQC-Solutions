@@ -32,6 +32,12 @@ namespace ApiEmily
                 routeTemplate: "{version}/{controller}/{id}",
                 defaults: new { controller = "ClanV2", id = RouteParameter.Optional }
             );
+
+            config.Routes.MapHttpRoute(
+                name: "v3.0-api",
+                routeTemplate: "{version}/{controller}/{id}",
+                defaults: new { controller = "ClanV3", id = RouteParameter.Optional }
+            );
         }
     }
 
