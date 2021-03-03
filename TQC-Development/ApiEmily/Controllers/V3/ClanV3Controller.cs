@@ -30,7 +30,6 @@ namespace ApiEmily.Controllers.V3
             }
             catch (Exception)
             {
-                //return InternalServerError(ex);
                 return InternalServerError(new Exception("Something went wrong while processing the request.") { Source = "Attempting to get clan information." });
             }
         }
@@ -45,7 +44,7 @@ namespace ApiEmily.Controllers.V3
 
                 if (uint.TryParse(id.ToString(), out uint identifier))
                 {
-                    Clan clan = await _clanService.GetClanAsync(identifier);
+                    var clan = await _clanService.GetClanAsync(identifier);
 
                     if (clan == null) return NotFound();
 

@@ -18,7 +18,7 @@ namespace ApiEmily.Models
         #endregion
 
         #region Constructors
-        public ClanPlatform(string name, string platformImageURL, uint identifier) : base(identifier)
+        public ClanPlatform(string name, string platformImageURL, int identifier) : base(identifier)
         {
             _name = name;
             _platformImageURL = platformImageURL;

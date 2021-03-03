@@ -17,7 +17,7 @@ namespace ApiEmily.Models
         #endregion
 
         #region Constructors
-        public ClanMember(bool isFounder, string userName, uint identifier) : base (userName, identifier)
+        public ClanMember(bool isFounder, string userName, int identifier) : base (userName, identifier)
         {
             _isFounder = isFounder;
         }

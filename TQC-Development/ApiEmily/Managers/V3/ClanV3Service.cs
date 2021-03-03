@@ -9,7 +9,7 @@ namespace ApiEmily.Managers.V3
 {
     public class ClanV3Service
     {
-        public async Task<IEnumerable<Clan>> GetClansAsync()
+        public async Task<IEnumerable<Guild>> GetClansAsync()
         {
             var result = await ((IClanRepository)new ClanV3Repository()).GetAllAsync();
 
@@ -30,7 +30,7 @@ namespace ApiEmily.Managers.V3
             return result;
         }
 
-        public async Task<Clan> GetClanAsync(uint identifier)
+        public async Task<Guild> GetClanAsync(uint identifier)
         {
             var result = await ((IClanRepository)new ClanV3Repository()).GetAsync(identifier);
 
@@ -46,7 +46,7 @@ namespace ApiEmily.Managers.V3
 
         public async Task<Member> GetMemberAsync(uint identifier)
         {
-            var result = await ((IMemberRepository)new ClanMemberV3Repository()).GetAsync(identifier);
+            var result = await ((IMemberRepository)new ClanFounderV3Repository()).GetAsync(identifier);
 
             return result;
         }

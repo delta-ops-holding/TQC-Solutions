@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ApiEmily.Repositories.V3
 {
-    public class ClanMemberV3Repository : IMemberRepository
+    public class ClanFounderV3Repository : IMemberRepository
     {
         public async Task<IEnumerable<Member>> GetAllAsync()
         {
@@ -23,7 +23,7 @@ namespace ApiEmily.Repositories.V3
                     Connection = db.GetConnection()
                 })
                 {
-                    List<ClanMember> temporaryClanMembers = new List<ClanMember>();
+                    List<Member> temporaryClanFounders = new List<Member>();
 
                     try
                     {
@@ -34,19 +34,19 @@ namespace ApiEmily.Repositories.V3
 
                             if (!dataReader.HasRows)
                             {
-                                return temporaryClanMembers;
+                                return temporaryClanFounders;
                             }
 
                             try
                             {
                                 while (await dataReader.ReadAsync())
                                 {
-                                    ClanMember temporaryClanMember = new ClanMember(
-                                        identifier: (uint)dataReader.GetInt32(0),
+                                    ClanFounder temporaryClanMember = new ClanFounder(
+                                        identity: dataReader.GetInt32(0),
                                         userName: dataReader.GetString(1),
                                         isFounder: dataReader.GetBoolean(2));
 
-                                    temporaryClanMembers.Add(temporaryClanMember);
+                                    temporaryClanFounders.Add(temporaryClanMember);
                                 }
                             }
                             catch (Exception)
@@ -55,7 +55,7 @@ namespace ApiEmily.Repositories.V3
                             }
                         }
 
-                        return temporaryClanMembers;
+                        return temporaryClanFounders;
                     }
                     catch (Exception)
                     {
@@ -77,7 +77,7 @@ namespace ApiEmily.Repositories.V3
                     Connection = db.GetConnection()
                 })
                 {
-                    ClanMember temporaryClanMember = null;
+                    Member temporaryClanFounder = null;
 
                     try
                     {
@@ -90,15 +90,15 @@ namespace ApiEmily.Repositories.V3
 
                             if (!dataReader.HasRows)
                             {
-                                return temporaryClanMember;
+                                return temporaryClanFounder;
                             }
 
                             try
                             {
                                 while (await dataReader.ReadAsync())
                                 {
-                                    temporaryClanMember = new ClanMember(
-                                        identifier: (uint)dataReader.GetInt32(0),
+                                    temporaryClanFounder = new ClanFounder(
+                                        identity: dataReader.GetInt32(0),
                                         userName: dataReader.GetString(1),
                                         isFounder: dataReader.GetBoolean(2));
                                 }
@@ -109,7 +109,7 @@ namespace ApiEmily.Repositories.V3
                             }
                         }
 
-                        return temporaryClanMember;
+                        return temporaryClanFounder;
                     }
                     catch (Exception)
                     {

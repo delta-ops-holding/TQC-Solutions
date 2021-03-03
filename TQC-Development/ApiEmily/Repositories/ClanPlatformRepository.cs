@@ -48,7 +48,7 @@ namespace ApiEmily.Repositories
                                     new ClanPlatform(
                                         r.GetString(1),
                                         r.GetString(2),
-                                        (uint)r.GetInt32(0))
+                                        r.GetInt32(0))
                             );
                             }
                             catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
@@ -99,7 +99,7 @@ namespace ApiEmily.Repositories
                             clanPlatform = new ClanPlatform(
                                r.GetString(1),
                                r.GetString(2),
-                               (uint)r.GetInt32(0));
+                               r.GetInt32(0));
                         }
                     }
                     catch (DbException) { throw new ExternalException($"Error occurred while executing command text.") as DbException; }

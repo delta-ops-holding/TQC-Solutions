@@ -48,7 +48,7 @@ namespace ApiEmily.Repositories
                                     new ClanMember(
                                         r.GetBoolean(2),
                                         r.GetString(1),
-                                        (uint)r.GetInt32(0)));
+                                        r.GetInt32(0)));
                             }
                             catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                         }
@@ -109,7 +109,7 @@ namespace ApiEmily.Repositories
                             {
                                 try
                                 {
-                                    clanMembers.Add(new ClanMember(r.GetBoolean(2), r.GetString(1), uint.Parse(r.GetInt32(0).ToString())));
+                                    clanMembers.Add(new ClanMember(r.GetBoolean(2), r.GetString(1), r.GetInt32(0)));
                                 }
                                 catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                             }

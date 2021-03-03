@@ -45,7 +45,7 @@ namespace ApiEmily.Controllers.V2
 
                 if (uint.TryParse(id.ToString(), out uint identifier))
                 {
-                    Clan clan = await Service.GetClanAsync(identifier);
+                    var clan = await Service.GetClanAsync(identifier);
 
                     if (clan == null) return NotFound();
 

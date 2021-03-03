@@ -16,7 +16,7 @@ namespace ApiEmily.Repositories
 {
     public class ClanRepository : IClanRepository
     {
-        public async Task<IEnumerable<Clan>> GetAllAsync()
+        public async Task<IEnumerable<Guild>> GetAllAsync()
         {
             using var db = SqlDatabase.SqlInstance;
 
@@ -55,7 +55,7 @@ namespace ApiEmily.Repositories
                                             try
                                             {
                                                 clan.Members.Add(
-                                                    new ClanMember(r.GetBoolean(9), r.GetString(8), (uint)r.GetInt32(7)));
+                                                    new ClanMember(r.GetBoolean(9), r.GetString(8), r.GetInt32(7)));
                                             }
                                             catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                                         }
@@ -68,8 +68,8 @@ namespace ApiEmily.Repositories
                                     {
                                         tempClans.Add(
                                             new Clan(r.GetString(1), r.GetString(2),
-                                            new ClanPlatform(r.GetString(5), r.GetString(6), (uint)r.GetInt32(4)),
-                                            new List<Member>(), (uint)r.GetInt32(0)));
+                                            new ClanPlatform(r.GetString(5), r.GetString(6), r.GetInt32(4)),
+                                            new List<Member>(), r.GetInt32(0)));
                                     }
                                     catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
 
@@ -83,7 +83,7 @@ namespace ApiEmily.Repositories
                                                 try
                                                 {
                                                     clan.Members.Add(
-                                                        new ClanMember(r.GetBoolean(9), r.GetString(8), (uint)r.GetInt32(7)));
+                                                        new ClanMember(r.GetBoolean(9), r.GetString(8), r.GetInt32(7)));
                                                 }
                                                 catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                                             }
@@ -108,7 +108,7 @@ namespace ApiEmily.Repositories
             finally { db.CloseConnection(); }
         }
 
-        public async Task<Clan> GetAsync(uint identifier)
+        public async Task<Guild> GetAsync(uint identifier)
         {
             using var db = SqlDatabase.SqlInstance;
 
@@ -144,7 +144,7 @@ namespace ApiEmily.Repositories
                                     try
                                     {
                                         tempClan.Members.Add(
-                                            new ClanMember(r.GetBoolean(9), r.GetString(8), (uint)r.GetInt32(7)));
+                                            new ClanMember(r.GetBoolean(9), r.GetString(8), r.GetInt32(7)));
                                     }
                                     catch (NotSupportedException) { throw new NotSupportedException($"Collection was read-only, an error has occurred."); }
                                 }
@@ -157,15 +157,15 @@ namespace ApiEmily.Repositories
                                     new ClanPlatform(
                                        r.GetString(5),
                                        r.GetString(6),
-                                       (uint)r.GetInt32(3)),
+                                       r.GetInt32(3)),
                                     new List<Member>()
                                     {
                                     new ClanMember(
                                         r.GetBoolean(9),
                                         r.GetString(8),
-                                        (uint) r.GetInt32(7))
+                                         r.GetInt32(7))
                                     },
-                                    (uint)r.GetInt32(0));
+                                    r.GetInt32(0));
                             }
                         }
                     }

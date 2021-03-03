@@ -11,15 +11,15 @@ namespace ApiEmily.Models
     public abstract class BaseEntity
     {
         #region Fields
-        private uint _identifier;
+        private int _identifier;
         #endregion
 
         #region Properties
-        public uint Identifier { get => _identifier; set => _identifier = value; }
+        public int Identifier { get => _identifier; set => _identifier = value; }
         #endregion
 
         #region Constructors
-        protected BaseEntity(uint identifier)
+        protected BaseEntity(int identifier)
         {
             _identifier = identifier;
         } 

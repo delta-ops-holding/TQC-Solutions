@@ -13,7 +13,7 @@ namespace ApiEmily.Managers
 {
     public class ClanService
     {
-        public async Task<IEnumerable<Clan>> GetClansAsync()
+        public async Task<IEnumerable<Guild>> GetClansAsync()
         {
             var result = await ((IClanRepository)new ClanRepository()).GetAllAsync();
 
@@ -34,7 +34,7 @@ namespace ApiEmily.Managers
             return result;
         }
 
-        public async Task<Clan> GetClanAsync(uint identifier)
+        public async Task<Guild> GetClanAsync(uint identifier)
         {
             var result = await ((IClanRepository)new ClanRepository()).GetAsync(identifier);
 

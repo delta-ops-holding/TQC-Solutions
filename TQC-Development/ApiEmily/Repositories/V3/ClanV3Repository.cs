@@ -1,5 +1,6 @@
 ﻿using ApiEmily.Database;
 using ApiEmily.Models;
+using ApiEmily.Models.V3;
 using ApiEmily.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace ApiEmily.Repositories.V3
 {
     public class ClanV3Repository : IClanRepository
     {
-        public async Task<IEnumerable<Clan>> GetAllAsync()
+        public async Task<IEnumerable<Guild>> GetAllAsync()
         {
             using (var db = SqlDatabase.SqlInstance)
             {
@@ -23,7 +24,7 @@ namespace ApiEmily.Repositories.V3
                     Connection = db.GetConnection()
                 })
                 {
-                    IList<Clan> temporaryClans = new List<Clan>();
+                    var temporaryClans = new List<ClanV3>();
 
                     try
                     {
@@ -31,7 +32,6 @@ namespace ApiEmily.Repositories.V3
 
                         using (var dataReader = await command.ExecuteReaderAsync())
                         {
-
                             if (!dataReader.HasRows)
                             {
                                 return temporaryClans;
@@ -41,21 +41,19 @@ namespace ApiEmily.Repositories.V3
                             {
                                 while (await dataReader.ReadAsync())
                                 {
-                                    Clan temporaryClan = new Clan(
-                                        identifier: (uint)dataReader.GetInt32(0),
+                                    var temporaryClan = new ClanV3(
+                                        identifier: dataReader.GetInt32(0),
                                         name: dataReader.GetString(1),
                                         about: dataReader.GetString(2),
                                         clanPlatform: new ClanPlatform(
-                                            identifier: (uint)dataReader.GetInt32(3),
+                                            identifier: dataReader.GetInt32(3),
                                             name: dataReader.GetString(5),
                                             platformImageURL: dataReader.GetString(6)),
-                                        members: new List<Member>()
-                                        {
-                                            new ClanMember(
-                                            identifier: (uint)dataReader.GetInt32(7),
+                                        founder: new ClanFounder(
+                                            identity: dataReader.GetInt32(7),
                                             userName: dataReader.GetString(8),
                                             isFounder: dataReader.GetBoolean(9))
-                                        });
+                                        );
 
                                     temporaryClans.Add(temporaryClan);
                                 }
@@ -68,15 +66,15 @@ namespace ApiEmily.Repositories.V3
 
                         return temporaryClans;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        throw new Exception("Failed to handle request.");
+                        throw ex;
                     }
                 }
             }
         }
 
-        public async Task<Clan> GetAsync(uint identifier)
+        public async Task<Guild> GetAsync(uint identifier)
         {
             using (var db = SqlDatabase.SqlInstance)
             {
@@ -88,7 +86,7 @@ namespace ApiEmily.Repositories.V3
                     Connection = db.GetConnection()
                 })
                 {
-                    Clan temporaryClan = null;
+                    ClanV3 temporaryClan = null;
 
                     try
                     {
@@ -108,21 +106,19 @@ namespace ApiEmily.Repositories.V3
                             {
                                 while (await dataReader.ReadAsync())
                                 {
-                                    temporaryClan = new Clan(
-                                        identifier: (uint)dataReader.GetInt32(0),
+                                    temporaryClan = new ClanV3(
+                                        identifier: dataReader.GetInt32(0),
                                         name: dataReader.GetString(1),
                                         about: dataReader.GetString(2),
                                         clanPlatform: new ClanPlatform(
-                                            identifier: (uint)dataReader.GetInt32(3),
+                                            identifier: dataReader.GetInt32(3),
                                             name: dataReader.GetString(5),
                                             platformImageURL: dataReader.GetString(6)),
-                                        members: new List<Member>()
-                                        {
-                                            new ClanMember(
-                                            identifier: (uint)dataReader.GetInt32(7),
+                                        founder: new ClanFounder(
+                                            identity: dataReader.GetInt32(7),
                                             userName: dataReader.GetString(8),
                                             isFounder: dataReader.GetBoolean(9))
-                                        });
+                                        );
                                 }
                             }
                             catch (Exception)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,8 +65,16 @@ namespace ApiEmily.Database
         {
             try
             {
+
                 if (_sqlConnection != null)
+                {
+                    if (_sqlConnection.State.Equals(ConnectionState.Closed))
+                    {
+                        return;
+                    }
+
                     _sqlConnection.Close();
+                }
             }
             catch (Exception)
             {
@@ -79,7 +88,14 @@ namespace ApiEmily.Database
             try
             {
                 if (_sqlConnection != null)
+                {
+                    if (_sqlConnection.State.Equals(ConnectionState.Open))
+                    {
+                        return;
+                    }
+
                     await _sqlConnection.OpenAsync();
+                }
             }
             catch (Exception)
             {

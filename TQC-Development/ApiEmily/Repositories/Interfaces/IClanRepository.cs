@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ApiEmily.Repositories.Interfaces
 {
-    public interface IClanRepository : IRepository<Clan>
+    public interface IClanRepository : IRepository<Guild>
     {
 
     }

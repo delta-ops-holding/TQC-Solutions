@@ -17,7 +17,7 @@ namespace ApiEmily.Models
         #endregion
 
         #region Constructors
-        protected Member(string userName, uint identifier) : base (identifier)
+        protected Member(string userName, int identifier) : base (identifier)
         {
             _userName = userName;
         }

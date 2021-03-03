@@ -139,9 +139,12 @@
     <Compile Include="Managers\V3\ClanV3Service.cs" />
     <Compile Include="Models\BaseEntity.cs" />
     <Compile Include="Models\Clan.cs" />
+    <Compile Include="Models\ClanFounder.cs" />
     <Compile Include="Models\ClanMember.cs" />
     <Compile Include="Models\ClanPlatform.cs" />
+    <Compile Include="Models\Guild.cs" />
     <Compile Include="Models\Member.cs" />
+    <Compile Include="Models\V3\ClanV3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ClanMemberRepository.cs" />
     <Compile Include="Repositories\ClanPlatformRepository.cs" />
@@ -150,7 +153,7 @@
     <Compile Include="Repositories\Interfaces\IMemberRepository.cs" />
     <Compile Include="Repositories\Interfaces\IClanRepository.cs" />
     <Compile Include="Repositories\Interfaces\IRepository.cs" />
-    <Compile Include="Repositories\V3\ClanMemberV3Repository.cs" />
+    <Compile Include="Repositories\V3\ClanFounderV3Repository.cs" />
     <Compile Include="Repositories\V3\ClanV3Repository.cs" />
   </ItemGroup>
   <ItemGroup>
