@@ -35,7 +35,7 @@ namespace DiscordBot.Interfaces
         /// <param name="platformId">The platform identifier for which the notification should appear in.</param>
         /// <param name="discordUser">The user who is assigned to the notification.</param>
         /// <param name="clanName">Used to identify the assigned clan.</param>
-        public async void NotifyAdminAsync(byte platformId, IUser discordUser, Enums.ClanNames clanName)
+        public async Task NotifyAdminAsync(byte platformId, IUser discordUser, Enums.ClanNames clanName)
         {
             // Channel to post to.
             //ulong channelId = 0; // To give a default value to catch on.
@@ -82,7 +82,7 @@ namespace DiscordBot.Interfaces
         /// </summary>
         /// <param name="discordUser">The User to direct message.</param>
         /// <param name="clanName">The clan name the user assigned to.</param>
-        public async void NotifyUserAsync(IUser discordUser, Enums.ClanNames clanName)
+        public async Task NotifyUserAsync(IUser discordUser, Enums.ClanNames clanName)
         {
             try
             {
