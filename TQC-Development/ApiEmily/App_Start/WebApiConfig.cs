@@ -22,22 +22,28 @@ namespace ApiEmily
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
-                name: "v1.0-api",
+                name: "Default",
                 routeTemplate: "{version}/{controller}/{id}",
-                defaults: new { controller = "ClanV1", id = RouteParameter.Optional }
+                defaults: new { id = RouteParameter.Optional }
             );
 
-            config.Routes.MapHttpRoute(
-                name: "v2.0-api",
-                routeTemplate: "{version}/{controller}/{id}",
-                defaults: new { controller = "ClanV2", id = RouteParameter.Optional }
-            );
+            //config.Routes.MapHttpRoute(
+            //    name: "v1.0-api",
+            //    routeTemplate: "{version}/{controller}/{id}",
+            //    defaults: new { controller = "ClanV1", id = RouteParameter.Optional }
+            //);
 
-            config.Routes.MapHttpRoute(
-                name: "v3.0-api",
-                routeTemplate: "{version}/{controller}/{id}",
-                defaults: new { controller = "ClanV3", id = RouteParameter.Optional }
-            );
+            //config.Routes.MapHttpRoute(
+            //    name: "v2.0-api",
+            //    routeTemplate: "{version}/{controller}/{id}",
+            //    defaults: new { controller = "ClanV2", id = RouteParameter.Optional }
+            //);
+
+            //config.Routes.MapHttpRoute(
+            //    name: "v3.0-api",
+            //    routeTemplate: "{version}/{controller}/{id}",
+            //    defaults: new { controller = "ClanV3", id = RouteParameter.Optional }
+            //);
         }
     }
 
