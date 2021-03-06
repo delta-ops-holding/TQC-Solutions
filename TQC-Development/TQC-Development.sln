@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiEmily.Tests", "ApiEmily.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\App\DiscordBot.csproj", "{D640DAD9-2F8A-476F-BCA1-3CE461D44EEC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiEmerald", "ApiEmerald\ApiEmerald.csproj", "{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{D640DAD9-2F8A-476F-BCA1-3CE461D44EEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D640DAD9-2F8A-476F-BCA1-3CE461D44EEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D640DAD9-2F8A-476F-BCA1-3CE461D44EEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
