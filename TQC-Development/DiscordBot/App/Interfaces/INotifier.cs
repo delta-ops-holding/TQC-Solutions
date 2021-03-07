@@ -17,7 +17,7 @@ namespace DiscordBot.Interfaces
         /// </summary>
         /// <param name="discordUser">The user to direct message.</param>
         /// <param name="clanName">The name of the clan.</param>
-        Task NotifyUserAsync(IUser discordUser, Enums.ClanNames clanName);
+        Task NotifyUserAsync(IUser discordUser, Enums.Clan clanName);
 
         /// <summary>
         /// Notifies an admin role.
@@ -25,6 +25,6 @@ namespace DiscordBot.Interfaces
         /// <param name="platformId">Used to identify the admin for a platform.</param>
         /// <param name="discordUser">The user which invoked the notification.</param>
         /// <param name="clanName">The name of the clan.</param>
-        Task NotifyAdminAsync(byte platformId, IUser discordUser, Enums.ClanNames clanName);
+        Task NotifyAdminAsync(byte platformId, IUser discordUser, Enums.Clan clanName);
     }
 }

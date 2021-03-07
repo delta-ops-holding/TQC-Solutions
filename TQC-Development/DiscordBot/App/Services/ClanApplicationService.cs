@@ -6,16 +6,18 @@ using DiscordBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
 {
-    public class ClanApplicationService : Interfaces.IApplication
+    /// <summary>
+    /// Represents a service for handling Clan Applications.
+    /// </summary>
+    public class ClanApplicationService : IClanApplication
     {
         private const uint DelayTimerInHours = 24;
 
-        private static Stack<User> _temporaryRuntimeUsers = new Stack<User>(20);
+        private static Stack<UserModel> _temporaryRuntimeUsers = new Stack<UserModel>(20);
         private readonly DataService _dataService;
         private readonly INotifier _notifier;
         private readonly ILogger _logger;
@@ -33,13 +35,30 @@ namespace DiscordBot.Services
             _dataService = dataService;
         }
 
-        public async Task CreateClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
+        public async Task ProcessClanApplicationAsync(IUserMessage userMessage, SocketReaction socketReaction)
+        {
+            if (socketReaction.User.IsSpecified)
+            {
+                await CreateClanApplicationAsync(userMessage, socketReaction);
+            }
+
+            await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{socketReaction.UserId}>"));
+        }
+
+        /// <summary>
+        /// Create the clan application.
+        /// </summary>
+        /// <param name="userMessage"></param>
+        /// <param name="reaction"></param>
+        /// <returns>An asynchronous operation.</returns>
+        private async Task CreateClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
             DateTimeOffset currentTime = DateTimeOffset.UtcNow;
-            Enums.ClanNames clanName = _dataService.GetClanName(reaction.Emote);
+            Enums.Clan clanName = _dataService.GetClanName(reaction.Emote);
 
-            if (!_temporaryRuntimeUsers.Any(u => u.UserId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours))
+            if (!_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours))
             {
+                _temporaryRuntimeUsers.Push(new UserModel() { Id = Guid.NewGuid(), DiscordId = reaction.UserId, Date = DateTimeOffset.UtcNow });
                 await SendClanApplicationAsync(reaction, clanName);
 
                 return;
@@ -51,22 +70,21 @@ namespace DiscordBot.Services
             }
             catch (HttpException)
             {
-                await _logger.Log(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                await _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
             }
 
-            await _logger.Log(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+            await _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
             await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
-        }
+        }        
 
         /// <summary>
-        /// Notifies the people about the clan application.
+        /// Send the created clan application, to notify leaders.
         /// </summary>
         /// <param name="reaction"></param>
         /// <param name="clanName"></param>
         /// <returns>An asyncronous process containing the Task.</returns>
-        private async Task SendClanApplicationAsync(SocketReaction reaction, Enums.ClanNames clanName)
-        {
-            _temporaryRuntimeUsers.Push(new User() { UserId = reaction.UserId, Date = DateTimeOffset.UtcNow });
+        private async Task SendClanApplicationAsync(SocketReaction reaction, Enums.Clan clanName)
+        {            
             await _notifier.NotifyUserAsync(reaction.User.Value, clanName);
 
             switch (reaction.Channel.Id)
@@ -87,7 +105,7 @@ namespace DiscordBot.Services
                     break;
             }
 
-            await _logger.Log(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
+            await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
         }
     }
 }
