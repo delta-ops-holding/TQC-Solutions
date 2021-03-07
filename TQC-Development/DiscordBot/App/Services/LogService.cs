@@ -25,19 +25,11 @@ namespace DiscordBot.Services
         /// </summary>
         /// <param name="logMessage">The message to log.</param>
         /// <returns>A Completed Task.</returns>
-        public async Task ConsoleLog(LogMessage logMessage)
+        public Task ConsoleLog(LogMessage logMessage)
         {
-            switch (logMessage.Exception)
-            {
-                case GatewayReconnectException:
-                    Console.WriteLine(new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services."));
-                    await _client.StopAsync();
-                    await _client.StartAsync();
-                    break;
-                default:
-                    Console.WriteLine(logMessage);
-                    break;
-            }
+            Console.WriteLine(logMessage.ToString());
+
+            return Task.CompletedTask;
         }
     }
 }
