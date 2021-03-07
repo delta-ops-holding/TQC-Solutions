@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using DiscordBot.Enums;
 using DiscordBot.Interfaces;
 using DiscordBot.Models;
 using System;
@@ -17,7 +18,7 @@ namespace DiscordBot.Services
     {
         private const uint DelayTimerInHours = 24;
 
-        private static Stack<UserModel> _temporaryRuntimeUsers = new Stack<UserModel>(20);
+        private static readonly Stack<UserModel> _temporaryRuntimeUsers = new(20);
         private readonly DataService _dataService;
         private readonly INotifier _notifier;
         private readonly ILogger _logger;
@@ -40,6 +41,7 @@ namespace DiscordBot.Services
             if (socketReaction.User.IsSpecified)
             {
                 await CreateClanApplicationAsync(userMessage, socketReaction);
+                return;
             }
 
             await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{socketReaction.UserId}>"));
@@ -54,7 +56,7 @@ namespace DiscordBot.Services
         private async Task CreateClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
             DateTimeOffset currentTime = DateTimeOffset.UtcNow;
-            Enums.Clan clanName = _dataService.GetClanName(reaction.Emote);
+            Clan clanName = _dataService.GetClanName(reaction.Emote);
 
             if (!_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours))
             {
@@ -83,27 +85,31 @@ namespace DiscordBot.Services
         /// <param name="reaction"></param>
         /// <param name="clanName"></param>
         /// <returns>An asyncronous process containing the Task.</returns>
-        private async Task SendClanApplicationAsync(SocketReaction reaction, Enums.Clan clanName)
+        private async Task SendClanApplicationAsync(SocketReaction reaction, Clan clanName)
         {            
             await _notifier.NotifyUserAsync(reaction.User.Value, clanName);
+
+            byte platformId = 0;
 
             switch (reaction.Channel.Id)
             {
                 // Steam / PC | pc-clans
                 case 765277945194348544:
-                    await _notifier.NotifyAdminAsync(1, reaction.User.Value, clanName);
+                    platformId = 1;
                     break;
 
                 // Playstation | ps4-clans
                 case 765277969278042132:
-                    await _notifier.NotifyAdminAsync(2, reaction.User.Value, clanName);
+                    platformId = 2;
                     break;
 
                 // Xbox | xbox-clans
                 case 765277993454534667:
-                    await _notifier.NotifyAdminAsync(3, reaction.User.Value, clanName);
+                    platformId = 3;
                     break;
             }
+
+            await _notifier.NotifyAdminAsync(platformId, reaction.User.Value, clanName);
 
             await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
         }
