@@ -1,3 +1,11 @@
+using DatabaseAccess.Database;
+using DatabaseAccess.Database.Interfaces;
+using DatabaseAccess.Managers.Interfaces;
+using DatabaseAccess.Managers.V3;
+using DatabaseAccess.Models;
+using DatabaseAccess.Repositories;
+using DatabaseAccess.Repositories.Interfaces;
+using DatabaseAccess.Repositories.V3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +30,15 @@ namespace ApiEmerald
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var database = new SqlDatabase(Configuration);
+
+            services.AddSingleton<IDatabase>(database);
+            services.AddSingleton<IClanService>(
+                new ClanV3Service(
+                    new ClanV3Repository(database),
+                    new ClanPlatformRepository(database),
+                    new ClanMemberRepository(database)));
+
             services.AddCors(options =>
             {
                 options.AddPolicy(name: _allowAnyPolicy,

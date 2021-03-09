@@ -1,6 +1,10 @@
-﻿using DatabaseAccess.Managers.V3;
+﻿using DatabaseAccess.Database.Interfaces;
+using DatabaseAccess.Managers.Interfaces;
+using DatabaseAccess.Managers.V3;
+using DatabaseAccess.Repositories.Interfaces;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +16,12 @@ namespace ApiEmerald.Controllers
     [EnableCors("TQC-Policy")]
     public class ClanV3Controller : ControllerBase
     {
-        private readonly ClanV3Service _clanService = new ClanV3Service();
+        private IClanService ClanService { get; }
+
+        public ClanV3Controller(IClanService service)
+        {
+            ClanService = service;
+        }
 
         [Route("")]
         [HttpGet]
@@ -20,9 +29,9 @@ namespace ApiEmerald.Controllers
         {
             try
             {
-                var result = await _clanService.GetClansAsync();
+                var result = await ClanService.GetClansAsync();
 
-                if (result.Count() == 0)
+                if (!result.Any())
                     return NotFound();
 
                 return Ok(result);
@@ -43,7 +52,7 @@ namespace ApiEmerald.Controllers
 
                 if (uint.TryParse(id.ToString(), out uint identifier))
                 {
-                    var clan = await _clanService.GetClanAsync(identifier);
+                    var clan = await ClanService.GetClanAsync(identifier);
 
                     if (clan == null) return NotFound();
 
@@ -65,7 +74,7 @@ namespace ApiEmerald.Controllers
         {
             try
             {
-                var result = await _clanService.GetMembersAsync();
+                var result = await ClanService.GetMembersAsync();
 
                 if (!result.Any()) return NotFound();
 
@@ -87,7 +96,7 @@ namespace ApiEmerald.Controllers
 
                 if (uint.TryParse(id.ToString(), out uint identifier))
                 {
-                    var member = await _clanService.GetMemberAsync(identifier);
+                    var member = await ClanService.GetMemberAsync(identifier);
 
                     if (member == null) return NotFound();
 
@@ -109,7 +118,7 @@ namespace ApiEmerald.Controllers
         {
             try
             {
-                var platforms = await _clanService.GetClanPlatformsAsync();
+                var platforms = await ClanService.GetClanPlatformsAsync();
 
                 if (platforms == null) return NotFound();
 
@@ -133,7 +142,7 @@ namespace ApiEmerald.Controllers
 
                 if (uint.TryParse(id.ToString(), out uint identifier))
                 {
-                    var platform = await _clanService.GetClanPlatformAsync(identifier);
+                    var platform = await ClanService.GetClanPlatformAsync(identifier);
 
                     if (platform == null) return NotFound();
 
