@@ -1,4 +1,4 @@
-﻿using DatabaseAccess.Database;
+﻿using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Models;
 using DatabaseAccess.Repositories.Interfaces;
 using System;
@@ -15,21 +15,26 @@ namespace DatabaseAccess.Repositories
 {
     public class ClanRepository : IClanRepository
     {
+        private readonly IDatabase _databaseInstance;
+
+        public ClanRepository(IDatabase database)
+        {
+            _databaseInstance = database;
+        }
+
         public async Task<IEnumerable<Guild>> GetAllAsync()
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clan_getall",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             try
             {
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -104,19 +109,17 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
 
         public async Task<Guild> GetAsync(uint identifier)
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clan_getbyid",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             c.Parameters.AddWithValue("@clanId", int.Parse(identifier.ToString()));
@@ -125,7 +128,7 @@ namespace DatabaseAccess.Repositories
             {
                 Clan tempClan = null;
 
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -179,7 +182,7 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
     }
 }

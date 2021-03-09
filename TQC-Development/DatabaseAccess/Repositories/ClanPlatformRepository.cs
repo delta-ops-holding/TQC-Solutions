@@ -1,4 +1,4 @@
-﻿using DatabaseAccess.Database;
+﻿using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Models;
 using DatabaseAccess.Repositories.Interfaces;
 using System;
@@ -14,23 +14,28 @@ namespace DatabaseAccess.Repositories
 {
     public class ClanPlatformRepository : IClanPlatformRepository
     {
+        private readonly IDatabase _databaseInstance;
+
+        public ClanPlatformRepository(IDatabase database)
+        {
+            _databaseInstance = database;
+        }
+
         public async Task<IEnumerable<ClanPlatform>> GetAllAsync()
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clanplatform_getall",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             try
             {
                 List<ClanPlatform> clanPlatforms = new List<ClanPlatform>();
 
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -63,19 +68,17 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
 
         public async Task<ClanPlatform> GetAsync(uint identifier)
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clanplatform_getbyid",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             c.Parameters.AddWithValue("@clanPlatformId", int.Parse(identifier.ToString()));
@@ -84,7 +87,7 @@ namespace DatabaseAccess.Repositories
             {
                 ClanPlatform clanPlatform = null;
 
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -111,7 +114,7 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
     }
 }

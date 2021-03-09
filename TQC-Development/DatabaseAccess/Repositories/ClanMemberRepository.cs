@@ -1,4 +1,4 @@
-﻿using DatabaseAccess.Database;
+﻿using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Models;
 using DatabaseAccess.Repositories.Interfaces;
 using System;
@@ -14,23 +14,28 @@ namespace DatabaseAccess.Repositories
 {
     public class ClanMemberRepository : IMemberRepository
     {
+        private readonly IDatabase _databaseInstance;
+
+        public ClanMemberRepository(IDatabase database)
+        {
+            _databaseInstance = database;
+        }
+
         public async Task<IEnumerable<Member>> GetAllAsync()
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clanauthority_getall",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             try
             {
                 List<Member> clanMembers = new List<Member>();
 
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -62,7 +67,7 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
 
         /// <summary>
@@ -77,14 +82,12 @@ namespace DatabaseAccess.Repositories
 
         public async Task<IEnumerable<Member>> GetByIdAsync(uint identifier)
         {
-            using var db = SqlDatabase.SqlInstance;
-
             using SqlCommand c = new SqlCommand()
             {
                 CommandText = "proc_clanauthority_getbyid",
                 CommandType = CommandType.StoredProcedure,
                 CommandTimeout = 15,
-                Connection = db.GetConnection()
+                Connection = _databaseInstance.GetConnection()
             };
 
             c.Parameters.AddWithValue("@clanId", int.Parse(identifier.ToString()));
@@ -93,7 +96,7 @@ namespace DatabaseAccess.Repositories
             {
                 List<Member> clanMembers = new List<Member>();
 
-                await db.OpenConnectionAsync();
+                await _databaseInstance.OpenConnectionAsync();
 
                 using SqlDataReader r = await c.ExecuteReaderAsync();
 
@@ -125,7 +128,7 @@ namespace DatabaseAccess.Repositories
             catch (SqlException) { throw; }
             catch (IOException) { throw; }
             catch (Exception) { throw; }
-            finally { db.CloseConnection(); }
+            finally { _databaseInstance.CloseConnection(); }
         }
     }
 }

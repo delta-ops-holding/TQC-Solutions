@@ -2,7 +2,7 @@
 
 namespace DatabaseAccess.Repositories.Interfaces
 {
-    interface IClanPlatformRepository : IRepository<ClanPlatform>
+    public interface IClanPlatformRepository : IRepository<ClanPlatform>
     {
     }
 }

@@ -11,33 +11,16 @@ namespace DatabaseAccess.Database
 {
     public class SqlDatabase : IDatabase
     {
-        private readonly IConfiguration _configuration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false).Build();
-
-        private static SqlDatabase _sqlInstance = null;
-        private static readonly object _sqlDataLock = new object();
         private readonly string _connectionString = string.Empty;
         private readonly SqlConnection _sqlConnection = null;
 
-        public static SqlDatabase SqlInstance
-        {
-            get
-            {
-                lock (_sqlDataLock)
-                {
-                    if (_sqlInstance == null) _sqlInstance = new SqlDatabase();
-
-                    return _sqlInstance;
-                }
-            }
-        }
-
-        private SqlDatabase()
+        public SqlDatabase(IConfiguration configuration)
         {
             if (_sqlConnection == null)
             {
-                if (_configuration != null)
+                if (configuration != null)
                 {
-                    _connectionString = _configuration.GetConnectionString("ApiDb");
+                    _connectionString = configuration.GetConnectionString("ApiDb");
 
                     if (!string.IsNullOrEmpty(_connectionString))
                         _sqlConnection = new SqlConnection(_connectionString);
