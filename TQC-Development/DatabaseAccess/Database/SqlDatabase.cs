@@ -4,7 +4,6 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace DatabaseAccess.Database
@@ -16,19 +15,23 @@ namespace DatabaseAccess.Database
 
         public SqlDatabase(IConfiguration configuration)
         {
-            if (_sqlConnection == null)
+            try
             {
                 if (configuration != null)
                 {
                     _connectionString = configuration.GetConnectionString("ApiDb");
 
-                    if (!string.IsNullOrEmpty(_connectionString))
-                        _sqlConnection = new SqlConnection(_connectionString);
-                    else
-                        throw new Exception($"Server configuration error.");
+                    if (string.IsNullOrEmpty(_connectionString))
+                    {
+                        throw new Exception("Configuration Error.", new NullReferenceException("Connection string was null."));
+                    }
+
+                    _sqlConnection = new SqlConnection(_connectionString);
                 }
-                else
-                    throw new Exception($"Server error.");
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
