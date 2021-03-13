@@ -93,7 +93,8 @@ namespace DiscordBot.Services
         private async Task UserAlreadyAppliedToClan(SocketReaction reaction, IUser userObj)
         {
             _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
-            await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", $"Guardian tried applying to more than one clan.", $"{userObj.Username}#{userObj.Discriminator}", DateTime.UtcNow);
+
+            await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", $"Guardian tried applying to more than one clan.", $"{reaction.UserId}", DateTime.UtcNow);
         }
 
         private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser userObj)
@@ -141,7 +142,7 @@ namespace DiscordBot.Services
                 LogSeverity.Info,
                 "Sent Clan Application",
                 $"Guardian applied to join {clanName}.",
-                $"{userObj.Username}#{userObj.Discriminator}",
+                $"{userObj.Id}",
                 DateTime.UtcNow);
         }
     }

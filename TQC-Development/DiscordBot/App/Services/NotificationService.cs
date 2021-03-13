@@ -95,7 +95,7 @@ namespace DiscordBot.Interfaces
                     LogSeverity.Error,
                     "Notify User",
                     "Couldn't DM Guardian. [Privacy is on or sender is blocked]",
-                    $"{discordUser.Username}#{discordUser.Discriminator}",
+                    $"{discordUser.Id}",
                     DateTime.UtcNow);
             }
         }
