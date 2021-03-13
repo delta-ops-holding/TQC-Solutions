@@ -19,7 +19,7 @@ namespace DiscordBot.Services
         private const uint DelayTimerInHours = 24;
 
         private static readonly Stack<UserModel> _temporaryRuntimeUsers = new(20);
-        private readonly DataService _dataService;
+        private readonly IDataService _dataService;
         private readonly INotifier _notifier;
         private readonly ILogger _logger;
 
@@ -29,7 +29,7 @@ namespace DiscordBot.Services
         /// <param name="notificationService">A notification service, which implements <see cref="INotifier"/>.</param>
         /// <param name="logService">A log service, which implements <see cref="ILogger"/>.</param>
         /// <param name="dataService">The data service, which gives the required data to process the request. [Cannot be null]</param>
-        public ClanApplicationService(INotifier notificationService, ILogger logService, DataService dataService)
+        public ClanApplicationService(INotifier notificationService, ILogger logService, IDataService dataService)
         {
             _notifier = notificationService;
             _logger = logService;

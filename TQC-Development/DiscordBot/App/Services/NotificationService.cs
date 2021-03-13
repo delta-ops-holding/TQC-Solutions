@@ -10,7 +10,7 @@ namespace DiscordBot.Interfaces
     public class NotificationService : INotifier
     {
         private readonly DiscordSocketClient _client;
-        private readonly DataService _dataService;
+        private readonly IDataService _dataService;
         private readonly ILogger _loggable;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace DiscordBot.Interfaces
         /// <param name="client">Used to identify the client to use.</param>
         /// <param name="loggable">Used to log data.</param>
         /// <param name="dataService">To proceed the request, with the right data.</param>
-        public NotificationService(DiscordSocketClient client, ILogger loggable, DataService dataService)
+        public NotificationService(DiscordSocketClient client, ILogger loggable, IDataService dataService)
         {
             _client = client;
             _loggable = loggable;

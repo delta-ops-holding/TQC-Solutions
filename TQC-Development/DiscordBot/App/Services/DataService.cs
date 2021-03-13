@@ -1,12 +1,13 @@
 ﻿using Discord;
 using DiscordBot.Enums;
+using DiscordBot.Interfaces;
 
 namespace DiscordBot.Services
 {
     /// <summary>
     /// Represents a service, for handling data flow.
     /// </summary>
-    public class DataService
+    public class DataService : IDataService
     {
         /// <summary>
         /// Gets the clan name, by a given emote.
