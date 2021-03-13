@@ -12,9 +12,16 @@ namespace DiscordBot.Interfaces
     public interface ILogger
     {
         /// <summary>
-        /// Logs a message.
+        /// Logs a message to the console.
         /// </summary>
         /// <param name="logMessage">Used to provide the message to log.</param>
-        Task ConsoleLog(LogMessage logMessage);
+        void ConsoleLog(LogMessage logMessage);
+
+        /// <summary>
+        /// Saves a log in the database.
+        /// </summary>
+        /// <param name="logMessage">Information of the log.</param>
+        /// <returns>A task representing the asynchronous process.</returns>
+        Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate);
     }
 }

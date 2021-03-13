@@ -36,15 +36,24 @@ namespace DiscordBot.Services
             _dataService = dataService;
         }
 
-        public async Task ProcessClanApplicationAsync(IUserMessage userMessage, SocketReaction socketReaction)
+        public async Task ProcessClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
         {
-            if (socketReaction.User.IsSpecified)
+            if (reaction.User.IsSpecified)
             {
-                await CreateClanApplicationAsync(userMessage, socketReaction);
+                await CreateClanApplicationAsync(userMessage, reaction);
                 return;
             }
 
-            await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{socketReaction.UserId}>"));
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{reaction.UserId}>"));
+
+            await _logger.DatabaseLogAsync(
+                LogSeverity.Warning,
+                "Process Clan Application",
+                $"User was not found in downloaded cache.",
+                $"{reaction.UserId}",
+                DateTime.UtcNow);
+
+            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }
 
         /// <summary>
@@ -72,10 +81,18 @@ namespace DiscordBot.Services
             }
             catch (HttpException)
             {
-                await _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
             }
 
-            await _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+
+            await _logger.DatabaseLogAsync(
+                LogSeverity.Warning,
+                "Create Clan Application",
+                $"Guardian tried applying to more than one clan",
+                $"{reaction.User.Value.Username}#{reaction.User.Value.Discriminator}",
+                DateTime.UtcNow);
+
             await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }        
 
@@ -111,7 +128,14 @@ namespace DiscordBot.Services
 
             await _notifier.NotifyAdminAsync(platformId, reaction.User.Value, clanName);
 
-            await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
+
+            await _logger.DatabaseLogAsync(
+                LogSeverity.Info,
+                "Sent Clan Application",
+                $"Guardian applied to join {clanName}.",
+                $"{reaction.User.Value.Username}#{reaction.User.Value.Discriminator}",
+                DateTime.UtcNow);
         }
     }
 }

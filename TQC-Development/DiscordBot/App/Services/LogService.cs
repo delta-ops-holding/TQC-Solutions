@@ -1,9 +1,7 @@
-﻿using Discord;
-using Discord.WebSocket;
+﻿using DatabaseAccess.Repositories.Interfaces;
+using Discord;
 using DiscordBot.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Services
@@ -13,11 +11,11 @@ namespace DiscordBot.Services
     /// </summary>
     public class LogService : ILogger
     {
-        private readonly DiscordSocketClient _client;
+        private readonly ILogRepository _logRepo;
 
-        public LogService(DiscordSocketClient client)
+        public LogService(ILogRepository logRepo)
         {
-            _client = client;
+            _logRepo = logRepo;
         }
 
         /// <summary>
@@ -25,9 +23,34 @@ namespace DiscordBot.Services
         /// </summary>
         /// <param name="logMessage">The message to log.</param>
         /// <returns>A Completed Task.</returns>
-        public Task ConsoleLog(LogMessage logMessage)
+        public void ConsoleLog(LogMessage logMessage)
         {
             Console.WriteLine(logMessage.ToString());
+        }
+
+        public Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate)
+        {
+            _ = Task.Run(async () =>
+            {
+                var s = severity switch
+                {
+                    LogSeverity.Critical => 1,
+                    LogSeverity.Error => 2,
+                    LogSeverity.Warning => 3,
+                    LogSeverity.Info => 4,
+                    LogSeverity.Verbose => 5,
+                    _ => 6
+                };
+
+                var log = new DatabaseAccess.Models.LogMessage(
+                    logSeverity: (DatabaseAccess.Enums.LogSeverity)s,
+                    source: source,
+                    message: message,
+                    createdBy: createdBy,
+                    createdDate: createdDate);
+
+                await _logRepo.CreateLog(log);
+            }); 
 
             return Task.CompletedTask;
         }

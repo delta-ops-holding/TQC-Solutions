@@ -7,8 +7,19 @@
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="appsettings.json" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Discord.Net" Version="2.3.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\DatabaseAccess\DatabaseAccess.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Properties\launchSettings.json">

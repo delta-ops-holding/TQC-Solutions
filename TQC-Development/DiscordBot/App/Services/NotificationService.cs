@@ -2,6 +2,7 @@
 using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Interfaces
@@ -88,7 +89,14 @@ namespace DiscordBot.Interfaces
             catch (HttpException)
             {
                 // Log Error if could not message the user.
-                await _loggable.ConsoleLog(new LogMessage(LogSeverity.Error, "Reaction Added", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                _loggable.ConsoleLog(new LogMessage(LogSeverity.Error, "Reaction Added", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+
+                await _loggable.DatabaseLogAsync(
+                    LogSeverity.Error,
+                    "Notify User",
+                    "Couldn't DM Guardian. [Privacy is on or sender is blocked]",
+                    $"{discordUser.Username}#{discordUser.Discriminator}",
+                    DateTime.UtcNow);
             }
         }
     }

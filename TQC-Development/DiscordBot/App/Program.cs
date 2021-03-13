@@ -1,10 +1,16 @@
-﻿using Discord;
+﻿using DatabaseAccess.Database;
+using DatabaseAccess.Database.Interfaces;
+using DatabaseAccess.Repositories;
+using DatabaseAccess.Repositories.Interfaces;
+using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Interfaces;
 using DiscordBot.Services;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,11 +18,14 @@ namespace DiscordBot
 {
     public class Program
     {
-        private const string DiscordToken = "";
+        private const string DiscordToken = "NzY1Mjk3Mzk0NjQ4MjE5Njc4.X4SwvQ.xgWBRkSezMDkRCJ989ujvQBHYAE";
+        private IConfiguration _configuration;
 
         private DiscordSocketClient _client;
         private DiscordSocketConfig _config;
         private DataService _dataService;
+        private ILogRepository _logRepository;
+        private IDatabase _database;
         private IClanApplication _clanApplication;
         private INotifier _notifier;
         private ILogger _logger;
@@ -27,6 +36,7 @@ namespace DiscordBot
 
         private async Task InitServicesAsync()
         {
+            _configuration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false).Build();
             _config = new DiscordSocketConfig()
             {
                 LogLevel = LogSeverity.Info,
@@ -36,8 +46,10 @@ namespace DiscordBot
             };
 
             _client = new DiscordSocketClient(_config);
+            _database = new SqlDatabase(_configuration);
+            _logRepository = new DatabaseLogRepository(_database);
+            _logger = new LogService(_logRepository);
             _dataService = new DataService();
-            _logger = new LogService(_client);
 
             _notifier = new NotificationService(_client, _logger, _dataService);
             _clanApplication = new ClanApplicationService(_notifier, _logger, _dataService);
@@ -57,10 +69,12 @@ namespace DiscordBot
             {
                 await DownloadGuildUsersAsync();
 
-                await _client.SetGameAsync("v2.3.5", type: ActivityType.Playing);
+                await _client.SetGameAsync("v2.4.3", type: ActivityType.Playing);
 
                 // Load data from db at some point.
                 _clanApplicationChannels = new List<ulong> { 765277945194348544, 765277993454534667, 765277969278042132 };
+
+                ValidateConfiguration();
             };
 
             await InitializeConnectionWithDiscordAsync();
@@ -69,12 +83,24 @@ namespace DiscordBot
             await Task.Delay(-1);
         }
 
+        private void ValidateConfiguration()
+        {
+            string validationMessage;
+            if (_configuration != null && !string.IsNullOrEmpty(_configuration.GetConnectionString("ApiDb")))
+            {
+                validationMessage = "Configuration is Valid.";
+            }
+            else
+            {
+                validationMessage = "Configuration is Invalid.";
+            }
+
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "Configuration", $"{validationMessage}"));
+        }
+
         private Task GuildMembersDownloaded(SocketGuild arg)
         {
-            _ = Task.Run(async () =>
-              {
-                  await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Guild Members Downloaded", $"Cached Offline Users from {arg.Name}!"));
-              });
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Guild Members Downloaded", $"Cached Offline Users from {arg.Name}!"));
 
             return Task.CompletedTask;
         }
@@ -83,19 +109,31 @@ namespace DiscordBot
         {
             _ = Task.Run(async () =>
               {
+                  var log = new LogMessage();
+
                   switch (arg.Exception)
                   {
                       case GatewayReconnectException:
-                          await _logger.ConsoleLog(new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services."));
+                          log = new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services.");
+
+                          await _logger.DatabaseLogAsync(
+                                LogSeverity.Critical,
+                                "Gateway",
+                                $"Restarting Services.",
+                                $"Discord",
+                                DateTime.UtcNow);
+
                           await RestartConnectionWithDiscordAsync();
                           break;
                       case WebSocketClosedException:
-                          await _logger.ConsoleLog(new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing.."));
+                          log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
                           break;
                       default:
-                          await _logger.ConsoleLog(arg);
+                          log = arg;
                           break;
                   }
+
+                  _logger.ConsoleLog(log);
               });
 
             return Task.CompletedTask;
@@ -103,13 +141,14 @@ namespace DiscordBot
 
         private Task DownloadGuildUsersAsync()
         {
-            _ = Task.Run(async () => {
-                await _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", "Loading Guilds.."));
+            _ = Task.Run(async () =>
+            {
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", "Loading Guilds.."));
 
                 await Task.WhenAll(_client.Guilds.Select(g => g.DownloadUsersAsync()));
                 int count = _client.Guilds.Sum(g => g.Users.Count);
 
-                await _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", $"Finished Download. Cached => {count} users."));
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "DownloadGuildUsers", $"Finished Download. Cached => {count} users."));
             });
 
             return Task.CompletedTask;
@@ -117,10 +156,7 @@ namespace DiscordBot
 
         private Task GuildAvailable(SocketGuild arg)
         {
-            _ = Task.Run(async () =>
-              {
-                  await _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Guild Available", $"{arg.Name} is now available!"));
-              });
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Guild Available", $"{arg.Name} is now available!"));
 
             return Task.CompletedTask;
         }
@@ -132,7 +168,7 @@ namespace DiscordBot
                   // Debug Mode:
                   if (socketReaction.Channel.Id.Equals(761687188341522492))
                   {
-                      await _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
+                      _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
                       return;
                   }
 
@@ -149,10 +185,17 @@ namespace DiscordBot
                       if (guildUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
                       {
                           // Log the message to the console.
-                          await _logger.ConsoleLog(
+                          _logger.ConsoleLog(
                                 logMessage: new LogMessage(
                                     severity: LogSeverity.Info,
                                     source: "Clan Application", $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message."));
+
+                          await _logger.DatabaseLogAsync(
+                              LogSeverity.Info,
+                              "Reaction Added",
+                              $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message.",
+                              $"{socketReaction.User.Value.Username}",
+                              DateTime.UtcNow);
 
                           return;
                       }
