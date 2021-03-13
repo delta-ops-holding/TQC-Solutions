@@ -69,7 +69,7 @@ namespace DiscordBot
             {
                 await DownloadGuildUsersAsync();
 
-                await _client.SetGameAsync("v2.4.3", type: ActivityType.Playing);
+                await _client.SetGameAsync("v2.5.0", type: ActivityType.Playing);
 
                 // Load data from db at some point.
                 _clanApplicationChannels = new List<ulong> { 765277945194348544, 765277993454534667, 765277969278042132 };
@@ -163,50 +163,62 @@ namespace DiscordBot
 
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
-            _ = Task.Run(async () =>
-              {
-                  // Debug Mode:
-                  if (socketReaction.Channel.Id.Equals(761687188341522492))
-                  {
-                      _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
-                      return;
-                  }
+            try
+            {
+                _ = Task.Run(async () =>
+                {
+                    // Debug Mode:
+                    if (socketReaction.Channel.Id.Equals(761687188341522492))
+                    {
+                        _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
+                        return;
+                    }
 
-                  // Get or download the user cache from the Server.
-                  IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
+                    // Get or download the user cache from the Server.
+                    IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
 
-                  // If the socket reaction, is from any of the filtered channels.
-                  if (_clanApplicationChannels.Contains(socketReaction.Channel.Id))
-                  {
-                      // Get the value from the socket reaction as a Socket Guild User.
-                      var guildUser = socketReaction.User.Value as SocketGuildUser;
+                    // If the socket reaction, is from any of the filtered channels.
+                    if (_clanApplicationChannels.Contains(socketReaction.Channel.Id))
+                    {
+                        // Get the value from the socket reaction as a Socket Guild User.
+                        var guildUser = socketReaction.User.Value as SocketGuildUser;
 
-                      // If the user has any roles from the filter.
-                      if (guildUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
-                      {
-                          // Log the message to the console.
-                          _logger.ConsoleLog(
-                                logMessage: new LogMessage(
-                                    severity: LogSeverity.Info,
-                                    source: "Clan Application", $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message."));
+                        // If the user has any roles from the filter.
+                        if (guildUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
+                        {
+                            // Log the message to the console.
+                            _logger.ConsoleLog(
+                                  logMessage: new LogMessage(
+                                      severity: LogSeverity.Info,
+                                      source: "Clan Application", $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message."));
 
-                          await _logger.DatabaseLogAsync(
-                              LogSeverity.Info,
-                              "Reaction Added",
-                              $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message.",
-                              $"{socketReaction.User.Value.Username}",
-                              DateTime.UtcNow);
+                            await _logger.DatabaseLogAsync(
+                                LogSeverity.Info,
+                                "Reaction Added",
+                                $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message.",
+                                $"{socketReaction.User.Value.Username}",
+                                DateTime.UtcNow);
 
-                          return;
-                      }
+                            return;
+                        }
 
-                      // Process a new clan application.
-                      await _clanApplication.ProcessClanApplicationAsync(userMessage, socketReaction);
+                        // Process a new clan application.
+                        await _clanApplication.ProcessClanApplicationAsync(socketReaction);
 
-                      return;
-                  }
-              });
+                        // Remove Reaction after process.
+                        await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
 
+                        return;
+                    }
+                });
+            }
+            catch (Exception)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _logger.DatabaseLogAsync(LogSeverity.Error, "Reaction Added", "Uncaught Error when processing Clan Application.", "TQC Minion", DateTime.UtcNow);
+                });
+            }
             return Task.CompletedTask;
         }
 

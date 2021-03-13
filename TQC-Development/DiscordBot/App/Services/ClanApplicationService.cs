@@ -36,11 +36,11 @@ namespace DiscordBot.Services
             _dataService = dataService;
         }
 
-        public async Task ProcessClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
+        public async Task ProcessClanApplicationAsync(SocketReaction reaction)
         {
             if (reaction.User.IsSpecified)
             {
-                await CreateClanApplicationAsync(userMessage, reaction);
+                await CreateClanApplicationAsync(reaction);
                 return;
             }
 
@@ -52,49 +52,54 @@ namespace DiscordBot.Services
                 $"User was not found in downloaded cache.",
                 $"{reaction.UserId}",
                 DateTime.UtcNow);
-
-            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }
 
         /// <summary>
         /// Create the clan application.
         /// </summary>
-        /// <param name="userMessage"></param>
         /// <param name="reaction"></param>
         /// <returns>An asynchronous operation.</returns>
-        private async Task CreateClanApplicationAsync(IUserMessage userMessage, SocketReaction reaction)
+        private async Task CreateClanApplicationAsync(SocketReaction reaction)
         {
             DateTimeOffset currentTime = DateTimeOffset.UtcNow;
             Clan clanName = _dataService.GetClanName(reaction.Emote);
+            IUser userObj = reaction.User.GetValueOrDefault();
 
-            if (!_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours))
+            // !_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours)
+            if (CheckUserForAlreadyExistingClanApplication(currentTime, userObj))
             {
-                _temporaryRuntimeUsers.Push(new UserModel() { Id = Guid.NewGuid(), DiscordId = reaction.UserId, Date = DateTimeOffset.UtcNow });
-                await SendClanApplicationAsync(reaction, clanName);
+                _temporaryRuntimeUsers.Push(
+                    new UserModel(Guid.NewGuid(), userObj.Id, DateTimeOffset.UtcNow, clanName));
 
+                await SendClanApplicationAsync(reaction, clanName);
                 return;
             }
 
             try
             {
-                await reaction.User.Value.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining a delta clan.");
+                var userModel = _temporaryRuntimeUsers.FirstOrDefault(x => x.DiscordId == userObj.Id);
+
+                await userObj.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining {userModel.ClanApplication}.");
             }
             catch (HttpException)
             {
                 _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow);
             }
 
+            await UserAlreadyAppliedToClan(reaction, userObj);
+        }
+
+        private async Task UserAlreadyAppliedToClan(SocketReaction reaction, IUser userObj)
+        {
             _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+            await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", $"Guardian tried applying to more than one clan.", $"{userObj.Username}#{userObj.Discriminator}", DateTime.UtcNow);
+        }
 
-            await _logger.DatabaseLogAsync(
-                LogSeverity.Warning,
-                "Create Clan Application",
-                $"Guardian tried applying to more than one clan",
-                $"{reaction.User.Value.Username}#{reaction.User.Value.Discriminator}",
-                DateTime.UtcNow);
-
-            await userMessage.RemoveReactionAsync(reaction.Emote, reaction.UserId);
-        }        
+        private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser userObj)
+        {
+            return !_temporaryRuntimeUsers.Any(u => u.DiscordId == userObj.Id && (currentTime - u.Date).TotalHours <= DelayTimerInHours);
+        }
 
         /// <summary>
         /// Send the created clan application, to notify leaders.
@@ -103,8 +108,10 @@ namespace DiscordBot.Services
         /// <param name="clanName"></param>
         /// <returns>An asyncronous process containing the Task.</returns>
         private async Task SendClanApplicationAsync(SocketReaction reaction, Clan clanName)
-        {            
-            await _notifier.NotifyUserAsync(reaction.User.Value, clanName);
+        {
+            IUser userObj = reaction.User.GetValueOrDefault();
+
+            await _notifier.NotifyUserAsync(userObj, clanName);
 
             byte platformId = 0;
 
@@ -126,15 +133,15 @@ namespace DiscordBot.Services
                     break;
             }
 
-            await _notifier.NotifyAdminAsync(platformId, reaction.User.Value, clanName);
+            await _notifier.NotifyAdminAsync(platformId, userObj, clanName);
 
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{reaction.UserId}> applied to join {clanName}"));
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{userObj.Id}> applied to join {clanName}"));
 
             await _logger.DatabaseLogAsync(
                 LogSeverity.Info,
                 "Sent Clan Application",
                 $"Guardian applied to join {clanName}.",
-                $"{reaction.User.Value.Username}#{reaction.User.Value.Discriminator}",
+                $"{userObj.Username}#{userObj.Discriminator}",
                 DateTime.UtcNow);
         }
     }
