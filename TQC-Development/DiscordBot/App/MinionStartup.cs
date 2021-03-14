@@ -20,6 +20,7 @@ namespace DiscordBot
     public class MinionStartup : IStartup
     {
         private readonly DiscordSocketClient _client;
+        private readonly ICommandHandler _commandHandler;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly IClanApplication _clanApplication;
@@ -29,12 +30,14 @@ namespace DiscordBot
             DiscordSocketClient client,
             IConfiguration configuration,
             ILogger logger,
-            IClanApplication clanApplication)
+            IClanApplication clanApplication,
+            ICommandHandler commandHandler)
         {
             _configuration = configuration;
             _client = client;
             _logger = logger;
             _clanApplication = clanApplication;
+            _commandHandler = commandHandler;
         }
 
         public async Task InitBotAsync()
@@ -44,18 +47,7 @@ namespace DiscordBot
             _client.GuildAvailable += GuildAvailable;
             _client.GuildMembersDownloaded += GuildMembersDownloaded;
             _client.ReactionAdded += ReactionAdded;
-
-            _client.Ready += async () =>
-            {
-                await DownloadGuildUsersAsync();
-
-                await _client.SetGameAsync(_configuration.GetValue<string>("Configuration:DiscordBot:Version"), type: ActivityType.Playing);
-
-                // Load data from db at some point.
-                _clanApplicationChannels = new List<ulong> { 765277945194348544, 765277993454534667, 765277969278042132 };
-
-                ValidateConfiguration();
-            };
+            _client.Ready += OnClientReady;
 
             await InitializeConnectionWithDiscordAsync();
 
@@ -63,20 +55,20 @@ namespace DiscordBot
             await Task.Delay(-1);
         }
 
-        private void ValidateConfiguration()
+        private Task OnClientReady()
         {
-            string validationMessage;
-            if (_configuration != null && !string.IsNullOrEmpty(_configuration.GetConnectionString("ApiDb")))
+            _ = Task.Run(async () =>
             {
-                validationMessage = "Configuration is Valid.";
-            }
-            else
-            {
-                validationMessage = "Configuration is Invalid.";
-            }
+                await ValidateConfiguration();
+                // Load data from db at some point.
+                _clanApplicationChannels = new List<ulong> { 765277945194348544, 765277993454534667, 765277969278042132 };
+                await _client.SetGameAsync(_configuration.GetValue<string>("Configuration:DiscordBot:Version"), type: ActivityType.Playing);
+                await DownloadGuildUsersAsync();
+            });
 
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "Configuration", $"{validationMessage}"));
+            return Task.CompletedTask;
         }
+
 
         private Task GuildMembersDownloaded(SocketGuild arg)
         {
@@ -89,31 +81,38 @@ namespace DiscordBot
         {
             _ = Task.Run(async () =>
             {
-                var log = new LogMessage();
-
-                switch (arg.Exception)
+                try
                 {
-                    case GatewayReconnectException:
-                        log = new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services.");
+                    var log = new LogMessage();
 
-                        await _logger.DatabaseLogAsync(
-                              LogSeverity.Critical,
-                              "Gateway",
-                              $"Restarting Services.",
-                              $"Discord",
-                              DateTime.UtcNow);
+                    switch (arg.Exception)
+                    {
+                        case GatewayReconnectException:
+                            log = new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services.");
 
-                        await RestartConnectionWithDiscordAsync();
-                        break;
-                    case WebSocketClosedException:
-                        log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
-                        break;
-                    default:
-                        log = arg;
-                        break;
+                            await _logger.DatabaseLogAsync(
+                                  LogSeverity.Critical,
+                                  "Gateway",
+                                  $"Restarting Services.",
+                                  $"Discord",
+                                  DateTime.UtcNow);
+
+                            await RestartConnectionWithDiscordAsync();
+                            break;
+                        case WebSocketClosedException:
+                            log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
+                            break;
+                        default:
+                            log = arg;
+                            break;
+                    }
+
+                    _logger.ConsoleLog(log);
                 }
-
-                _logger.ConsoleLog(log);
+                catch (Exception)
+                {
+                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "Logging", $"Error, failed to log message."));
+                }
             });
 
             return Task.CompletedTask;
@@ -143,9 +142,9 @@ namespace DiscordBot
 
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
-            try
+            _ = Task.Run(async () =>
             {
-                _ = Task.Run(async () =>
+                try
                 {
                     // Debug Mode:
                     if (socketReaction.Channel.Id.Equals(761687188341522492))
@@ -156,49 +155,75 @@ namespace DiscordBot
 
                     // Get or download the user cache from the Server.
                     IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
+                    SocketReaction currentReaction = socketReaction;
+
+                    if (currentReaction.User.GetValueOrDefault() is not SocketGuildUser currentUser)
+                    {
+                        currentUser = _client.GetUser(currentReaction.UserId) as SocketGuildUser;
+                    }
 
                     // If the socket reaction, is from any of the filtered channels.
-                    if (_clanApplicationChannels.Contains(socketReaction.Channel.Id))
+                    if (_clanApplicationChannels.Contains(currentReaction.Channel.Id))
                     {
-                        // Get the value from the socket reaction as a Socket Guild User.
-                        var guildUser = socketReaction.User.Value as SocketGuildUser;
-
                         // If the user has any roles from the filter.
-                        if (guildUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
+                        if (currentUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
                         {
                             // Log the message to the console.
                             _logger.ConsoleLog(
-                                  logMessage: new LogMessage(
-                                      severity: LogSeverity.Info,
-                                      source: "Clan Application", $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message."));
+                              logMessage: new LogMessage(
+                                  severity: LogSeverity.Info,
+                                  source: "Clan Application", $"Leadership <{currentUser.Id}> assigned reaction <{currentReaction.Emote.Name}> to message."));
 
                             await _logger.DatabaseLogAsync(
                                 LogSeverity.Info,
                                 "Reaction Added",
-                                $"Leadership <{guildUser.Nickname}:{guildUser.Id}> assigned reaction <{socketReaction.Emote.Name}> to message.",
-                                $"{socketReaction.User.Value.Username}",
+                                $"Leadership assigned reaction <{currentReaction.Emote.Name}> to message.",
+                                $"{currentUser.Id}",
                                 DateTime.UtcNow);
 
                             return;
                         }
 
                         // Process a new clan application.
-                        await _clanApplication.ProcessClanApplicationAsync(socketReaction);
+                        await _clanApplication.ProcessClanApplicationAsync(currentReaction, currentUser);
 
                         // Remove Reaction after process.
-                        await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
-
-                        return;
+                        await userMessage.RemoveReactionAsync(currentReaction.Emote, currentReaction.UserId);
                     }
-                });
-            }
-            catch (Exception)
-            {
-                _ = Task.Run(async () =>
+                }
+                catch (Exception)
                 {
-                    await _logger.DatabaseLogAsync(LogSeverity.Error, "Reaction Added", "Uncaught Error when processing Clan Application.", "TQC Minion", DateTime.UtcNow);
-                });
-            }
+                    await _logger.DatabaseLogAsync(LogSeverity.Error, "Reaction Added", "Error while processing Clan Application.", "TQC Minion", DateTime.UtcNow);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
+
+        private Task ValidateConfiguration()
+        {
+            _ = Task.Run(() =>
+           {
+               try
+               {
+                   string validationMessage;
+                   if (_configuration != null && !string.IsNullOrEmpty(_configuration.GetConnectionString("ApiDb")))
+                   {
+                       validationMessage = "Configuration is Valid.";
+                   }
+                   else
+                   {
+                       validationMessage = "Configuration is Invalid.";
+                   }
+
+                   _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "Configuration", $"{validationMessage}"));
+               }
+               catch (Exception)
+               {
+                   _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "Configuration", $"Error validating configuration."));
+               }
+           });
+
             return Task.CompletedTask;
         }
 

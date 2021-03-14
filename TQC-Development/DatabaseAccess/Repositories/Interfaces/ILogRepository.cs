@@ -9,5 +9,7 @@ namespace DatabaseAccess.Repositories.Interfaces
     public interface ILogRepository
     {
         Task CreateLog(LogMessage logMessage);
+
+        Task<IEnumerable<LogMessage>> GetLatest();
     }
 }

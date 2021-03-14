@@ -12,8 +12,9 @@ namespace DiscordBot.Interfaces
         /// <summary>
         /// Starts the process of a clan application.
         /// </summary>
-        /// <param name="socketReaction">Contains the reaction which was added by the user.</param>
+        /// <param name="currentReaction">Contains the reaction which was added by the user.</param>
+        /// <param name="currentUser">Current user, of which reacted to the message.</param>
         /// <returns>An asynchronous operation.</returns>
-        Task ProcessClanApplicationAsync(SocketReaction socketReaction);
+        Task ProcessClanApplicationAsync(SocketReaction currentReaction, IUser currentUser);
     }
 }

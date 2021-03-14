@@ -3,8 +3,11 @@ using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Repositories;
 using DatabaseAccess.Repositories.Interfaces;
 using Discord;
+using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
+using DiscordBot.Commands;
+using DiscordBot.Commands.Modules;
 using DiscordBot.Interfaces;
 using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static DiscordBot.Commands.Modules.InfoModule;
 
 namespace DiscordBot
 {
@@ -28,9 +32,16 @@ namespace DiscordBot
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    // Discord Services.
-                    services.AddSingleton<DiscordSocketClient, DiscordSocketClient>();
-                    services.AddSingleton<DiscordSocketConfig>();
+                    var config = new DiscordSocketConfig
+                    {
+                        LogLevel = LogSeverity.Info,
+                        MessageCacheSize = 100,
+                        ExclusiveBulkDelete = false,
+                        AlwaysDownloadUsers = true
+                    };
+
+                    services.AddSingleton(config);
+                    services.AddSingleton(new DiscordSocketClient(config));
 
                     // Database Services.
                     services.AddScoped<IDatabase, SqlDatabase>();
@@ -42,18 +53,18 @@ namespace DiscordBot
                     services.AddScoped<IClanApplication, ClanApplicationService>();
 
                     // Log Services.
-                    services.AddScoped<ILogger, LogService>();
+                    services.AddSingleton<ILogger, LogService>();
 
                     // Startup Services.
-                    services.AddSingleton<IStartup, MinionStartup>();
+                    services.AddSingleton<IStartup, MinionStartup>();                    
 
-                    services.Configure<DiscordSocketConfig>(options =>
-                    {
-                        options.LogLevel = LogSeverity.Info;
-                        options.MessageCacheSize = 100;
-                        options.ExclusiveBulkDelete = false;
-                        options.AlwaysDownloadUsers = true;
-                    });
+                    // Commands.                    
+                    services.AddScoped<CommandService>();
+                    services.AddScoped<ICommandHandler, CommandHandler>();
+
+                    // Command Modules.
+                    services.AddSingleton<InfoModule>();
+                    services.AddSingleton<LogModule>();
                 })
                 .Build();
 

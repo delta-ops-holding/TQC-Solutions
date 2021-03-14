@@ -3,17 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestAPI", "RestAPI\RestAPI.csproj", "{F9BC7D71-9D3D-49D3-BB1F-F6D61F125BE7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiEmily", "ApiEmily\ApiEmily.csproj", "{6CADA5DA-8BBD-4C45-813F-EB9C4E74C787}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiEmily.Tests", "ApiEmily.Tests\ApiEmily.Tests.csproj", "{1B8BDEF3-C579-4BCC-A1CC-16C758483CCA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\App\DiscordBot.csproj", "{D640DAD9-2F8A-476F-BCA1-3CE461D44EEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiEmerald", "ApiEmerald\ApiEmerald.csproj", "{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiEmerald", "ApiEmerald\ApiEmerald.csproj", "{86A6E930-C9D6-4D0A-B2F1-F7C7AC8530DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F9BC7D71-9D3D-49D3-BB1F-F6D61F125BE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9BC7D71-9D3D-49D3-BB1F-F6D61F125BE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9BC7D71-9D3D-49D3-BB1F-F6D61F125BE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9BC7D71-9D3D-49D3-BB1F-F6D61F125BE7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6CADA5DA-8BBD-4C45-813F-EB9C4E74C787}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6CADA5DA-8BBD-4C45-813F-EB9C4E74C787}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CADA5DA-8BBD-4C45-813F-EB9C4E74C787}.Release|Any CPU.ActiveCfg = Release|Any CPU

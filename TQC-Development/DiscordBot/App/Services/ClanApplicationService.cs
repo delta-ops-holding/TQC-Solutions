@@ -36,70 +36,93 @@ namespace DiscordBot.Services
             _dataService = dataService;
         }
 
-        public async Task ProcessClanApplicationAsync(SocketReaction reaction)
+        public async Task ProcessClanApplicationAsync(SocketReaction currentReaction, IUser currentUser)
         {
-            if (reaction.User.IsSpecified)
+            try
             {
-                await CreateClanApplicationAsync(reaction);
-                return;
+                if (currentReaction.User.IsSpecified || currentUser != null)
+                {
+                    await CreateClanApplicationAsync(currentReaction, currentUser);
+                    return;
+                }
+
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{currentReaction.UserId}>"));
+
+                await _logger.DatabaseLogAsync(
+                    LogSeverity.Warning,
+                    "Process Clan Application",
+                    $"User was not found in downloaded cache.",
+                    $"{currentReaction.UserId}",
+                    DateTime.UtcNow);
             }
-
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{reaction.UserId}>"));
-
-            await _logger.DatabaseLogAsync(
-                LogSeverity.Warning,
-                "Process Clan Application",
-                $"User was not found in downloaded cache.",
-                $"{reaction.UserId}",
-                DateTime.UtcNow);
+            catch (Exception ex)
+            {
+                await _logger.DatabaseLogAsync(
+                    LogSeverity.Error,
+                    "Proccess Clan Application",
+                    $"Error while creating clan application : {ex.Message}",
+                    "TQC Minion",
+                    DateTime.UtcNow);
+            }
         }
 
         /// <summary>
         /// Create the clan application.
         /// </summary>
-        /// <param name="reaction"></param>
+        /// <param name="currentReaction"></param>
         /// <returns>An asynchronous operation.</returns>
-        private async Task CreateClanApplicationAsync(SocketReaction reaction)
+        private async Task CreateClanApplicationAsync(SocketReaction currentReaction, IUser currentUser)
         {
-            DateTimeOffset currentTime = DateTimeOffset.UtcNow;
-            Clan clanName = _dataService.GetClanName(reaction.Emote);
-            IUser userObj = reaction.User.GetValueOrDefault();
-
-            // !_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours)
-            if (CheckUserForAlreadyExistingClanApplication(currentTime, userObj))
-            {
-                _temporaryRuntimeUsers.Push(
-                    new UserModel(Guid.NewGuid(), userObj.Id, DateTimeOffset.UtcNow, clanName));
-
-                await SendClanApplicationAsync(reaction, clanName);
-                return;
-            }
-
             try
             {
-                var userModel = _temporaryRuntimeUsers.FirstOrDefault(x => x.DiscordId == userObj.Id);
+                DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+                Clan clanName = _dataService.GetClanName(currentReaction.Emote);
 
-                await userObj.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining {userModel.ClanApplication}.");
+                // !_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours)
+                if (CheckUserForAlreadyExistingClanApplication(currentTime, currentUser))
+                {
+                    _temporaryRuntimeUsers.Push(
+                        new UserModel(Guid.NewGuid(), currentUser.Id, DateTimeOffset.UtcNow, clanName));
+
+                    await SendClanApplicationAsync(currentReaction, currentUser, clanName);
+                    return;
+                }
+
+                try
+                {
+                    var userModel = _temporaryRuntimeUsers.FirstOrDefault(x => x.DiscordId == currentUser.Id);
+
+                    await currentUser.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining {userModel.ClanApplication}.");
+                }
+                catch (HttpException)
+                {
+                    await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow);
+                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
+                }
+
+                await UserAlreadyAppliedToClan(currentUser);
             }
-            catch (HttpException)
+            catch (Exception ex)
             {
-                _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
-                await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow);
+                await _logger.DatabaseLogAsync(
+                    LogSeverity.Error,
+                    "Create Clan Application",
+                    $"Error in creating- or sending clan application : {ex.Message}",
+                    "TQC Minion",
+                    DateTime.UtcNow);
             }
-
-            await UserAlreadyAppliedToClan(reaction, userObj);
         }
 
-        private async Task UserAlreadyAppliedToClan(SocketReaction reaction, IUser userObj)
+        private async Task UserAlreadyAppliedToClan(IUser currentUser)
         {
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{reaction.UserId}> tried applying to more than one clan"));
+            await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", $"Guardian tried applying to more than one clan.", $"{currentUser.Id}", DateTime.UtcNow);
 
-            await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", $"Guardian tried applying to more than one clan.", $"{reaction.UserId}", DateTime.UtcNow);
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{currentUser.Id}> tried applying to more than one clan"));
         }
 
-        private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser userObj)
+        private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser currentUser)
         {
-            return !_temporaryRuntimeUsers.Any(u => u.DiscordId == userObj.Id && (currentTime - u.Date).TotalHours <= DelayTimerInHours);
+            return !_temporaryRuntimeUsers.Any(u => u.DiscordId == currentUser.Id && (currentTime - u.Date).TotalHours <= DelayTimerInHours);
         }
 
         /// <summary>
@@ -108,42 +131,52 @@ namespace DiscordBot.Services
         /// <param name="reaction"></param>
         /// <param name="clanName"></param>
         /// <returns>An asyncronous process containing the Task.</returns>
-        private async Task SendClanApplicationAsync(SocketReaction reaction, Clan clanName)
+        private async Task SendClanApplicationAsync(SocketReaction reaction, IUser currentUser, Clan clanName)
         {
-            IUser userObj = reaction.User.GetValueOrDefault();
-
-            await _notifier.NotifyUserAsync(userObj, clanName);
-
-            byte platformId = 0;
-
-            switch (reaction.Channel.Id)
+            try
             {
-                // Steam / PC | pc-clans
-                case 765277945194348544:
-                    platformId = 1;
-                    break;
+                await _notifier.NotifyUserAsync(currentUser, clanName);
 
-                // Playstation | ps4-clans
-                case 765277969278042132:
-                    platformId = 2;
-                    break;
+                byte platformId = 0;
 
-                // Xbox | xbox-clans
-                case 765277993454534667:
-                    platformId = 3;
-                    break;
+                switch (reaction.Channel.Id)
+                {
+                    // Steam / PC | pc-clans
+                    case 765277945194348544:
+                        platformId = 1;
+                        break;
+
+                    // Playstation | ps4-clans
+                    case 765277969278042132:
+                        platformId = 2;
+                        break;
+
+                    // Xbox | xbox-clans
+                    case 765277993454534667:
+                        platformId = 3;
+                        break;
+                }
+
+                await _notifier.NotifyAdminAsync(platformId, currentUser, clanName);
+
+                await _logger.DatabaseLogAsync(
+                    LogSeverity.Info,
+                    "Sent Clan Application",
+                    $"Guardian applied to join {clanName}.",
+                    $"{currentUser.Id}",
+                    DateTime.UtcNow);
+
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{currentUser.Id}> applied to join {clanName}"));
             }
-
-            await _notifier.NotifyAdminAsync(platformId, userObj, clanName);
-
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{userObj.Id}> applied to join {clanName}"));
-
-            await _logger.DatabaseLogAsync(
-                LogSeverity.Info,
-                "Sent Clan Application",
-                $"Guardian applied to join {clanName}.",
-                $"{userObj.Id}",
-                DateTime.UtcNow);
+            catch (Exception ex)
+            {
+                await _logger.DatabaseLogAsync(
+                    LogSeverity.Error,
+                    "Send Clan Application",
+                    $"Error while notifying users with clan application : {ex.Message}",
+                    "TQC Minion",
+                    DateTime.UtcNow);
+            }
         }
     }
 }

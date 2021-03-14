@@ -39,10 +39,10 @@ namespace DiscordBot.Interfaces
             ulong mainChannelId = 767474913308835880; // Channel on the admin server to post in.
             //ulong debugChannelId = 768014874289766402; // Dev Server, to test bot.
 
-            var pingRole = _dataService.GetRoleByClan(clanName);                          // Get the role to ping.
-            var messageChannel = _client.GetChannel(mainChannelId) as IMessageChannel;  // Get Channel object by channel id.
+            var pingRole = _dataService.GetRoleByClan(clanName);                            // Get the role to ping.
+            var messageChannel = _client.GetChannel(mainChannelId) as IMessageChannel;      // Get Channel object by channel id.
 
-            var embedMessage = new EmbedBuilder()                                       // Create new Embed Builder.
+            var embedMessage = new EmbedBuilder()                                           // Create new Embed Builder.
             {
                 Title = "New Clan Application Arrived!",
                 Description = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian."

@@ -1,6 +1,9 @@
-﻿using Discord;
+﻿using DiscordBot.Interfaces;
 using DiscordBot.Enums;
-using DiscordBot.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using DatabaseAccess.Repositories.Interfaces;
+using Discord;
 
 namespace DiscordBot.Services
 {
@@ -9,6 +12,13 @@ namespace DiscordBot.Services
     /// </summary>
     public class DataService : IDataService
     {
+        private readonly ILogRepository _logRepository;
+
+        public DataService(ILogRepository logRepository)
+        {
+            _logRepository = logRepository;
+        }
+
         /// <summary>
         /// Gets the clan name, by a given emote.
         /// </summary>
@@ -62,6 +72,11 @@ namespace DiscordBot.Services
                 Clan.SHΔDOW => "<@&725837886427234354>",
                 _ => Clan.Undefined.ToString(),
             };
+        }
+
+        public async Task<IEnumerable<DatabaseAccess.Models.LogMessage>> GetLatestLogs()
+        {
+            return await _logRepository.GetLatest();
         }
     }
 }

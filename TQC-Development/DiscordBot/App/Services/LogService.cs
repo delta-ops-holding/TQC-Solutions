@@ -28,31 +28,27 @@ namespace DiscordBot.Services
             Console.WriteLine(logMessage.ToString());
         }
 
-        public Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate)
+        public async Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate)
         {
-            _ = Task.Run(async () =>
+            var s = severity switch
             {
-                var s = severity switch
-                {
-                    LogSeverity.Critical => 1,
-                    LogSeverity.Error => 2,
-                    LogSeverity.Warning => 3,
-                    LogSeverity.Info => 4,
-                    LogSeverity.Verbose => 5,
-                    _ => 6
-                };
+                LogSeverity.Critical => 1,
+                LogSeverity.Error => 2,
+                LogSeverity.Warning => 3,
+                LogSeverity.Info => 4,
+                LogSeverity.Verbose => 5,
+                LogSeverity.Debug => 6,
+                _ => throw new NotSupportedException("Log Severity wasn't supported.")
+            };
 
-                var log = new DatabaseAccess.Models.LogMessage(
-                    logSeverity: (DatabaseAccess.Enums.LogSeverity)s,
-                    source: source,
-                    message: message,
-                    createdBy: createdBy,
-                    createdDate: createdDate);
+            var log = new DatabaseAccess.Models.LogMessage(
+                logSeverity: (DatabaseAccess.Enums.LogSeverity)s,
+                source: source,
+                message: message,
+                createdBy: createdBy,
+                createdDate: createdDate);
 
-                await _logRepo.CreateLog(log);
-            }); 
-
-            return Task.CompletedTask;
+            await _logRepo.CreateLog(log);
         }
     }
 }
