@@ -1,7 +1,6 @@
 ﻿using DatabaseAccess.Models;
-using System;
+using DataClassLibrary.Models;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DatabaseAccess.Repositories.Interfaces
@@ -10,6 +9,8 @@ namespace DatabaseAccess.Repositories.Interfaces
     {
         Task CreateLog(LogMessage logMessage);
 
-        Task<IEnumerable<LogMessage>> GetLatest();
+        Task<IEnumerable<LogModel>> GetLatest();
+
+        Task CreateLog(LogModel logModel);
     }
 }

@@ -70,9 +70,9 @@ namespace DatabaseAccess.Repositories.V3
 
                 return temporaryClans;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 

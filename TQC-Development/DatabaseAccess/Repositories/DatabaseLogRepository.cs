@@ -1,12 +1,12 @@
 ﻿using DatabaseAccess.Database.Interfaces;
-using DatabaseAccess.Enums;
 using DatabaseAccess.Models;
 using DatabaseAccess.Repositories.Interfaces;
+using DataClassLibrary.Enums;
+using DataClassLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DatabaseAccess.Repositories
@@ -44,9 +44,33 @@ namespace DatabaseAccess.Repositories
             finally { _databaseInstance.CloseConnection(); }
         }
 
-        public async Task<IEnumerable<LogMessage>> GetLatest()
+        public async Task CreateLog(LogModel logModel)
         {
-            using SqlCommand c = new SqlCommand()
+            using SqlCommand c = new()
+            {
+                CommandText = "proc_create_log",
+                CommandType = CommandType.StoredProcedure,
+                Connection = _databaseInstance.GetConnection()
+            };
+
+            c.Parameters.AddWithValue("@severity", (int)logModel.LogSeverity);
+            c.Parameters.AddWithValue("@source", logModel.Source);
+            c.Parameters.AddWithValue("@message", logModel.Message);
+            c.Parameters.AddWithValue("@createdBy", logModel.CreatedBy);
+            c.Parameters.AddWithValue("@createdDate", logModel.CreatedDateTime).DbType = DbType.DateTime;
+
+            try
+            {
+                await _databaseInstance.OpenConnectionAsync();
+                await c.ExecuteNonQueryAsync();
+            }
+            catch (Exception) { throw; }
+            finally { _databaseInstance.CloseConnection(); }
+        }
+
+        public async Task<IEnumerable<LogModel>> GetLatest()
+        {
+            using SqlCommand c = new()
             {
                 CommandText = "proc_get_latest_logs",
                 CommandType = CommandType.StoredProcedure,
@@ -59,18 +83,18 @@ namespace DatabaseAccess.Repositories
 
                 var dataReader = await c.ExecuteReaderAsync();
 
-                List<LogMessage> logs = new List<LogMessage>();
+                List<LogModel> logs = new List<LogModel>();
 
                 if (dataReader.HasRows)
                 {
                     while (await dataReader.ReadAsync())
                     {
-                        logs.Add(new LogMessage(
-                             logSeverity: (LogSeverity)dataReader.GetInt32(1),
+                        logs.Add(new LogModel(
+                             logSeverity: (LoggingSeverity)dataReader.GetInt32(1),
                              source: dataReader.GetString(2),
                              message: dataReader.GetString(3),
                              createdBy: dataReader.GetString(4),
-                             createdDate: dataReader.GetDateTime(5)));
+                             createdDateTime: dataReader.GetDateTime(5)));
                     }
                 }
 
