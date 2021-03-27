@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiEmerald", "ApiEmerald\Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataClassLibrary", "DataClassLibrary\DataClassLibrary.csproj", "{BFF0E9FC-9127-4D7B-8911-3783A3FB1A38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E5411D7-D16C-4A59-BBE8-D0A7408F3AD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFF0E9FC-9127-4D7B-8911-3783A3FB1A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFF0E9FC-9127-4D7B-8911-3783A3FB1A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFF0E9FC-9127-4D7B-8911-3783A3FB1A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFF0E9FC-9127-4D7B-8911-3783A3FB1A38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
