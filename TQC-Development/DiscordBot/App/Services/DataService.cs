@@ -1,9 +1,11 @@
-﻿using DiscordBot.Interfaces;
-using DiscordBot.Enums;
+﻿using Discord;
+using DiscordBot.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataClassLibrary.Enums;
 using DatabaseAccess.Repositories.Interfaces;
-using Discord;
+using DataClassLibrary.Models;
+using System;
 
 namespace DiscordBot.Services
 {
@@ -74,9 +76,10 @@ namespace DiscordBot.Services
             };
         }
 
-        public async Task<IEnumerable<DatabaseAccess.Models.LogMessage>> GetLatestLogs()
+        public Task<IEnumerable<LogModel>> GetLatestLogs()
         {
-            return await _logRepository.GetLatest();
+            throw new NotImplementedException();
+            //return await _logRepository.GetLatest();
         }
     }
 }

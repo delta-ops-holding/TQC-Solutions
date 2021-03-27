@@ -52,7 +52,7 @@ namespace DiscordBot.Commands.Modules
                 {
                     embeds.Add(new EmbedFieldBuilder()
                     {
-                        Name = logs.ElementAt(i).CreatedDate.ToString(),
+                        Name = logs.ElementAt(i).CreatedDateTime.ToString(),
                         Value = $"{logs.ElementAt(i).Source}\n{logs.ElementAt(i).CreatedBy}\n{logs.ElementAt(i).Message}",
                         IsInline = false
                     });

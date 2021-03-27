@@ -2,6 +2,8 @@
 using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Repositories;
 using DatabaseAccess.Repositories.Interfaces;
+using DataClassLibrary.Enums;
+using DataClassLibrary.Models;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
@@ -49,7 +51,8 @@ namespace DiscordBot
             _client.ReactionAdded += ReactionAdded;
             _client.Ready += OnClientReady;
 
-            await InitializeConnectionWithDiscordAsync();
+            await _client.LoginAsync(TokenType.Bot, _configuration.GetValue<string>("Configuration:DiscordBot:Token"));
+            await _client.StartAsync();
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
@@ -88,16 +91,12 @@ namespace DiscordBot
                     switch (arg.Exception)
                     {
                         case GatewayReconnectException:
+
+                            await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Critical, "Gateway", "Restarting TQC Minion.", "Discord", DateTime.UtcNow));
+
                             log = new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services.");
 
-                            await _logger.DatabaseLogAsync(
-                                  LogSeverity.Critical,
-                                  "Gateway",
-                                  $"Restarting Services.",
-                                  $"Discord",
-                                  DateTime.UtcNow);
-
-                            await RestartConnectionWithDiscordAsync();
+                            await _client.StartAsync();
                             break;
                         case WebSocketClosedException:
                             log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
@@ -111,7 +110,7 @@ namespace DiscordBot
                 }
                 catch (Exception)
                 {
-                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "Logging", $"Error, failed to log message."));
+                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "Logging", $"Error, failed to handle client."));
                 }
             });
 
@@ -146,13 +145,6 @@ namespace DiscordBot
             {
                 try
                 {
-                    // Debug Mode:
-                    if (socketReaction.Channel.Id.Equals(761687188341522492))
-                    {
-                        _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
-                        return;
-                    }
-
                     // Get or download the user cache from the Server.
                     IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
                     SocketReaction currentReaction = socketReaction;
@@ -162,24 +154,23 @@ namespace DiscordBot
                         currentUser = _client.GetUser(currentReaction.UserId) as SocketGuildUser;
                     }
 
+                    // Debug Mode:
+                    if (currentReaction.Channel.Id.Equals(761687188341522492))
+                    {
+                        _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
+                        return;
+                    }
+
                     // If the socket reaction, is from any of the filtered channels.
                     if (_clanApplicationChannels.Contains(currentReaction.Channel.Id))
                     {
                         // If the user has any roles from the filter.
                         if (currentUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
                         {
-                            // Log the message to the console.
-                            _logger.ConsoleLog(
-                              logMessage: new LogMessage(
-                                  severity: LogSeverity.Info,
-                                  source: "Clan Application", $"Leadership <{currentUser.Id}> assigned reaction <{currentReaction.Emote.Name}> to message."));
+                            var message = $"Leadership assigned reaction <{currentReaction.Emote.Name}> to message.";
+                            var createdBy = currentUser.Id.ToString();
 
-                            await _logger.DatabaseLogAsync(
-                                LogSeverity.Info,
-                                "Reaction Added",
-                                $"Leadership assigned reaction <{currentReaction.Emote.Name}> to message.",
-                                $"{currentUser.Id}",
-                                DateTime.UtcNow);
+                            await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Info, "Reaction Added", message, createdBy, DateTime.UtcNow));
 
                             return;
                         }
@@ -193,7 +184,7 @@ namespace DiscordBot
                 }
                 catch (Exception)
                 {
-                    await _logger.DatabaseLogAsync(LogSeverity.Error, "Reaction Added", "Error while processing Clan Application.", "TQC Minion", DateTime.UtcNow);
+                    await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Reaction Added", "Error while processing Clan Application.", "TQC Minion", DateTime.UtcNow));
                 }
             });
 
@@ -225,24 +216,6 @@ namespace DiscordBot
            });
 
             return Task.CompletedTask;
-        }
-
-        private async Task InitializeConnectionWithDiscordAsync()
-        {
-            await LogInToDiscordAsync();
-            await _client.StartAsync();
-        }
-
-        private async Task RestartConnectionWithDiscordAsync()
-        {
-            await _client.StopAsync();
-            await LogInToDiscordAsync();
-            await _client.StartAsync();
-        }
-
-        private async Task LogInToDiscordAsync()
-        {
-            await _client.LoginAsync(TokenType.Bot, _configuration.GetValue<string>("Configuration:DiscordBot:Token"));
         }
     }
 }

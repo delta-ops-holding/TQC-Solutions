@@ -1,22 +1,9 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBot.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Commands.Modules
 {
-    [NamedArgumentType]
-    public class ClanRosterArguments
-    {
-        public Clan Name { get; set; }
-        public SocketGuildUser User { get; set; }
-        public bool IsFounder { get; set; }
-    }
-
     [Group("clan")]
     [Alias("c")]
     public class ClanModule : ModuleBase<SocketCommandContext>

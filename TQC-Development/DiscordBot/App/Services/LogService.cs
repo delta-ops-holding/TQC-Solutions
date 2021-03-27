@@ -1,4 +1,6 @@
 ﻿using DatabaseAccess.Repositories.Interfaces;
+using DataClassLibrary.Enums;
+using DataClassLibrary.Models;
 using Discord;
 using DiscordBot.Interfaces;
 using System;
@@ -42,13 +44,18 @@ namespace DiscordBot.Services
             };
 
             var log = new DatabaseAccess.Models.LogMessage(
-                logSeverity: (DatabaseAccess.Enums.LogSeverity)s,
+                logSeverity: (LoggingSeverity)s,
                 source: source,
                 message: message,
                 createdBy: createdBy,
                 createdDate: createdDate);
 
             await _logRepo.CreateLog(log);
+        }
+
+        public async Task DatabaseLogAsync(LogModel logModel)
+        {
+            await _logRepo.CreateLog(logModel);
         }
     }
 }

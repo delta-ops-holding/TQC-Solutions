@@ -1,7 +1,6 @@
-﻿using Discord;
+﻿using DataClassLibrary.Models;
+using Discord;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Interfaces
@@ -23,5 +22,7 @@ namespace DiscordBot.Interfaces
         /// <param name="logMessage">Information of the log.</param>
         /// <returns>A task representing the asynchronous process.</returns>
         Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate);
+
+        Task DatabaseLogAsync(LogModel logModel);
     }
 }

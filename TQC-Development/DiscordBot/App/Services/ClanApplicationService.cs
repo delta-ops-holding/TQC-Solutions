@@ -1,9 +1,9 @@
-﻿using Discord;
+﻿using DataClassLibrary.Enums;
+using DataClassLibrary.Models;
+using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using DiscordBot.Enums;
 using DiscordBot.Interfaces;
-using DiscordBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,23 +46,18 @@ namespace DiscordBot.Services
                     return;
                 }
 
-                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{currentReaction.UserId}>"));
+                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Warning, "Process Clan Application", "User was not found in downloaded cache.", currentReaction.UserId.ToString(), DateTime.UtcNow));
 
-                await _logger.DatabaseLogAsync(
-                    LogSeverity.Warning,
-                    "Process Clan Application",
-                    $"User was not found in downloaded cache.",
-                    $"{currentReaction.UserId}",
-                    DateTime.UtcNow);
+                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{currentReaction.UserId}>"));
             }
             catch (Exception ex)
             {
-                await _logger.DatabaseLogAsync(
-                    LogSeverity.Error,
+                await _logger.DatabaseLogAsync(new LogModel(
+                    LoggingSeverity.Error,
                     "Proccess Clan Application",
                     $"Error while creating clan application : {ex.Message}",
                     "TQC Minion",
-                    DateTime.UtcNow);
+                    DateTime.UtcNow));
             }
         }
 
@@ -75,8 +70,8 @@ namespace DiscordBot.Services
         {
             try
             {
-                DateTimeOffset currentTime = DateTimeOffset.UtcNow;
-                Clan clanName = _dataService.GetClanName(currentReaction.Emote);
+                var currentTime = DateTimeOffset.UtcNow;
+                var clanName = _dataService.GetClanName(currentReaction.Emote);
 
                 // !_temporaryRuntimeUsers.Any(u => u.DiscordId == reaction.UserId && (currentTime - u.Date).TotalHours <= DelayTimerInHours)
                 if (CheckUserForAlreadyExistingClanApplication(currentTime, currentUser))
@@ -96,7 +91,7 @@ namespace DiscordBot.Services
                 }
                 catch (HttpException)
                 {
-                    await _logger.DatabaseLogAsync(LogSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow);
+                    await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow));
                     _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
                 }
 
@@ -104,12 +99,7 @@ namespace DiscordBot.Services
             }
             catch (Exception ex)
             {
-                await _logger.DatabaseLogAsync(
-                    LogSeverity.Error,
-                    "Create Clan Application",
-                    $"Error in creating- or sending clan application : {ex.Message}",
-                    "TQC Minion",
-                    DateTime.UtcNow);
+                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Create Clan Application", $"Error in creating- or sending clan application : {ex.Message}", "TQC Minion", DateTime.UtcNow));
             }
         }
 
@@ -159,23 +149,13 @@ namespace DiscordBot.Services
 
                 await _notifier.NotifyAdminAsync(platformId, currentUser, clanName);
 
-                await _logger.DatabaseLogAsync(
-                    LogSeverity.Info,
-                    "Sent Clan Application",
-                    $"Guardian applied to join {clanName}.",
-                    $"{currentUser.Id}",
-                    DateTime.UtcNow);
+                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Info, "Sent Clan Application", $"Guardian applied to join {clanName}.", $"{currentUser.Id}", DateTime.UtcNow));
 
                 _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{currentUser.Id}> applied to join {clanName}"));
             }
             catch (Exception ex)
             {
-                await _logger.DatabaseLogAsync(
-                    LogSeverity.Error,
-                    "Send Clan Application",
-                    $"Error while notifying users with clan application : {ex.Message}",
-                    "TQC Minion",
-                    DateTime.UtcNow);
+                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Send Clan Application", $"Error while notifying users with clan application : {ex.Message}", "TQC Minion", DateTime.UtcNow));
             }
         }
     }
