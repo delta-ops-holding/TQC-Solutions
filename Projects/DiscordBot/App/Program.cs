@@ -4,7 +4,6 @@ using DatabaseAccess.Repositories;
 using DatabaseAccess.Repositories.Interfaces;
 using Discord;
 using Discord.Commands;
-using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Commands;
 using DiscordBot.Commands.Modules;
@@ -14,9 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using static DiscordBot.Commands.Modules.InfoModule;
 
