@@ -40,15 +40,13 @@ namespace DiscordBot.Services
         {
             try
             {
-                if (currentReaction.User.IsSpecified || currentUser != null)
+                if (ValidateUserIsSpecified(currentReaction, currentUser))
                 {
                     await CreateClanApplicationAsync(currentReaction, currentUser);
                     return;
                 }
 
                 await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Warning, "Process Clan Application", "User was not found in downloaded cache.", currentReaction.UserId.ToString(), DateTime.UtcNow));
-
-                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Process Clan Application", $"User was not found in downloaded cache <{currentReaction.UserId}>"));
             }
             catch (Exception ex)
             {
@@ -59,6 +57,11 @@ namespace DiscordBot.Services
                     "TQC Minion",
                     DateTime.UtcNow));
             }
+        }
+
+        private static bool ValidateUserIsSpecified(SocketReaction currentReaction, IUser currentUser)
+        {
+            return currentReaction.User.IsSpecified || currentUser != null;
         }
 
         /// <summary>
@@ -87,12 +90,13 @@ namespace DiscordBot.Services
                 {
                     var userModel = _temporaryRuntimeUsers.FirstOrDefault(x => x.DiscordId == currentUser.Id);
 
-                    await currentUser.SendMessageAsync($"Guardian. Wait for your clan application to proceed. You've already signed up for joining {userModel.ClanApplication}.");
+                    string message = $"Guardian. Wait for your clan application to proceed. You've already signed up for joining {userModel.ClanApplication}.";
+
+                    await _notifier.SendDirectMessageToUserAsync(currentUser, message);
                 }
                 catch (HttpException)
                 {
                     await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Warning, "Create Clan Application", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow));
-                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "User Privacy", "Couldn't DM Guardian. [Privacy is on or sender is blocked]"));
                 }
 
                 await UserAlreadyAppliedToClan(currentUser);
@@ -125,38 +129,30 @@ namespace DiscordBot.Services
         {
             try
             {
-                await _notifier.NotifyUserAsync(currentUser, clanName);
+                byte platformId = GetPlatformByReaction(reaction);
 
-                byte platformId = 0;
-
-                switch (reaction.Channel.Id)
-                {
-                    // Steam / PC | pc-clans
-                    case 765277945194348544:
-                        platformId = 1;
-                        break;
-
-                    // Playstation | ps4-clans
-                    case 765277969278042132:
-                        platformId = 2;
-                        break;
-
-                    // Xbox | xbox-clans
-                    case 765277993454534667:
-                        platformId = 3;
-                        break;
-                }
-
-                await _notifier.NotifyAdminAsync(platformId, currentUser, clanName);
+                await _notifier.SendApplicationAsync(platformId, currentUser, clanName);
 
                 await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Info, "Sent Clan Application", $"Guardian applied to join {clanName}.", $"{currentUser.Id}", DateTime.UtcNow));
-
-                _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Clan Application", $"Guardian aka <{currentUser.Id}> applied to join {clanName}"));
             }
             catch (Exception ex)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Send Clan Application", $"Error while notifying users with clan application : {ex.Message}", "TQC Minion", DateTime.UtcNow));
+                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Send Clan Application", $"Error while sending clan application : {ex.Message}", "TQC Minion", DateTime.UtcNow));
             }
+        }
+
+        private static byte GetPlatformByReaction(SocketReaction reaction)
+        {
+            return reaction.Channel.Id switch
+            {
+                // Steam / PC | pc-clans
+                765277945194348544 => 1,
+                // Playstation | ps4-clans
+                765277969278042132 => 2,
+                // Xbox | xbox-clan
+                765277993454534667 => 3,
+                _ => 0 
+            };
         }
     }
 }

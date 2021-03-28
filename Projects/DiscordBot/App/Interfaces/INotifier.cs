@@ -10,18 +10,19 @@ namespace DiscordBot.Interfaces
     public interface INotifier
     {
         /// <summary>
-        /// Notifies a user as direct message.
+        /// Sends a notification about a new arrival of a clan application.
         /// </summary>
-        /// <param name="discordUser">The user to direct message.</param>
-        /// <param name="clanName">The name of the clan.</param>
-        Task NotifyUserAsync(IUser discordUser, Clan clanName);
+        /// <param name="platformId">Represents the platform of the applcation.</param>
+        /// <param name="discordUser">Contains the user from Discord.</param>
+        /// <param name="clan">A name of the clan which the application is for.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task SendApplicationAsync(byte platformId, IUser discordUser, Clan clan);
 
         /// <summary>
-        /// Notifies an admin role.
+        /// Sends a message directly to the Discord user.
         /// </summary>
-        /// <param name="platformId">Used to identify the admin for a platform.</param>
-        /// <param name="discordUser">The user which invoked the notification.</param>
-        /// <param name="clanName">The name of the clan.</param>
-        Task NotifyAdminAsync(byte platformId, IUser discordUser, Clan clanName);
+        /// <param name="discordUser">The user to direct message.</param>
+        /// <param name="message">Contains the message to send.</param>
+        Task SendDirectMessageToUserAsync(IUser discordUser, string message);
     }
 }
