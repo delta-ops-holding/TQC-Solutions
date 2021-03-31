@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace DiscordBot.Interfaces
 {
     /// <summary>
-    /// Able to Log messages to the console.
+    /// Provides access to log.
     /// </summary>
     public interface ILogger
     {
@@ -17,12 +17,10 @@ namespace DiscordBot.Interfaces
         void ConsoleLog(LogMessage logMessage);
 
         /// <summary>
-        /// Saves a log in the database.
+        /// Logs a process into the database.
         /// </summary>
-        /// <param name="logMessage">Information of the log.</param>
-        /// <returns>A task representing the asynchronous process.</returns>
-        Task DatabaseLogAsync(LogSeverity severity, string source, string message, string createdBy, DateTime createdDate);
-
-        Task DatabaseLogAsync(LogModel logModel);
+        /// <param name="logModel">Describes the information to be logged.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task LogAsync(LogModel logModel);
     }
 }
