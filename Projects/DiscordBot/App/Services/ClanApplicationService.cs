@@ -66,11 +66,6 @@ namespace DiscordBot.Services
             }
         }
 
-        private static bool ValidateUserIsSpecified(SocketReaction currentReaction, IUser currentUser)
-        {
-            return currentReaction.User.IsSpecified || currentUser != null;
-        }
-
         /// <summary>
         /// Create the clan application.
         /// </summary>
@@ -126,24 +121,6 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task UserAlreadyAppliedToClan(IUser currentUser)
-        {
-            await _logger.LogAsync(
-                new LogModel(
-                    LoggingSeverity.Warning,
-                    "Create Clan Application",
-                    $"Guardian tried applying to more than one clan.",
-                    $"{currentUser.Id}",
-                    DateTime.UtcNow));
-
-            _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{currentUser.Id}> tried applying to more than one clan"));
-        }
-
-        private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser currentUser)
-        {
-            return !_temporaryRuntimeUsers.Any(u => u.DiscordId == currentUser.Id && (currentTime - u.Date).TotalHours <= DelayTimerInHours);
-        }
-
         /// <summary>
         /// Send the created clan application, to notify leaders.
         /// </summary>
@@ -172,6 +149,27 @@ namespace DiscordBot.Services
             }
         }
 
+        private async Task UserAlreadyAppliedToClan(IUser currentUser)
+        {
+            await _logger.LogAsync(
+                new LogModel(
+                    LoggingSeverity.Warning,
+                    "Create Clan Application",
+                    $"Guardian tried applying to more than one clan.",
+                    $"{currentUser.Id}",
+                    DateTime.UtcNow));
+
+            _logger.ConsoleLog(new LogMessage(LogSeverity.Warning, "Clan Application", $"Guardian aka <{currentUser.Id}> tried applying to more than one clan"));
+        }
+
+        private static bool ValidateUserIsSpecified(SocketReaction currentReaction, IUser currentUser)
+        {
+            return currentReaction.User.IsSpecified || currentUser != null;
+        }
+        private static bool CheckUserForAlreadyExistingClanApplication(DateTimeOffset currentTime, IUser currentUser)
+        {
+            return !_temporaryRuntimeUsers.Any(u => u.DiscordId == currentUser.Id && (currentTime - u.Date).TotalHours <= DelayTimerInHours);
+        }
         private static byte GetPlatformByReaction(SocketReaction reaction)
         {
             return reaction.Channel.Id switch

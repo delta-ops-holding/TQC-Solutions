@@ -72,7 +72,6 @@ namespace DiscordBot
             return Task.CompletedTask;
         }
 
-
         private Task GuildMembersDownloaded(SocketGuild arg)
         {
             _logger.ConsoleLog(new LogMessage(LogSeverity.Info, "Guild Members Downloaded", $"Cached Offline Users from {arg.Name}!"));
@@ -86,30 +85,29 @@ namespace DiscordBot
             {
                 try
                 {
-                    LogModel logModel = new();
                     var log = new LogMessage();
 
                     switch (arg.Exception)
                     {
                         case GatewayReconnectException:
-                            logModel = new(
+                            await _logger.LogAsync(new(
                                 LoggingSeverity.Debug,
                                 "Client Log",
                                 "Restarting Client",
                                 "Discord",
-                                DateTime.UtcNow);
+                                DateTime.UtcNow));
 
                             log = new LogMessage(LogSeverity.Debug, "Gateway", "Restarting Services.");
 
                             await _client.StartAsync();
                             break;
                         case WebSocketClosedException:
-                            logModel = new(
+                            await _logger.LogAsync(new(
                                 LoggingSeverity.Debug,
                                 "Client Log",
                                 "Client connection was closed.",
                                 "Discord",
-                                DateTime.UtcNow);
+                                DateTime.UtcNow));
 
                             log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
                             break;
@@ -117,8 +115,7 @@ namespace DiscordBot
                             log = arg;
                             break;
                     }
-
-                    await _logger.LogAsync(logModel);
+                    
                     _logger.ConsoleLog(log);
                 }
                 catch (Exception)
