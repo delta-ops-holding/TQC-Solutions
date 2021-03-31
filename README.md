@@ -10,7 +10,7 @@ Link | Framework | Version
 [Deprecated API Emily](https://github.com/iZeQure/TQC-Development/tree/master/Projects/ApiEmily) | .NET Framework 4.6.2 | v3.1.1
 [Deprecated API Rest](https://github.com/iZeQure/TQC-Development/tree/master/Projects/RestAPI) | .NET Core 3.1 | N/A
 [Database Library](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DatabaseAccess) | .NET Core 5.0 | v1.3.0
-[Discord Bot](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DiscordBot/App) | .NET Core 5.0 | v2.7.5
+[Discord Bot](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DiscordBot/App) | .NET Core 5.0 | v2.7.9
 
 ### Prerequisites
 - [x] [.NET Core](https://dotnet.microsoft.com/download) ~> 3.1 SDK
