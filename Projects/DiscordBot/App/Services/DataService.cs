@@ -33,19 +33,19 @@ namespace DiscordBot.Services
 
             return e.Id switch
             {
-                765283689957294121 => Clan.TRΔNSIENT,
-                765283671455825962 => Clan.TENΔCITY,
-                765283591579762718 => Clan.ΔEGIS,
-                765283655727317032 => Clan.ETHEREΔL,
-                765283608436408330 => Clan.CELESTIΔL,
-                772951082544267284 => Clan.MΔJESTIC,
-                765283621891604530 => Clan.DEFIΔNCE,
-                765283749612355605 => Clan.VIGILΔNT,
-                765283935558303794 => Clan.TRΔNQUILITY,
-                765283645065134130 => Clan.ETERNΔL,
-                772951082326163457 => Clan.IMMORTΔL,
-                765283634247893002 => Clan.EPHEMERΔ,
-                767090159211905054 => Clan.SHΔDOW,
+                783506275057008691 => Clan.TRΔNSIENT,
+                783506209914880000 => Clan.TENΔCITY,
+                783505835170857041 => Clan.ΔEGIS,
+                783506077228597248 => Clan.ETHEREΔL,
+                783505861691310121 => Clan.CELESTIΔL,
+                783506132681228298 => Clan.MΔJESTIC,
+                783505883267072012 => Clan.DEFIΔNCE,
+                783506295104864286 => Clan.VIGILΔNT,
+                783506251904581672 => Clan.TRΔNQUILITY,
+                783506052388749382 => Clan.ETERNΔL,
+                783506106869743636 => Clan.IMMORTΔL,
+                783506022370246726 => Clan.EPHEMERΔ,
+                783506171499774005 => Clan.SHΔDOW,
                 _ => Clan.Undefined,
             };
         }
