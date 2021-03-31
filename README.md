@@ -6,11 +6,11 @@ As of being a member of this community, gives a lot of opportunities, as to help
 ### Projects
 Link | Framework | Version
 --------- | --------- | ----------
-[Production API Emerald](https://github.com/iZeQure/TQC-Development/tree/master/Projects/ApiEmerald) | .NET Core 5.0 | v3.2.2
+[Production API Emerald](https://github.com/iZeQure/TQC-Development/tree/master/Projects/ApiEmerald) | .NET Core 5.0 | v3.2.3
 [Deprecated API Emily](https://github.com/iZeQure/TQC-Development/tree/master/Projects/ApiEmily) | .NET Framework 4.6.2 | v3.1.1
 [Deprecated API Rest](https://github.com/iZeQure/TQC-Development/tree/master/Projects/RestAPI) | .NET Core 3.1 | N/A
 [Database Library](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DatabaseAccess) | .NET Core 5.0 | v1.3.0
-[Discord Bot](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DiscordBot/App) | .NET Core 5.0 | v2.7.0
+[Discord Bot](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DiscordBot/App) | .NET Core 5.0 | v2.7.5
 
 ### Prerequisites
 - [x] [.NET Core](https://dotnet.microsoft.com/download) ~> 3.1 SDK
