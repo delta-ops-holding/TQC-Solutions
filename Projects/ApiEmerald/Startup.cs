@@ -2,9 +2,7 @@ using DatabaseAccess.Database;
 using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Managers.Interfaces;
 using DatabaseAccess.Managers.V3;
-using DatabaseAccess.Models;
 using DatabaseAccess.Repositories;
-using DatabaseAccess.Repositories.Interfaces;
 using DatabaseAccess.Repositories.V3;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -60,7 +58,7 @@ namespace ApiEmerald
             );
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TQC Community API", Version = "v3.0.1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TQC Community API", Version = "v3.2.3" });
             });
         }
 
