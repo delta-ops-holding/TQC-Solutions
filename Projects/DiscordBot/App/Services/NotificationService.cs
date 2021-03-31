@@ -52,7 +52,13 @@ namespace DiscordBot.Interfaces
             }
             catch (Exception)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Critical, "Send Clan Application", "Error, while notfifying clan application arrival.", "TQC Minion", DateTime.UtcNow));
+                await _logger.LogAsync(
+                    new LogModel(
+                        LoggingSeverity.Critical,
+                        "Send Clan Application",
+                        "Error, could not send clan application.",
+                        "TQC Minion",
+                        DateTime.UtcNow));
             }
         }
 
@@ -70,7 +76,13 @@ namespace DiscordBot.Interfaces
             }
             catch (HttpException)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Warning, "User DM", "Couldn't DM Guardian, due to privacy reasons.", "TQC Minion", DateTime.UtcNow));
+                await _logger.LogAsync(
+                    new LogModel(
+                        LoggingSeverity.Warning,
+                        "User DM",
+                        "Couldn't DM Guardian, due to privacy reasons.",
+                        discordUser.Id.ToString(),
+                        DateTime.UtcNow));
             }
         }
 
@@ -105,7 +117,13 @@ namespace DiscordBot.Interfaces
             }
             catch (Exception)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Critical, "Notify Admins", "Error, while trying to notify admins.", "TQC Minion", DateTime.UtcNow));
+                await _logger.LogAsync(
+                    new LogModel(
+                        LoggingSeverity.Critical,
+                        "Notify Admin",
+                        "Error, clan application could not be sent in specific admin channel.",
+                        "TQC Minion",
+                        DateTime.UtcNow));
             }
         }
 
@@ -120,18 +138,35 @@ namespace DiscordBot.Interfaces
             try
             {
                 // Try Direct Message the user with a notification about the assignment.
-                await discordUser.SendMessageAsync($"Hello Guardian. You're successfully signed up for the clan, {clanName}. Please await patiently for an admin to proceed your request.");
+                await discordUser.SendMessageAsync(
+                    $"Hello Guardian. You're successfully signed up for {clanName}. " +
+                    $"Please await patiently for an admin to proceed your request. " +
+                    $"Applying for more clans will not speed up the process.");
 
                 return false;
             }
             catch (HttpException)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Notify User", "Couldn't DM Guardian due to privacry reasons.", discordUser.Id.ToString(), DateTime.UtcNow));
+                await _logger.LogAsync(
+                    new LogModel(
+                        LoggingSeverity.Error,
+                        "Notify User",
+                        "Couldn't DM Guardian due to privacry reasons.",
+                        discordUser.Id.ToString(),
+                        DateTime.UtcNow));
+
                 return true;
             }
             catch (Exception)
             {
-                await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Critical, "Notify User", "Error, while trying to notify user.", "TQC Minion", DateTime.UtcNow));
+                await _logger.LogAsync(
+                    new LogModel(
+                        LoggingSeverity.Critical,
+                        "Notify User",
+                        "Error, could not DM the Guardian.",
+                        "TQC Minion",
+                        DateTime.UtcNow));
+
                 return true;
             }
         }
@@ -156,7 +191,7 @@ namespace DiscordBot.Interfaces
             switch (platformId)
             {
                 case 1:
-                    embedMessage.Color = Color.LighterGrey;
+                    embedMessage.Color = Color.Red;
                     embedMessage.WithFooter($"{clanName}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
                     break;
                 case 2:

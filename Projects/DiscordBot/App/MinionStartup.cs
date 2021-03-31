@@ -86,19 +86,31 @@ namespace DiscordBot
             {
                 try
                 {
+                    LogModel logModel = new();
                     var log = new LogMessage();
 
                     switch (arg.Exception)
                     {
                         case GatewayReconnectException:
+                            logModel = new(
+                                LoggingSeverity.Debug,
+                                "Client Log",
+                                "Restarting Client",
+                                "Discord",
+                                DateTime.UtcNow);
 
-                            await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Critical, "Gateway", "Restarting TQC Minion.", "Discord", DateTime.UtcNow));
-
-                            log = new LogMessage(LogSeverity.Critical, "Gateway", "Restarting Services.");
+                            log = new LogMessage(LogSeverity.Debug, "Gateway", "Restarting Services.");
 
                             await _client.StartAsync();
                             break;
                         case WebSocketClosedException:
+                            logModel = new(
+                                LoggingSeverity.Debug,
+                                "Client Log",
+                                "Client connection was closed.",
+                                "Discord",
+                                DateTime.UtcNow);
+
                             log = new LogMessage(LogSeverity.Critical, "Discord", "WebSocket connection was closed. Establishing..");
                             break;
                         default:
@@ -106,11 +118,12 @@ namespace DiscordBot
                             break;
                     }
 
+                    await _logger.LogAsync(logModel);
                     _logger.ConsoleLog(log);
                 }
                 catch (Exception)
                 {
-                    _logger.ConsoleLog(new LogMessage(LogSeverity.Error, "Logging", $"Error, failed to handle client."));
+                    await _logger.LogAsync(new LogModel(LoggingSeverity.Debug, "Client Log", "Error while handling client logging.", "TQC Minion", DateTime.UtcNow));
                 }
             });
 
@@ -170,7 +183,7 @@ namespace DiscordBot
                             var message = $"Leadership assigned reaction <{currentReaction.Emote.Name}> to message.";
                             var createdBy = currentUser.Id.ToString();
 
-                            await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Info, "Reaction Added", message, createdBy, DateTime.UtcNow));
+                            await _logger.LogAsync(new LogModel(LoggingSeverity.Info, "Reaction Added", message, createdBy, DateTime.UtcNow));
 
                             return;
                         }
@@ -184,7 +197,13 @@ namespace DiscordBot
                 }
                 catch (Exception)
                 {
-                    await _logger.DatabaseLogAsync(new LogModel(LoggingSeverity.Error, "Reaction Added", "Error while processing Clan Application.", "TQC Minion", DateTime.UtcNow));
+                    await _logger.LogAsync(
+                        new LogModel(
+                            LoggingSeverity.Error,
+                            "Reaction Added",
+                            "Error, could not handle reaction on clan application.",
+                            "TQC Minion",
+                            DateTime.UtcNow));
                 }
             });
 
@@ -200,14 +219,14 @@ namespace DiscordBot
                    string validationMessage;
                    if (_configuration != null && !string.IsNullOrEmpty(_configuration.GetConnectionString("ApiDb")))
                    {
-                       validationMessage = "Configuration is Valid.";
+                       validationMessage = "Configuration validation succeeded!";
                    }
                    else
                    {
-                       validationMessage = "Configuration is Invalid.";
+                       validationMessage = "Configuration validation failed!";
                    }
 
-                   _logger.ConsoleLog(new LogMessage(LogSeverity.Verbose, "Configuration", $"{validationMessage}"));
+                   _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Configuration", $"{validationMessage}"));
                }
                catch (Exception)
                {
