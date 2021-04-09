@@ -39,13 +39,13 @@ namespace DiscordBot.Interfaces
             try
             {
                 
-                string clanApplicationArrivalMessage = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clan}. Confirmation message has also been sent to the Guardian."; ;
+                string clanApplicationArrivalMessage = $"<@{discordUser.Id}>, registered themself for joining {clan}. Confirmation message has also been sent to the Guardian."; ;
 
                 bool userHasPrivacySettingsOn = await NotifyUserAsync(discordUser, clan);
 
                 if (userHasPrivacySettingsOn)
                 {
-                    clanApplicationArrivalMessage = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                    clanApplicationArrivalMessage = $"<@{discordUser.Id}>, registered themself for joining {clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
                 }
 
                 await NotifyAdminAsync(platformId, clan, clanApplicationArrivalMessage);
