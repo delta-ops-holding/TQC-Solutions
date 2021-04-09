@@ -1,4 +1,5 @@
 ﻿using DataClassLibrary.Enums;
+using DataClassLibrary.Models;
 using Discord;
 using System.Threading.Tasks;
 
@@ -12,11 +13,10 @@ namespace DiscordBot.Interfaces
         /// <summary>
         /// Sends a notification about a new arrival of a clan application.
         /// </summary>
-        /// <param name="platformId">Represents the platform of the applcation.</param>
-        /// <param name="discordUser">Contains the user from Discord.</param>
-        /// <param name="clan">A name of the clan which the application is for.</param>
+        /// <param name="message">A struct representing the message.</param>
+        /// <param name="discordUser">A generic representing the discord user.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task SendApplicationAsync(byte platformId, IUser discordUser, Clan clan);
+        Task SendApplicationAsync(MessageModel message);
 
         /// <summary>
         /// Sends a message directly to the Discord user.

@@ -27,28 +27,23 @@ namespace DiscordBot.Interfaces
             _dataService = dataService;
         }
 
-        /// <summary>
-        /// Send application.
-        /// </summary>
-        /// <param name="platformId">Describes the platform of which the application is from.</param>
-        /// <param name="discordUser">Represents a user from Discord.</param>
-        /// <param name="clan">A clan which has been applied to.</param>
-        /// <returns></returns>
-        public async Task SendApplicationAsync(byte platformId, IUser discordUser, Clan clan)
+        public async Task SendApplicationAsync(MessageModel message)
         {
             try
             {
-                
-                string clanApplicationArrivalMessage = $"<@{discordUser.Id}>, registered themself for joining {clan}. Confirmation message has also been sent to the Guardian."; ;
-
-                bool userHasPrivacySettingsOn = await NotifyUserAsync(discordUser, clan);
-
-                if (userHasPrivacySettingsOn)
+                if (message.DiscordUser is IUser discordUser)
                 {
-                    clanApplicationArrivalMessage = $"<@{discordUser.Id}>, registered themself for joining {clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
-                }
+                    message.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {message.Clan}. Confirmation message has also been sent to the Guardian."; ;
 
-                await NotifyAdminAsync(platformId, clan, clanApplicationArrivalMessage);
+                    bool userHasPrivacySettingsOn = await NotifyUserAsync(discordUser, message.Clan);
+
+                    if (userHasPrivacySettingsOn)
+                    {
+                        message.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {message.Clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                    }
+
+                    await NotifyAdminAsync(message);
+                }
             }
             catch (Exception)
             {
@@ -89,31 +84,32 @@ namespace DiscordBot.Interfaces
         /// <summary>
         /// Notify Admin Channel.
         /// </summary>
-        /// <param name="platformId">The platform identifier for which the notification should appear in.</param>
-        /// <param name="clanName">Used to identify the assigned clan.</param>
-        /// <param name="message">A message to notify admins with.</param>
-        private async Task NotifyAdminAsync(byte platformId, Clan clanName, string message)
+        /// <param name="message">A model representing the message to send.</param>
+        private async Task NotifyAdminAsync(MessageModel message)
         {
             try
             {
-                // Channel to post to.
-                //ulong channelId = 0; // To give a default value to catch on.
-                //ulong debugChannelId = 768014874289766402; // Dev Server, to test bot.
-                ulong mainChannelId = 767474913308835880; // Channel on the admin server to post in.
+                if (message.DiscordUser is IUser discordUser)
+                {
+                    // Channel to post to.
+                    //ulong channelId = 0; // To give a default value to catch on.
+                    //ulong debugChannelId = 768014874289766402; // Dev Server, to test bot.
+                    ulong mainChannelId = 767474913308835880; // Channel on the admin server to post in.
 
-                // Get the role to ping.
-                string pingRole = _dataService.GetRoleByClan(clanName);
+                    // Get the role to ping.
+                    string pingRole = _dataService.GetRoleByClan(message.Clan);
 
-                // Get Channel object by channel id.
-                IMessageChannel messageChannel = _client.GetChannel(mainChannelId) as IMessageChannel;
+                    // Get Channel object by channel id.
+                    IMessageChannel messageChannel = _client.GetChannel(mainChannelId) as IMessageChannel;
 
-                // Check if the pinged role is empty.
-                pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{clanName}>" : pingRole;
+                    // Check if the pinged role is empty.
+                    pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{message.Clan}>" : pingRole;
 
-                Embed embeddedMessage = CreateEmbed(platformId, clanName, message);
+                    Embed embeddedMessage = CreateEmbed(message);
 
-                // Send embedded message to admins.
-                await messageChannel.SendMessageAsync(text: $"{pingRole}!", embed: embeddedMessage);
+                    // Send embedded message to admins.
+                    await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{discordUser.Id}>", embed: embeddedMessage);
+                }
             }
             catch (Exception)
             {
@@ -174,37 +170,53 @@ namespace DiscordBot.Interfaces
         /// <summary>
         /// Creates an embedded message.
         /// </summary>
-        /// <param name="platformId">A platform id, represents the color of the embed.</param>
-        /// <param name="clanName">Which clan the embed is for.</param>
-        /// <param name="description">A message desription for the embed.</param>
+        /// <param name="message">A model representing the message to send.</param>
         /// <returns></returns>
-        private static Embed CreateEmbed(byte platformId, Clan clanName, string description)
+        private static Embed CreateEmbed(MessageModel message)
         {
             // Create new Embed Builder.
             var embedMessage = new EmbedBuilder()
             {
                 Title = "New Clan Application Arrived!",
-                Description = description
+                Description = message.Message
             };
 
             // Switch on provided platform identifier.
-            switch (platformId)
+            switch (message.PlatformId)
             {
                 case 1:
                     embedMessage.Color = Color.Red;
-                    embedMessage.WithFooter($"{clanName}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{message.Clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
                     break;
                 case 2:
                     embedMessage.Color = Color.Blue;
-                    embedMessage.WithFooter($"{clanName}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{message.Clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
                     break;
                 case 3:
                     embedMessage.Color = Color.Green;
-                    embedMessage.WithFooter($"{clanName}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{message.Clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
                     break;
             }
 
             return embedMessage.Build();
+        }
+
+        private static string CreateStylishMessage(string message, Clan clan, byte platformId)
+        {
+            string footerMessage = platformId switch
+            {
+                1 => $"{clan} https://cdn.discordapp.com/emojis/641432631715561473.png?v=1",
+                2 => $"{clan} https://cdn.discordapp.com/emojis/551501319177895958.png?v=1",
+                3 => $"{clan} https://cdn.discordapp.com/emojis/551501460202979328.png?v=1",
+                _ => $"Couldn't get information."
+            };
+
+            var stylishMessage =
+                $"New Clan Application Arrived!\n" +
+                $"{message}\n" +
+                $"{footerMessage}";
+
+            return stylishMessage;
         }
     }
 }

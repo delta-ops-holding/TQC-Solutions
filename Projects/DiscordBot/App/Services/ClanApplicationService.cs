@@ -107,7 +107,7 @@ namespace DiscordBot.Services
                             DateTime.UtcNow));
                 }
 
-                await UserAlreadyAppliedToClan(currentUser);
+                await UserAlreadyAppliedToClanAsync(currentUser);
             }
             catch (Exception)
             {
@@ -131,9 +131,9 @@ namespace DiscordBot.Services
         {
             try
             {
-                byte platformId = GetPlatformByReaction(reaction);
+                MessageModel message = new(string.Empty, GetPlatformByReaction(reaction), clanName, currentUser);
 
-                await _notifier.SendApplicationAsync(platformId, currentUser, clanName);
+                await _notifier.SendApplicationAsync(message);
 
                 await _logger.LogAsync(new LogModel(LoggingSeverity.Info, "Sent Clan Application", $"Guardian applied to join {clanName}.", $"{currentUser.Id}", DateTime.UtcNow));
             }
@@ -149,7 +149,7 @@ namespace DiscordBot.Services
             }
         }
 
-        private async Task UserAlreadyAppliedToClan(IUser currentUser)
+        private async Task UserAlreadyAppliedToClanAsync(IUser currentUser)
         {
             await _logger.LogAsync(
                 new LogModel(
