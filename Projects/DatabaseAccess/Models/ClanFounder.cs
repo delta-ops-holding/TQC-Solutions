@@ -7,13 +7,16 @@ namespace DatabaseAccess.Models
 {
     public class ClanFounder : Member
     {
-        private bool _isFounder;
+        private readonly bool _isFounder;
 
-        public ClanFounder(int identity, string userName, bool isFounder): base(identifier: identity, userName: userName)
+        public ClanFounder(int identity, string userName, bool isFounder) : base(identifier: identity, userName: userName)
         {
             _isFounder = isFounder;
         }
 
-        public bool IsFounder { get => _isFounder; set => _isFounder = value; }
+        public bool IsFounder
+        {
+            get { return _isFounder; }
+        }
     }
 }

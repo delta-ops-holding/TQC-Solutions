@@ -10,19 +10,16 @@ namespace DatabaseAccess.Models
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public abstract class BaseEntity
     {
-        #region Fields
-        private int _identifier;
-        #endregion
+        private readonly int _identifier;
 
-        #region Properties
-        public int Identifier { get => _identifier; set => _identifier = value; }
-        #endregion
-
-        #region Constructors
-        protected BaseEntity(int identifier)
+        internal BaseEntity(int identifier)
         {
             _identifier = identifier;
-        } 
-        #endregion
+        }
+
+        public int Identifier
+        {
+            get { return _identifier; }
+        }
     }
 }

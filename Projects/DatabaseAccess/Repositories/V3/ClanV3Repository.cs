@@ -3,6 +3,7 @@ using DatabaseAccess.Models;
 using DatabaseAccess.Models.V3;
 using DatabaseAccess.Repositories.Interfaces;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -45,21 +46,50 @@ namespace DatabaseAccess.Repositories.V3
                     {
                         while (await dataReader.ReadAsync())
                         {
-                            var temporaryClan = new ClanV3(
-                                identifier: dataReader.GetInt32(0),
-                                name: dataReader.GetString(1),
-                                about: dataReader.GetString(2),
-                                clanPlatform: new ClanPlatform(
-                                    identifier: dataReader.GetInt32(3),
-                                    name: dataReader.GetString(5),
-                                    platformImageURL: dataReader.GetString(6)),
-                                founder: new ClanFounder(
-                                    identity: dataReader.GetInt32(7),
-                                    userName: dataReader.GetString(8),
-                                    isFounder: dataReader.GetBoolean(9))
+                            // Check if clan already exists.
+                            if (temporaryClans.Any(clan => clan.Identifier == dataReader.GetInt32(0)) == false)
+                            {
+                                var clanObj = new ClanV3(
+                                    identifier: dataReader.GetInt32(0),
+                                    name: dataReader.GetString(1),
+                                    about: dataReader.GetString(2),
+                                    clanPlatform: new ClanPlatform(identifier: dataReader.GetInt32(3), name: dataReader.GetString(5), platformImageURL: dataReader.GetString(6)),
+                                    founder: dataReader.GetBoolean(9) == true ? new ClanFounder(identity: dataReader.GetInt32(7), userName: dataReader.GetString(8), isFounder: dataReader.GetBoolean(9)) : null,
+                                    admins: new List<Member>()
                                 );
 
-                            temporaryClans.Add(temporaryClan);
+                                temporaryClans.Add(clanObj);
+                            }                            
+
+                            // If member is not founder.
+                            if (dataReader.GetBoolean(9) == false)
+                            {
+                                var memberObj = new ClanAdminV3(
+                                        identifier: dataReader.GetInt32(7),
+                                        userName: dataReader.GetString(8)
+                                    );
+
+                                if (temporaryClans.Any(clan => clan.Identifier == dataReader.GetInt32(7)))
+                                {
+                                    var getClan = temporaryClans.Where(clan => clan.Identifier == dataReader.GetInt32(7)).FirstOrDefault();
+
+                                    getClan.Admins.Add(memberObj);
+                                }
+                            }
+
+                            //var temporaryClan = new ClanV3(
+                            //    identifier: dataReader.GetInt32(0),
+                            //    name: dataReader.GetString(1),
+                            //    about: dataReader.GetString(2),
+                            //    clanPlatform: new ClanPlatform(
+                            //        identifier: dataReader.GetInt32(3),
+                            //        name: dataReader.GetString(5),
+                            //        platformImageURL: dataReader.GetString(6)),
+                            //    founder: new ClanFounder(
+                            //        identity: dataReader.GetInt32(7),
+                            //        userName: dataReader.GetString(8),
+                            //        isFounder: dataReader.GetBoolean(9))
+                            //    );
                         }
                     }
                     catch (Exception)
@@ -105,19 +135,42 @@ namespace DatabaseAccess.Repositories.V3
                     {
                         while (await dataReader.ReadAsync())
                         {
-                            temporaryClan = new ClanV3(
-                                identifier: dataReader.GetInt32(0),
-                                name: dataReader.GetString(1),
-                                about: dataReader.GetString(2),
-                                clanPlatform: new ClanPlatform(
-                                    identifier: dataReader.GetInt32(3),
-                                    name: dataReader.GetString(5),
-                                    platformImageURL: dataReader.GetString(6)),
-                                founder: new ClanFounder(
-                                    identity: dataReader.GetInt32(7),
-                                    userName: dataReader.GetString(8),
-                                    isFounder: dataReader.GetBoolean(9))
+                            if (temporaryClan == null)
+                            {
+                                temporaryClan = new ClanV3(
+                                    identifier: dataReader.GetInt32(0),
+                                    name: dataReader.GetString(1),
+                                    about: dataReader.GetString(2),
+                                    clanPlatform: new ClanPlatform(identifier: dataReader.GetInt32(3), name: dataReader.GetString(5), platformImageURL: dataReader.GetString(6)),
+                                    founder: dataReader.GetBoolean(9) == true ? new ClanFounder(identity: dataReader.GetInt32(7), userName: dataReader.GetString(8), isFounder: dataReader.GetBoolean(9)) : null,
+                                    admins: new List<Member>()
                                 );
+                            }
+
+                            // If member is not founder.
+                            if (dataReader.GetBoolean(9) == false)
+                            {
+                                var memberObj = new ClanAdminV3(
+                                        identifier: dataReader.GetInt32(7),
+                                        userName: dataReader.GetString(8)
+                                    );
+
+                                temporaryClan.Admins.Add(memberObj);
+                            }
+
+                            //temporaryClan = new ClanV3(
+                            //    identifier: dataReader.GetInt32(0),
+                            //    name: dataReader.GetString(1),
+                            //    about: dataReader.GetString(2),
+                            //    clanPlatform: new ClanPlatform(
+                            //        identifier: dataReader.GetInt32(3),
+                            //        name: dataReader.GetString(5),
+                            //        platformImageURL: dataReader.GetString(6)),
+                            //    founder: new ClanFounder(
+                            //        identity: dataReader.GetInt32(7),
+                            //        userName: dataReader.GetString(8),
+                            //        isFounder: dataReader.GetBoolean(9))
+                            //    );
                         }
                     }
                     catch (Exception)

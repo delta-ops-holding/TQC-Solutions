@@ -7,20 +7,16 @@ namespace DatabaseAccess.Models
 {
     public abstract class Member : BaseEntity
     {
-        #region Fields
-        private string _userName;
+        private readonly string _userName;
 
-        #endregion
-
-        #region Properties
-        public string UserName { get => _userName; set => _userName = value; }
-        #endregion
-
-        #region Constructors
-        protected Member(string userName, int identifier) : base (identifier)
+        protected Member(string userName, int identifier) : base(identifier)
         {
             _userName = userName;
         }
-        #endregion
+
+        public string UserName
+        {
+            get { return _userName; }
+        }        
     }
 }

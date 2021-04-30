@@ -7,22 +7,23 @@ namespace DatabaseAccess.Models
 {
     public class ClanPlatform : BaseEntity
     {
-        #region Fields
-        private string _name;
-        private string _platformImageURL;
-        #endregion
+        private readonly string _name;
+        private readonly string _platformImageURL;
 
-        #region Properties
-        public string Name { get => _name; set => _name = value; }
-        public string PlatformImageURL { get => _platformImageURL; set => _platformImageURL = value; } 
-        #endregion
-
-        #region Constructors
         public ClanPlatform(string name, string platformImageURL, int identifier) : base(identifier)
         {
             _name = name;
             _platformImageURL = platformImageURL;
         }
-        #endregion
+
+        public string Name
+        {
+            get { return _name; }
+        }
+
+        public string PlatformImageURL
+        {
+            get { return _platformImageURL; }
+        }
     }
 }
