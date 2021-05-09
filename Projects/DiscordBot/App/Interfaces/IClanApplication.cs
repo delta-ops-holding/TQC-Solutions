@@ -10,11 +10,11 @@ namespace DiscordBot.Interfaces
     public interface IClanApplication
     {
         /// <summary>
-        /// Starts the process of a clan application.
+        /// User applies to a clan application, given by the <see cref="SocketReaction"/> object.
         /// </summary>
-        /// <param name="currentReaction">Contains the reaction which was added by the user.</param>
-        /// <param name="currentUser">Current user, of which reacted to the message.</param>
-        /// <returns>An asynchronous operation.</returns>
-        Task ProcessClanApplicationAsync(SocketReaction currentReaction, IUser currentUser);
+        /// <param name="clanReactedTo">Represents the object that contains the necessary information about the reaction of a message.</param>
+        /// <param name="userWhoReacted">The user who reacted to the message.</param>
+        /// <returns>A Task representing the asynchronous process.</returns>
+        Task ApplyToClanAsync(SocketReaction clanReactedTo, IUser userWhoReacted);
     }
 }

@@ -8,11 +8,16 @@ namespace DatabaseAccess.Managers.Interfaces
 {
     public interface IClanService
     {
-        Task<IEnumerable<BaseEntity>> GetClansAsync();
-        Task<IEnumerable<BaseEntity>> GetClanPlatformsAsync();
-        Task<IEnumerable<BaseEntity>> GetMembersAsync();
-        Task<BaseEntity> GetClanAsync(uint identifier);
-        Task<BaseEntity> GetClanPlatformAsync(uint identifier);
-        Task<BaseEntity> GetMemberAsync(uint identifier);
+        Task<IEnumerable<Guild>> GetClansAsync();
+
+        Task<IEnumerable<ClanPlatform>> GetClanPlatformsAsync();
+
+        Task<IEnumerable<Member>> GetMembersAsync();
+
+        Task<Guild> GetClanAsync(uint identifier);
+
+        Task<ClanPlatform> GetClanPlatformAsync(uint identifier);
+
+        Task<Member> GetMemberAsync(uint identifier);
     }
 }

@@ -115,7 +115,7 @@ namespace DiscordBot
                             log = arg;
                             break;
                     }
-                    
+
                     _logger.ConsoleLog(log);
                 }
                 catch (Exception)
@@ -153,54 +153,44 @@ namespace DiscordBot
         {
             _ = Task.Run(async () =>
             {
-                try
+                // Get or download the user cache from the Server.
+                IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
+
+                if (socketReaction.User.GetValueOrDefault() is not SocketGuildUser currentUser)
                 {
-                    // Get or download the user cache from the Server.
-                    IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
-                    SocketReaction currentReaction = socketReaction;
+                    currentUser = _client.GetUser(socketReaction.UserId) as SocketGuildUser;
+                }
 
-                    if (currentReaction.User.GetValueOrDefault() is not SocketGuildUser currentUser)
-                    {
-                        currentUser = _client.GetUser(currentReaction.UserId) as SocketGuildUser;
-                    }
+                // Debug Mode:
+                if (socketReaction.Channel.Id.Equals(761687188341522492))
+                {
+                    _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
+                    return;
+                }
 
-                    // Debug Mode:
-                    if (currentReaction.Channel.Id.Equals(761687188341522492))
+                // If the socket reaction, is from any of the filtered channels.
+                if (_clanApplicationChannels.Contains(socketReaction.Channel.Id))
+                {
+                    // If the user has any roles from the filter.
+                    if (currentUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
                     {
-                        _logger.ConsoleLog(new LogMessage(LogSeverity.Debug, "Debugging", "Working as intentional."));
+                        string message = $"Leadership assigned reaction <{socketReaction.Emote.Name}> to message.";
+                        string createdBy = currentUser.Id.ToString();
+
+                        await _logger.LogAsync(new LogModel(LoggingSeverity.Info, "Reaction Added", message, createdBy, DateTime.UtcNow));
+
                         return;
                     }
 
-                    // If the socket reaction, is from any of the filtered channels.
-                    if (_clanApplicationChannels.Contains(currentReaction.Channel.Id))
-                    {
-                        // If the user has any roles from the filter.
-                        if (currentUser.Roles.Any(r => r.Id.Equals(414618518554673152)))
-                        {
-                            var message = $"Leadership assigned reaction <{currentReaction.Emote.Name}> to message.";
-                            var createdBy = currentUser.Id.ToString();
+                    // Process a new clan application.
+                    // Old Caller.
+                    //await _clanApplication.ProcessClanApplicationAsync(currentReaction, currentUser);
 
-                            await _logger.LogAsync(new LogModel(LoggingSeverity.Info, "Reaction Added", message, createdBy, DateTime.UtcNow));
+                    // New Caller
+                    await _clanApplication.ApplyToClanAsync(socketReaction, currentUser);
 
-                            return;
-                        }
-
-                        // Process a new clan application.
-                        await _clanApplication.ProcessClanApplicationAsync(currentReaction, currentUser);
-
-                        // Remove Reaction after process.
-                        await userMessage.RemoveReactionAsync(currentReaction.Emote, currentReaction.UserId);
-                    }
-                }
-                catch (Exception)
-                {
-                    await _logger.LogAsync(
-                        new LogModel(
-                            LoggingSeverity.Error,
-                            "Reaction Added",
-                            "Error, could not handle reaction on clan application.",
-                            "TQC Minion",
-                            DateTime.UtcNow));
+                    // Remove Reaction after process.
+                    await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
                 }
             });
 
