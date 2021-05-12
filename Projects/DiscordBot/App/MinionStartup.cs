@@ -1,20 +1,13 @@
-﻿using DatabaseAccess.Database;
-using DatabaseAccess.Database.Interfaces;
-using DatabaseAccess.Repositories;
-using DatabaseAccess.Repositories.Interfaces;
-using DataClassLibrary.Enums;
+﻿using DataClassLibrary.Enums;
 using DataClassLibrary.Models;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using DiscordBot.Interfaces;
-using DiscordBot.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot
