@@ -1,11 +1,11 @@
-﻿using Discord;
-using DiscordBot.Interfaces;
-using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Discord;
+using DiscordBot.Interfaces;
 using DataClassLibrary.Enums;
-using DatabaseAccess.Repositories.Interfaces;
 using DataClassLibrary.Models;
-using System;
+using DatabaseAccess.Repositories.Interfaces;
 
 namespace DiscordBot.Services
 {
@@ -14,6 +14,7 @@ namespace DiscordBot.Services
     /// </summary>
     public class DataService : IDataService
     {
+        private IList<Clan> _clans = new List<Clan>();
         private readonly ILogRepository _logRepository;
 
         public DataService(ILogRepository logRepository)
@@ -46,6 +47,7 @@ namespace DiscordBot.Services
                 783506106869743636 => Clan.IMMORTΔL,
                 783506022370246726 => Clan.EPHEMERΔ,
                 783506171499774005 => Clan.SHΔDOW,
+                849017066739859520 => Clan.QUΔNTUM,
                 _ => Clan.Undefined,
             };
         }
@@ -72,6 +74,7 @@ namespace DiscordBot.Services
                 Clan.IMMORTΔL => "<@&772933700681859123>",
                 Clan.EPHEMERΔ => "<@&694675786111647814>",
                 Clan.SHΔDOW => "<@&725837886427234354>",
+                Clan.QUΔNTUM => "<@&848288604341272621>",
                 _ => Clan.Undefined.ToString(),
             };
         }
