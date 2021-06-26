@@ -16,6 +16,7 @@ namespace DiscordBot
     {
         private readonly DiscordSocketClient _client;
         private readonly ICommandHandler _commandHandler;
+        private readonly IDataService _dataService;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly IClanApplication _clanApplication;
@@ -26,18 +27,20 @@ namespace DiscordBot
             IConfiguration configuration,
             ILogger logger,
             IClanApplication clanApplication,
-            ICommandHandler commandHandler)
+            ICommandHandler commandHandler,
+            IDataService dataService)
         {
             _configuration = configuration;
             _client = client;
             _logger = logger;
             _clanApplication = clanApplication;
             _commandHandler = commandHandler;
+            _dataService = dataService;
         }
 
         public async Task InitBotAsync()
         {
-            // Events.
+            // Hook Events.
             _client.Log += ClientLogging;
             _client.GuildAvailable += GuildAvailable;
             _client.GuildMembersDownloaded += GuildMembersDownloaded;
@@ -58,7 +61,7 @@ namespace DiscordBot
                 await ValidateConfiguration();
                 // Load data from db at some point.
                 _clanApplicationChannels = new List<ulong> { 765277945194348544, 765277993454534667, 765277969278042132 };
-                await _client.SetGameAsync(_configuration.GetValue<string>("Configuration:DiscordBot:Version"), type: ActivityType.Playing);
+                await _client.SetGameAsync($"On {_configuration.GetValue<string>("Configuration:DiscordBot:Version")}", type: ActivityType.Playing);
                 await DownloadGuildUsersAsync();
             });
 

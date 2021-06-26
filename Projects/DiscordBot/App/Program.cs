@@ -42,10 +42,12 @@ namespace DiscordBot
 
                     // Database Services.
                     services.AddScoped<IDatabase, SqlDatabase>();
-                    services.AddScoped<ILogRepository, DatabaseLogRepository>();                    
+                    services.AddScoped<ILogRepository, DatabaseLogRepository>();
+                    services.AddScoped<IBotInformationRepository, BotInformationRepository>();
 
                     // Utility Services.
                     services.AddScoped<IDataService, DataService>();
+                    services.AddScoped<IInformationService, InformationService>();
                     services.AddScoped<INotifier, NotificationService>();
                     services.AddScoped<IClanApplication, ClanApplicationService>();
 

@@ -1,3 +1,7 @@
+using DataAccessLibrary.Handlers;
+using DataAccessLibrary.Handlers.Helpers;
+using DataAccessLibrary.Repositories.Abstractions;
+using DataAccessLibrary.Repositories;
 using DatabaseAccess.Database;
 using DatabaseAccess.Database.Interfaces;
 using DatabaseAccess.Managers.Interfaces;
@@ -28,6 +32,10 @@ namespace ApiEmerald
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<ISqlHandler, SqlHandler>();
+            services.AddTransient<IClanRepository, DataAccessLibrary.Repositories.ClanRepository>();
+
+
             var database = new SqlDatabase(Configuration);
 
             services.AddSingleton<IDatabase>(database);
