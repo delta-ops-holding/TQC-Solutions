@@ -1,3 +1,7 @@
+using DataAccessLibrary.Handlers;
+using DataAccessLibrary.Handlers.Helpers;
+using DataAccessLibrary.Repositories;
+using DataAccessLibrary.Repositories.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TqcApi.Filters;
 
 namespace TqcApi
 {
@@ -26,11 +31,21 @@ namespace TqcApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<ISqlHandler, SqlHandler>();
+            services.AddScoped<IClanRepository, ClanRepository>();
 
             services.AddControllers();
+            services.AddApiVersioning();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TqcApi", Version = "v1" });
+                c.SwaggerDoc("v1.0", new OpenApiInfo
+                {
+                    Version = "v1.0",
+                    Title = "TQC Api v1"
+                });
+
+                c.OperationFilter<RemoveVersionParameterFilter>();
+                c.DocumentFilter<ReplaceVersionWithExactValueInPathFilter>();
             });
         }
 
@@ -39,9 +54,17 @@ namespace TqcApi
         {
             if (env.IsDevelopment())
             {
+                app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TqcApi v1"));
+                app.UseSwagger(c =>
+                {
+
+                });
+                app.UseSwaggerUI(c =>
+                {
+                    c.RoutePrefix = string.Empty;
+                    c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "TQC API v1.0");
+                });
             }
 
             app.UseHttpsRedirection();
