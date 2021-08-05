@@ -1,38 +1,30 @@
-﻿using ObjectLibrary.Clan.Abstractions;
-using ObjectLibrary.Common;
+﻿using ObjectLibrary.Clan.Interfaces;
+using ObjectLibrary.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ObjectLibrary.Clan
 {
     public class ClanApplication : BaseEntity, IClanApplication
     {
-        private readonly int _clanId;
+        private readonly IClan _clan;
         private readonly Guid _applicationGuid;
-        private readonly long _discordUserId;
-        private readonly DateTime _applicationRegistered;
-        private readonly DateTime _coolddownExpiry;
+        private readonly long _discordUserWhoAppliedSnowflakeId;
+        private readonly DateTime _applicationRegistrationDateTime;
+        private readonly DateTime _cooldownExpiryDateTime;
 
-        public ClanApplication(int id, int clanId, Guid applicationGuid, long discordUserId, DateTime applicationRegistered, DateTime coolddownExpiry) : base(id)
+        public ClanApplication(int id, IClan clan, Guid applicationGuid, long discordUserWhoAppliedSnowflakeId, DateTime applicationRegistrationDateTime, DateTime cooldownExpiryDateTime) : base(id)
         {
-            _clanId = clanId;
+            _clan = clan;
             _applicationGuid = applicationGuid;
-            _discordUserId = discordUserId;
-            _applicationRegistered = applicationRegistered;
-            _coolddownExpiry = coolddownExpiry;
+            _discordUserWhoAppliedSnowflakeId = discordUserWhoAppliedSnowflakeId;
+            _applicationRegistrationDateTime = applicationRegistrationDateTime;
+            _cooldownExpiryDateTime = cooldownExpiryDateTime;
         }
 
-        public int ClanId => _clanId;
-
-        public Guid ApplicationGuid => _applicationGuid;
-
-        public long DiscordUserId => _discordUserId;
-
-        public DateTime ApplicationRegistered => _applicationRegistered;
-
-        public DateTime CoolddownExpiry => _coolddownExpiry;
+        public IClan Clan { get { return _clan; } }
+        public Guid ApplicationGuid { get { return _applicationGuid; } }
+        public long DiscordUserAppliedSnowflakeId { get { return _discordUserWhoAppliedSnowflakeId; } }
+        public DateTime ApplicationRegistrationDateTime { get { return _applicationRegistrationDateTime; } }
+        public DateTime CooldownExpiryDateTime { get { return _cooldownExpiryDateTime; } }
     }
 }

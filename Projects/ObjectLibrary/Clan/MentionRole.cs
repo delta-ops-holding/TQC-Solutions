@@ -1,21 +1,19 @@
-﻿using ObjectLibrary.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ObjectLibrary.Clan.Interfaces;
 
 namespace ObjectLibrary.Clan
 {
-    public class MentionRole : BaseEntity
+    public struct MentionRole : IMentionRole
     {
-        private readonly long _mentionRoleId;
+        private readonly int _clanId;
+        private readonly long _discordSnowflakeRoleId;
 
-        public MentionRole(int clanId, long mentionRoleId) : base(clanId)
+        public MentionRole(int clanId, long discordSnowflakeRoleId)
         {
-            _mentionRoleId = mentionRoleId;
+            _clanId = clanId;
+            _discordSnowflakeRoleId = discordSnowflakeRoleId;
         }
 
-        public long MentionRoleId => _mentionRoleId;
+        public int ClanId { get { return _clanId; } }
+        public long DiscordSnowflakeRoleId { get { return _discordSnowflakeRoleId; } }
     }
 }

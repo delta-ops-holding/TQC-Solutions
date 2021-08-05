@@ -1,21 +1,19 @@
-﻿using ObjectLibrary.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ObjectLibrary.Clan.Interfaces;
 
 namespace ObjectLibrary.Clan
 {
-    public class ClanEmote : BaseEntity
+    public struct ClanEmote : IClanEmote
     {
-        private readonly long _emoteId;
+        private readonly int _clanId;
+        private readonly long _discordSnowflakeEmoteId;
 
-        public ClanEmote(int clanId, long emoteId) : base (clanId)
+        public ClanEmote(int clanId, long discordSnowflakeEmoteId)
         {
-            _emoteId = emoteId;
+            _clanId = clanId;
+            _discordSnowflakeEmoteId = discordSnowflakeEmoteId;
         }
 
-        public long EmoteID => _emoteId;
+        public int ClanId { get { return _clanId; } }
+        public long DiscordSnowflakeEmoteId { get { return _discordSnowflakeEmoteId; } }
     }
 }

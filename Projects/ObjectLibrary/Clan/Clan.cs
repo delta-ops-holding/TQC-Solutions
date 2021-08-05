@@ -1,10 +1,5 @@
-﻿using ObjectLibrary.Clan.Abstractions;
-using ObjectLibrary.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ObjectLibrary.Clan.Interfaces;
+using ObjectLibrary.Core;
 
 namespace ObjectLibrary.Clan
 {
@@ -12,35 +7,21 @@ namespace ObjectLibrary.Clan
     {
         private readonly string _name;
         private readonly string _about;
-        private readonly Platform _platform;
-        private ClanFounder _founder;
-        private readonly List<ClanAdmin> _admins = new();
+        private readonly IPlatform _platform;
+        private readonly IClanEmote _clanEmote;
+        private readonly IMentionRole _mentionRole;
 
-        public Clan(int id, string name, string about, Platform platform) : base(id)
+        public Clan(int id, string name, string about, IPlatform platform) : base(id)
         {
             _name = name;
             _about = about;
             _platform = platform;
         }
 
-        public string Name => _name;
-
-        public string About => _about;
-
-        public ClanFounder Founder => _founder;
-
-        public List<ClanAdmin> Admins => _admins;
-
-        public Platform Platform => _platform;
-
-        public void AddClanMember(ClanAdmin member)
-        {
-            _admins.Add(member);
-        }
-
-        public void AddClanFounder(ClanFounder founder)
-        {
-            _founder = founder;
-        }
+        public string Name { get { return _name; } }
+        public string About { get { return _about; } }
+        public IPlatform Platform { get { return _platform; } }
+        public IClanEmote ClanEmote { get { return _clanEmote; } }
+        public IMentionRole MentionRole { get { return _mentionRole; } }
     }
 }
