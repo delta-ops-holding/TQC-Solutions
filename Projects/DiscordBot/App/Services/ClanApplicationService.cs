@@ -44,6 +44,16 @@ namespace DiscordBot.Services
                 DateTimeOffset currentDateTime = DateTimeOffset.UtcNow;
                 Clan clanName = _dataService.GetClanName(clanReactedTo.Emote);
 
+                if (clanName == Clan.Undefined)
+                {
+                    string message = "Guardian, the clan no longer supports more application, or was simply not found. Reach out to an admin if you think this was an error.";
+
+                    await _logger.LogAsync(new LogModel(LoggingSeverity.Debug, ToString(), $"Clan does not support any more application, or was not found..", $"{userWhoReacted.Id}", DateTime.UtcNow));
+                    await _notifier.SendDirectMessageToUserAsync(userWhoReacted, message);
+
+                    return;
+                }
+
                 // Check whether the user has an already processing clan application within 24 hours.
                 if (UserHasAnExistingClanApplication(userWhoReacted, currentDateTime))
                 {
