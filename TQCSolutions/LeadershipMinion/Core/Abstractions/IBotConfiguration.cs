@@ -12,5 +12,6 @@ namespace LeadershipMinion.Core.Abstractions
         string Version { get; }
         string Status { get; }
         string Token { get; }
+        List<string> FunFacts { get; }
     }
 }

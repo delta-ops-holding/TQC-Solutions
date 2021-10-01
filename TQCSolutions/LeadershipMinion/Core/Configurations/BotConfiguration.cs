@@ -1,4 +1,5 @@
 ﻿using LeadershipMinion.Core.Abstractions;
+using LeadershipMinion.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,13 @@ namespace LeadershipMinion.Core.Configurations
 
         public BotConfiguration()
         {
-            _token = Environment.GetEnvironmentVariable("Token");
+            _token = Environment.GetEnvironmentVariable(ConstantHelper.TOKEN_ENVIRONMENT_VARIABLE_NAME);
         }
 
         public string CommandPrefix { get; set; }
         public string Version { get; set; }
         public string Status { get; set; }
         public string Token { get { return _token; } }
+        public List<string> FunFacts { get; set; }
     }
 }

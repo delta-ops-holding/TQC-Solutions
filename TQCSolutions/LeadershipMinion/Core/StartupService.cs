@@ -57,25 +57,28 @@ namespace LeadershipMinion.Core
 
         private Task Ready()
         {
-            Task t = Task.Run(
+            _ = Task.Run(
                 async () =>
                 {
                     // Set Game Status on Ready.
                     _logger.LogInformation("Setting game as status..");
                     await _discordClient.SetGameAsync($"On {_botConfiguration.Version}", type: ActivityType.Playing);
 
+                    // Run Funny Facts to be displayed as status.
+                    RunFunFactsRoulette();
+
                     // Download all Guild users on Ready.
                     _logger.LogInformation("Downloading Guild Members..");
                     await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
                 });
 
-            return t;
+            return Task.CompletedTask;
         }
 
         private Task ClientLog(LogMessage logMessage)
         {
             // Use Task to run background thread.
-            Task t = Task.Run(
+            _ = Task.Run(
                 async () =>
                 {
                     try
@@ -103,7 +106,7 @@ namespace LeadershipMinion.Core
                     }
                 });
 
-            return t;
+            return Task.CompletedTask;
         }
 
         private async Task RestartConnectionAsync()
@@ -115,9 +118,35 @@ namespace LeadershipMinion.Core
             await InitializeBotAsync();
         }
 
+        private void RunFunFactsRoulette()
+        {
+            _ = Task.Run(
+                async () =>
+                {
+                    _logger.LogInformation("Running Fun Facts Roulette.");
+                    var loopFunFacts = true;
+
+                    do
+                    {
+                        var rnd = new Random();
+
+                        var selectedFact = _botConfiguration.FunFacts.ElementAt<string>(rnd.Next(0, _botConfiguration.FunFacts.Count));
+
+                        _logger.LogInformation($"New Fact Selected: {selectedFact}");
+                        await _discordClient.SetGameAsync(selectedFact, type: ActivityType.CustomStatus);
+
+                        await Task.Delay(3000);
+                    } while (loopFunFacts);
+                });
+        }
+
         private void DisposeEvents()
         {
             _discordClient.Log -= ClientLog;
+            _discordClient.Ready -= Ready;
+            _discordClient.GuildMembersDownloaded -= DownloadedGuildMembers;
+            _discordClient.GuildAvailable -= GuildAvailable;
+            _discordClient.ReactionAdded -= ReactionAdded;
         }
     }
 }
