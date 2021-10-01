@@ -2,6 +2,7 @@
 using Discord.Net;
 using Discord.WebSocket;
 using LeadershipMinion.Core.Abstractions;
+using LeadershipMinion.Core.Helpers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,8 @@ namespace LeadershipMinion.Core
 {
     public class StartupService : IStartupService
     {
+        private readonly string _botStatusVersion;
+
         private readonly IBotConfiguration _botConfiguration;
         private readonly ILogger<StartupService> _logger;
         private readonly DiscordSocketClient _discordClient;
@@ -22,6 +25,8 @@ namespace LeadershipMinion.Core
             _botConfiguration = botConfiguration;
             _logger = logger;
             _discordClient = discordClient;
+
+            _botStatusVersion = $"On {_botConfiguration.Version}-{_botConfiguration.Status}";
         }
 
         public async Task InitializeBotAsync()
@@ -32,6 +37,9 @@ namespace LeadershipMinion.Core
             _discordClient.GuildMembersDownloaded += DownloadedGuildMembers;
             _discordClient.GuildAvailable += GuildAvailable;
             _discordClient.ReactionAdded += ReactionAdded;
+
+            await _discordClient.LoginAsync(TokenType.Bot, _botConfiguration.Token);
+            await _discordClient.StartAsync();
 
             await Task.Delay(-1);
         }
@@ -62,10 +70,10 @@ namespace LeadershipMinion.Core
                 {
                     // Set Game Status on Ready.
                     _logger.LogInformation("Setting game as status..");
-                    await _discordClient.SetGameAsync($"On {_botConfiguration.Version}", type: ActivityType.Playing);
+                    await _discordClient.SetGameAsync(_botStatusVersion, type: ActivityType.Playing);
 
                     // Run Funny Facts to be displayed as status.
-                    RunFunFactsRoulette();
+                    //RunFunFactsRoulette();
 
                     // Download all Guild users on Ready.
                     _logger.LogInformation("Downloading Guild Members..");
@@ -128,14 +136,12 @@ namespace LeadershipMinion.Core
 
                     do
                     {
+                        var funFacts = _botConfiguration.FunFacts;
                         var rnd = new Random();
+                        var selectedFact = funFacts.ElementAt<string>(rnd.Next(0, funFacts.Count));
+                        await _discordClient.SetGameAsync($"{_botStatusVersion} - {selectedFact}", type: ActivityType.Playing);
 
-                        var selectedFact = _botConfiguration.FunFacts.ElementAt<string>(rnd.Next(0, _botConfiguration.FunFacts.Count));
-
-                        _logger.LogInformation($"New Fact Selected: {selectedFact}");
-                        await _discordClient.SetGameAsync(selectedFact, type: ActivityType.CustomStatus);
-
-                        await Task.Delay(3000);
+                        await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN_FROM_SECONDS));
                     } while (loopFunFacts);
                 });
         }
