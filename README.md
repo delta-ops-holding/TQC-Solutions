@@ -9,10 +9,9 @@ Link | Framework | Version
 [Discord Bot](https://github.com/iZeQure/TQC-Development/tree/master/Projects/DiscordBot/App) | .NET Core 5.0 | v2.7.14
 
 ### Prerequisites
-- [x] [.NET Core](https://dotnet.microsoft.com/download) ~> 3.1 SDK
+- [x] [.NET](https://dotnet.microsoft.com/download) ~> 5.0 SDK
 - [x] [Docker](https://www.docker.com/) ~ Latest.
 - [x] Visual Studio ~ Any Edition
-- [x] SQL Server Access ~ Hosted
 - [x] A Great Smile
 - [x] Lots of cookies
 
