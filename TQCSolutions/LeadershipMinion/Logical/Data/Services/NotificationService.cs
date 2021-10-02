@@ -26,61 +26,22 @@ namespace LeadershipMinion.Logical.Data.Services
             _discordClient = discordClient;
         }
 
-        public async Task SendApplicationAsync(MessageModel model)
+        public async Task NotifyStaffsAsync(MessageModel model)
         {
             try
             {
                 if (model.DiscordUser is IUser discordUser)
                 {
-                    model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message has also been sent to the Guardian."; ;
-
-                    bool userHasPrivacySettingsOn = await NotifyUserAsync(discordUser, model.Clan);
-
-                    if (userHasPrivacySettingsOn)
-                    {
-                        model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
-                    }
-
-                    await NotifyAdminAsync(model);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
-        }
-
-        public async Task SendDirectMessageToUserAsync(MessageModel model)
-        {
-            try
-            {
-                if (model.DiscordUser is IUser user)
-                {
-                    await user.SendMessageAsync(model.Message);
-                }
-            }
-            catch (HttpException httpEx)
-            {
-                _logger.LogError(httpEx, httpEx.Message);
-            }
-        }
-
-        private async Task NotifyAdminAsync(MessageModel message)
-        {
-            try
-            {
-                if (message.DiscordUser is IUser discordUser)
-                {
                     // Get the role to ping.
-                    string pingRole = _clanService.GetMentionRoleByClanName(message.Clan);
+                    string pingRole = _clanService.GetMentionRoleByClanName(model.Clan);
 
                     // Get Channel object by channel id.
                     IMessageChannel messageChannel = _discordClient.GetChannel(_botConfiguration.StaffChannel) as IMessageChannel;
 
                     // Check if the pinged role is empty.
-                    pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{message.Clan}>" : pingRole;
+                    pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{model.Clan}>" : pingRole;
 
-                    Embed embeddedMessage = CreateEmbed(message);
+                    Embed embeddedMessage = CreateEmbed(model);
 
                     // Send embedded message to admins.
                     await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{discordUser.Id}>", embed: embeddedMessage);
@@ -92,17 +53,23 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
-        private async Task<bool> NotifyUserAsync(IUser discordUser, Clan clanName)
+        public async Task<bool> NotifyUserAsync(MessageModel model)
         {
             try
             {
-                // Try Direct Message the user with a notification about the assignment.
-                await discordUser.SendMessageAsync(
-                    $"Hello Guardian. You're successfully signed up for {clanName}. " +
-                    $"Please await patiently for an admin to proceed your request. " +
-                    $"Applying for more clans will not speed up the process.");
+                if (model.DiscordUser is IUser user)
+                {
+                    // Try Direct Message the user with a notification about the assignment.
+                    await user.SendMessageAsync(model.Message);
 
-                return false;
+                    return false;
+                }
+                //await discordUser.SendMessageAsync(
+                //    $"Hello Guardian. You're successfully signed up for {clanName}. " +
+                //    $"Please await patiently for an admin to proceed your request. " +
+                //    $"Applying for more clans will not speed up the process.");
+
+                throw new Exception($"Something went wrong while sending a dm to user.");
             }
             catch (HttpException httpEx)
             {
@@ -118,7 +85,7 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
-        private static Embed CreateEmbed(MessageModel model)
+        internal static Embed CreateEmbed(MessageModel model)
         {
             // Create new Embed Builder.
             var embedMessage = new EmbedBuilder()
@@ -146,7 +113,5 @@ namespace LeadershipMinion.Logical.Data.Services
 
             return embedMessage.Build();
         }
-
-
     }
 }

@@ -36,16 +36,23 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 var clanName = _clanService.GetClanNameByEmoteId(emote.Id);
                 var platform = _clanService.GetClanPlatformByChannelId(appliedBy.Channel.Id);
 
-                if (HasApplicationCooldown(userWhoReacted, currentDateTimeOffset))
+                if (ApplicantHasCooldown(userWhoReacted, currentDateTimeOffset))
                 {
                     var existingApplication = _applicationsUnderCooldown.FirstOrDefault(u => u.DiscordUserId == userWhoReacted.Id);
                     string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
 
                     var model = new MessageModel(message, platform, existingApplication.AppliedToClan, userWhoReacted);
-                    await _notificationService.SendDirectMessageToUserAsync(model);
+                    var hasPrivacy = await _notificationService.NotifyUserAsync(model);
 
-                    _logger.LogInformation($"Guardian <{userWhoReacted.Id}> attempted to apply to more than one clan, while being on cooldown.");
+                    var logMessage = $"Guardian <{userWhoReacted.Id}> attempted to apply to more than one clan, while being on cooldown.";
 
+                    if (hasPrivacy)
+                    {
+                        _logger.LogWarning($"{logMessage} User was not notified due to privacy settings.");
+                        return;
+                    }
+
+                    _logger.LogInformation($"{logMessage} User was notified.");
                     return;
                 }
 
@@ -55,8 +62,35 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 var messageModel = new MessageModel("", platform, clanName, userWhoReacted);
 
                 _logger.LogInformation($"Guardian <{userWhoReacted.Id}> applied to join {clanName}.");
-                await _notificationService.SendApplicationAsync(messageModel);
+                await SendApplicationAsync(messageModel);
+
                 return;
+            }
+
+            _logger.LogWarning($"User {appliedBy.User.Value.Id} was either not specified or the reaction object was null.");
+        }
+
+        internal async Task SendApplicationAsync(MessageModel model)
+        {
+            try
+            {
+                if (model.DiscordUser is IUser discordUser)
+                {
+                    model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message has also been sent to the Guardian."; ;
+
+                    bool userHasPrivacySettingsOn = await _notificationService.NotifyUserAsync(model);
+
+                    if (userHasPrivacySettingsOn)
+                    {
+                        model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                    }
+
+                    await _notificationService.NotifyStaffsAsync(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
             }
         }
 
@@ -65,7 +99,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
             return appliedBy.User.IsSpecified && userWhoReacted is not null;
         }
 
-        private static bool HasApplicationCooldown(IUser userWhoReacted, DateTimeOffset currentDateTimeOffset)
+        private static bool ApplicantHasCooldown(IUser userWhoReacted, DateTimeOffset currentDateTimeOffset)
         {
             return _applicationsUnderCooldown.Any(
                                 u => u.DiscordUserId == userWhoReacted.Id &&

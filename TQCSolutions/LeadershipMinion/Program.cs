@@ -7,10 +7,12 @@ using LeadershipMinion.Core.Helpers;
 using LeadershipMinion.Logical.Data.Abstractions;
 using LeadershipMinion.Logical.Data.Handlers;
 using LeadershipMinion.Logical.Data.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace LeadershipMinion
 {

@@ -32,8 +32,14 @@ namespace LeadershipMinion.Core
             _applicationHandler = applicationHandler;
         }
 
+        /// <summary>
+        /// Starts a connection with Discord Service asynchronous.
+        /// </summary>
+        /// <returns></returns>
         public async Task InitializeBotAsync()
         {
+            _logger.LogInformation("Starting Services...");
+
             // Enable Logging.
             _discordClient.Log += ClientLog;
             _discordClient.GuildAvailable += GuildAvailable;
@@ -47,13 +53,18 @@ namespace LeadershipMinion.Core
             await Task.Delay(-1);
         }
 
+        /// <summary>
+        /// Fired when a reaction is added to a message.
+        /// <br>ReactionAdded Event Handler for <see cref="DiscordSocketClient"/>.</br>
+        /// </summary>
+        /// <param name="cacheUserMessage"></param>
+        /// <param name="socketMessageChannel"></param>
+        /// <param name="socketReaction"></param>
+        /// <returns>A Task representing the asynchronous process.</returns>
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
             _ = Task.Run(async () =>
             {
-                // Get or download the user cache from the Server.
-                IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
-
                 if (socketReaction.User.GetValueOrDefault() is not SocketGuildUser currentUser)
                 {
                     currentUser = _discordClient.GetUser(socketReaction.UserId) as SocketGuildUser;
@@ -81,14 +92,26 @@ namespace LeadershipMinion.Core
                     // New Caller
                     await _applicationHandler.CreateApplicationAsync(socketReaction, currentUser);
 
-                    // Remove Reaction after process.
-                    await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                    // Cleanup Process.
+                    // Get or download the user cache from the Server.
+                    IUserMessage userMessage = await GetCachedEntityOrDownloadItAsync(cacheUserMessage);
+
+                    if (userMessage is not null)
+                    {
+                        await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                    }
                 }
             });
 
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Fired when a guild becomes available.
+        /// <br>GuildAvailable Event Handler for <see cref="DiscordSocketClient"/>.</br>
+        /// </summary>
+        /// <param name="guild"></param>
+        /// <returns>A Task representing the asynchronous process.</returns>
         private Task GuildAvailable(SocketGuild guild)
         {
             _logger.LogInformation($"{guild.Name} is now available!");
@@ -96,6 +119,12 @@ namespace LeadershipMinion.Core
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Fired when offline guild members are downloaded.
+        /// <br>GuildMembersDownloaded Event Handler for <see cref="DiscordSocketClient"/>.</br>
+        /// </summary>
+        /// <param name="guild"></param>
+        /// <returns>A Task representing the asynchronous process.</returns>
         private Task GuildMembersDownloaded(SocketGuild guild)
         {
             _logger.LogInformation($"Cached Offline Users from {guild.Name}!");
@@ -103,6 +132,11 @@ namespace LeadershipMinion.Core
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Fired when guild data has finished downloading.
+        /// <br>Ready Event Handler for <see cref="DiscordSocketClient"/>.</br>
+        /// </summary>
+        /// <returns>A Task representing the asynchronous process.</returns>
         private Task Ready()
         {
             _ = Task.Run(
@@ -122,6 +156,11 @@ namespace LeadershipMinion.Core
             return Task.CompletedTask;
         }        
 
+        /// <summary>
+        /// Log Event Handler for <see cref="DiscordSocketClient"/>.
+        /// </summary>
+        /// <param name="logMessage">A message object used for logging purposes.</param>
+        /// <returns>A Task representing the asynchronous process.</returns>
         private Task ClientLog(LogMessage logMessage)
         {
             // Use Task to run background thread.
@@ -130,12 +169,10 @@ namespace LeadershipMinion.Core
                 {
                     try
                     {
-                        var log = logMessage.ToString();
-
                         switch (logMessage.Exception)
                         {
                             case GatewayReconnectException:
-                                _logger.LogWarning(log);
+                                _logger.LogWarning("Discord requested a server reconnect.");
                                 await RestartConnectionAsync();
                                 break;
                             case WebSocketClosedException:
@@ -143,7 +180,7 @@ namespace LeadershipMinion.Core
                                 await RestartConnectionAsync();
                                 break;
                             default:
-                                _logger.LogInformation(log);
+                                _logger.LogInformation(logMessage.Message);
                                 break;
                         }
                     }
@@ -154,10 +191,11 @@ namespace LeadershipMinion.Core
                 });
 
             return Task.CompletedTask;
-        }
+        }                                                                                                                                    
 
-        private async Task RestartConnectionAsync()
+        internal async Task RestartConnectionAsync()
         {
+            _logger.LogInformation("Restarting Services...");
             await _discordClient.LogoutAsync();
             DisposeEvents();
             _logger.LogInformation("Logout Successfull.");
@@ -165,7 +203,41 @@ namespace LeadershipMinion.Core
             await InitializeBotAsync();
         }
 
-        private void RunFunFactsRoulette()
+        internal async Task<IUserMessage> GetCachedEntityOrDownloadItAsync(Cacheable<IUserMessage, ulong> cacheUserMessage)
+        {
+            try
+            {
+                return await cacheUserMessage.GetOrDownloadAsync();
+            }
+            catch (HttpException httpEx)
+            {
+                _logger.LogError(httpEx, $"Cannot cache message {cacheUserMessage.Id} from a user account.");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"The message is deleted and is not in the cache.");
+                return null;
+            }
+        }
+
+        internal Task DownloadGuildMembersAsync()
+        {
+            _ = Task.Run(
+                async () =>
+                {
+                    _logger.LogInformation("Downloading Guild Members..");
+
+                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
+                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
+
+                    _logger.LogInformation($"Finished Download. Cached => {count} users.");
+                });
+
+            return Task.CompletedTask;
+        }
+
+        internal void RunFunFactsRoulette()
         {
             _ = Task.Run(
                 async () =>
@@ -185,29 +257,15 @@ namespace LeadershipMinion.Core
                 });
         }
 
-        private void DisposeEvents()
+        internal void DisposeEvents()
         {
             _discordClient.Log -= ClientLog;
             _discordClient.Ready -= Ready;
             _discordClient.GuildMembersDownloaded -= GuildMembersDownloaded;
             _discordClient.GuildAvailable -= GuildAvailable;
             _discordClient.ReactionAdded -= ReactionAdded;
-        }
 
-        internal Task DownloadGuildMembersAsync()
-        {
-            _ = Task.Run(
-                async () =>
-                {
-                    _logger.LogInformation("Downloading Guild Members..");
-
-                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
-                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
-
-                    _logger.LogInformation($"Finished Download. Cached => {count} users.");
-                });
-
-            return Task.CompletedTask;
+            _logger.LogInformation("Events successfully disposed.");
         }
     }
 }
