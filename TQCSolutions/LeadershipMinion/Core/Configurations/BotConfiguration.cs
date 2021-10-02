@@ -2,9 +2,6 @@
 using LeadershipMinion.Core.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeadershipMinion.Core.Configurations
 {
@@ -21,6 +18,10 @@ namespace LeadershipMinion.Core.Configurations
         public string Version { get; set; }
         public string Status { get; set; }
         public string Token { get { return _token; } }
+        public ulong StaffRole { get; set; }
+        public ulong StaffChannel { get; set; }
+        public ulong DebugChannel { get; set; }
+        public List<ulong> Channels { get; set; }
         public List<string> FunFacts { get; set; }
     }
 }

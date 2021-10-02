@@ -3,6 +3,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using LeadershipMinion.Core.Abstractions;
 using LeadershipMinion.Core.Helpers;
+using LeadershipMinion.Logical.Data.Abstractions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,25 +19,27 @@ namespace LeadershipMinion.Core
 
         private readonly IBotConfiguration _botConfiguration;
         private readonly ILogger<StartupService> _logger;
+        private readonly IApplicationHandler _applicationHandler;
         private readonly DiscordSocketClient _discordClient;
 
-        public StartupService(IBotConfiguration botConfiguration, ILogger<StartupService> logger, DiscordSocketClient discordClient)
+        public StartupService(IBotConfiguration botConfiguration, ILogger<StartupService> logger, DiscordSocketClient discordClient, IApplicationHandler applicationHandler)
         {
             _botConfiguration = botConfiguration;
             _logger = logger;
             _discordClient = discordClient;
 
             _botStatusVersion = $"On {_botConfiguration.Version}-{_botConfiguration.Status}";
+            _applicationHandler = applicationHandler;
         }
 
         public async Task InitializeBotAsync()
         {
             // Enable Logging.
             _discordClient.Log += ClientLog;
-            _discordClient.Ready += Ready;
-            _discordClient.GuildMembersDownloaded += DownloadedGuildMembers;
             _discordClient.GuildAvailable += GuildAvailable;
+            _discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
             _discordClient.ReactionAdded += ReactionAdded;
+            _discordClient.Ready += Ready;
 
             await _discordClient.LoginAsync(TokenType.Bot, _botConfiguration.Token);
             await _discordClient.StartAsync();
@@ -44,9 +47,46 @@ namespace LeadershipMinion.Core
             await Task.Delay(-1);
         }
 
-        private Task ReactionAdded(Cacheable<IUserMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2, SocketReaction arg3)
+        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, Cacheable<IMessageChannel, ulong> socketMessageChannel, SocketReaction socketReaction)
         {
-            throw new NotImplementedException();
+            _ = Task.Run(async () =>
+            {
+                // Get or download the user cache from the Server.
+                IUserMessage userMessage = await cacheUserMessage.GetOrDownloadAsync();
+
+                if (socketReaction.User.GetValueOrDefault() is not SocketGuildUser currentUser)
+                {
+                    currentUser = _discordClient.GetUser(socketReaction.UserId) as SocketGuildUser;
+                }
+
+                // Debug Mode:
+                if (socketReaction.Channel.Id.Equals(_botConfiguration.DebugChannel))
+                {
+                    _logger.LogDebug("Working as intentional.");
+                    return;
+                }
+
+                // If the socket reaction, is from any of the filtered channels.
+                if (_botConfiguration.Channels.Contains(socketReaction.Channel.Id))
+                {
+                    // If the user has any roles from the filter.
+                    if (currentUser.Roles.Any(r => r.Id.Equals(_botConfiguration.StaffRole)))
+                    {
+                        string message = $"Leadership assigned reaction <{socketReaction.Emote.Name}> to message.";
+                        _logger.LogInformation($"{message}");
+
+                        return;
+                    }
+
+                    // New Caller
+                    await _applicationHandler.CreateApplicationAsync(socketReaction, currentUser);
+
+                    // Remove Reaction after process.
+                    await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
         private Task GuildAvailable(SocketGuild guild)
@@ -56,9 +96,9 @@ namespace LeadershipMinion.Core
             return Task.CompletedTask;
         }
 
-        private Task DownloadedGuildMembers(SocketGuild guild)
+        private Task GuildMembersDownloaded(SocketGuild guild)
         {
-            _logger.LogInformation($"Finished Downloading Guild Members; Cached <{guild.Users.Count}> Members.");
+            _logger.LogInformation($"Cached Offline Users from {guild.Name}!");
 
             return Task.CompletedTask;
         }
@@ -76,12 +116,11 @@ namespace LeadershipMinion.Core
                     //RunFunFactsRoulette();
 
                     // Download all Guild users on Ready.
-                    _logger.LogInformation("Downloading Guild Members..");
-                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
+                    await DownloadGuildMembersAsync();
                 });
 
             return Task.CompletedTask;
-        }
+        }        
 
         private Task ClientLog(LogMessage logMessage)
         {
@@ -150,9 +189,25 @@ namespace LeadershipMinion.Core
         {
             _discordClient.Log -= ClientLog;
             _discordClient.Ready -= Ready;
-            _discordClient.GuildMembersDownloaded -= DownloadedGuildMembers;
+            _discordClient.GuildMembersDownloaded -= GuildMembersDownloaded;
             _discordClient.GuildAvailable -= GuildAvailable;
             _discordClient.ReactionAdded -= ReactionAdded;
+        }
+
+        internal Task DownloadGuildMembersAsync()
+        {
+            _ = Task.Run(
+                async () =>
+                {
+                    _logger.LogInformation("Downloading Guild Members..");
+
+                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
+                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
+
+                    _logger.LogInformation($"Finished Download. Cached => {count} users.");
+                });
+
+            return Task.CompletedTask;
         }
     }
 }

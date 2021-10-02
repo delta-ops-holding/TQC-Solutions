@@ -4,6 +4,9 @@ using LeadershipMinion.Core;
 using LeadershipMinion.Core.Abstractions;
 using LeadershipMinion.Core.Configurations;
 using LeadershipMinion.Core.Helpers;
+using LeadershipMinion.Logical.Data.Abstractions;
+using LeadershipMinion.Logical.Data.Handlers;
+using LeadershipMinion.Logical.Data.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,7 +49,8 @@ namespace LeadershipMinion
             {
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
-                AlwaysDownloadUsers = true
+                AlwaysDownloadUsers = true,
+                GatewayIntents = GatewayIntents.All
             };
 
             // Get Bot Configuration.
@@ -54,6 +58,9 @@ namespace LeadershipMinion
 
             services.AddSingleton(new DiscordSocketClient(discordSocketConfiguration));
             services.AddSingleton<IBotConfiguration>(botConfiguration);
+            services.AddTransient<IClanService, ClanService>();
+            services.AddTransient<INotificationService, NotificationService>();
+            services.AddSingleton<IApplicationHandler, ApplicationHandler>();
             services.AddTransient<IStartupService, StartupService>();
         }
 
