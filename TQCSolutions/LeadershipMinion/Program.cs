@@ -50,7 +50,7 @@ namespace LeadershipMinion
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
-                GatewayIntents = GatewayIntents.All
+                ExclusiveBulkDelete = false
             };
 
             // Get Bot Configuration.

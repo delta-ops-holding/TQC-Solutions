@@ -47,7 +47,7 @@ namespace LeadershipMinion.Core
             await Task.Delay(-1);
         }
 
-        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, Cacheable<IMessageChannel, ulong> socketMessageChannel, SocketReaction socketReaction)
+        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
         {
             _ = Task.Run(async () =>
             {
