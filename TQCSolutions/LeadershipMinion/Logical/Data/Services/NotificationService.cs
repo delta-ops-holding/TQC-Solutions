@@ -73,6 +73,12 @@ namespace LeadershipMinion.Logical.Data.Services
             }
             catch (HttpException httpEx)
             {
+                // Check for Privacy Settings Discord Code.
+                if (httpEx.DiscordCode == 50007)
+                {
+                    return true;
+                }
+
                 _logger.LogError(httpEx, httpEx.Message);
 
                 return true;
@@ -85,7 +91,7 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
-        internal static Embed CreateEmbed(MessageModel model)
+        internal Embed CreateEmbed(MessageModel model)
         {
             // Create new Embed Builder.
             var embedMessage = new EmbedBuilder()

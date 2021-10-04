@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace LeadershipMinion.Logical.Data.Abstractions
 {
+    /// <summary>
+    /// Represents a generic Notification Service, used to notify.
+    /// </summary>
     public interface INotificationService
     {
         /// <summary>

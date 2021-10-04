@@ -32,20 +32,10 @@ namespace LeadershipMinion.Core
             _applicationHandler = applicationHandler;
         }
 
-        /// <summary>
-        /// Starts a connection with Discord Service asynchronous.
-        /// </summary>
-        /// <returns></returns>
         public async Task InitializeBotAsync()
         {
             _logger.LogInformation("Starting Services...");
-
-            // Enable Logging.
-            _discordClient.Log += ClientLog;
-            _discordClient.GuildAvailable += GuildAvailable;
-            _discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
-            _discordClient.ReactionAdded += ReactionAdded;
-            _discordClient.Ready += Ready;
+            InitializeEvents();
 
             await _discordClient.LoginAsync(TokenType.Bot, _botConfiguration.Token);
             await _discordClient.StartAsync();
@@ -255,6 +245,26 @@ namespace LeadershipMinion.Core
                         await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN_FROM_SECONDS));
                     } while (loopFunFacts);
                 });
+        }
+
+        internal void InitializeEvents()
+        {
+            // Enable Client Logging.
+            _discordClient.Log += ClientLog;
+
+            // Observe available guilds.
+            _discordClient.GuildAvailable += GuildAvailable;
+
+            // Observe when offline Guild Members are downloaded.
+            _discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
+
+            // Observe whenever a reaction is added to a message.
+            _discordClient.ReactionAdded += ReactionAdded;
+
+            // Observe whenever the client is ready.
+            _discordClient.Ready += Ready;
+
+            _logger.LogInformation("Events successfully initalized.");
         }
 
         internal void DisposeEvents()

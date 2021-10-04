@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace LeadershipMinion.Core.Abstractions
 {
+    /// <summary>
+    /// Represents a generic Bot Configuration.
+    /// </summary>
     public interface IBotConfiguration
     {
         string CommandPrefix { get; }
