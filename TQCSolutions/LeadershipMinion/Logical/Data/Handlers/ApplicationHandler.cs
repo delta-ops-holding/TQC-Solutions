@@ -13,6 +13,9 @@ namespace LeadershipMinion.Logical.Data.Handlers
 {
     public class ApplicationHandler : IApplicationHandler
     {
+        private const int CLEAN_INTERVAL = 5;
+        private const int TRY_AGAIN_TIMER = 1;
+
         private readonly IClanService _clanService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<ApplicationHandler> _logger;
@@ -41,7 +44,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                     var existingApplication = _applicationsUnderCooldown.FirstOrDefault(u => u.DiscordUserId == userWhoReacted.Id);
                     string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
 
-                    var model = new MessageModel(message, platform, existingApplication.AppliedToClan, userWhoReacted);
+                    var model = new MessageModel(message, platform, existingApplication.AppliedToClan, userWhoReacted, userWhoReacted.Id);
                     var hasPrivacy = await _notificationService.NotifyUserAsync(model);
 
                     var logMessage = $"Guardian <{userWhoReacted.Id}> attempted to apply to more than one clan, while being on cooldown.";
@@ -59,7 +62,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 var newApplication = new ApplicationModel(userWhoReacted.Id, currentDateTimeOffset, clanName, platform);
                 _applicationsUnderCooldown.Push(newApplication);
 
-                var messageModel = new MessageModel("", platform, clanName, userWhoReacted);
+                var messageModel = new MessageModel("", platform, clanName, userWhoReacted, userWhoReacted.Id);
 
                 _logger.LogInformation($"Guardian <{userWhoReacted.Id}> applied to join {clanName}.");
                 await SendApplicationAsync(messageModel);
@@ -105,6 +108,39 @@ namespace LeadershipMinion.Logical.Data.Handlers
                                 u => u.DiscordUserId == userWhoReacted.Id &&
                                 (currentDateTimeOffset - u.RegistrationDate)
                                 .TotalHours <= ConstantHelper.APPLICATION_COOLDOWN_FROM_HOURS);
+        }
+
+        private void CleanApplicationsByInternal()
+        {
+            //_logger.LogDebug("Cleaning applications..");
+
+            //_ = Task.Run(() =>
+            //{
+            //    while (!_applicationsUnderCooldown.Any())
+            //    {
+            //        _logger.LogDebug($"No applications found.");
+            //        Task.Delay(TimeSpan.FromMinutes(TRY_AGAIN_TIMER));
+            //    }
+
+            //    do
+            //    {
+            //        _logger.LogDebug($"Applications under CD: <{_applicationsUnderCooldown.Count}>.");
+
+            //        for(int i = 0; i < _applicationsUnderCooldown.Count; i++)
+            //        {
+            //            if (_applicationsUnderCooldown[i].RegistrationDate < DateTimeOffset.UtcNow)
+            //            {
+            //                _applicationsUnderCooldown.Remove(_applicationsUnderCooldown[i]);
+            //            }
+            //        }
+
+            //        _logger.LogDebug($"Cleaned Applications under CD: <{_applicationsUnderCooldown.Count}>.");
+
+            //    } while (_applicationsUnderCooldown is not null && _applicationsUnderCooldown.Any());
+
+            //    Task.Delay(TimeSpan.FromMinutes(CLEAN_INTERVAL));
+            //    CleanApplicationsByInternal();
+            //});
         }
     }
 }

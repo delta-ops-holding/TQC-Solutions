@@ -57,35 +57,43 @@ namespace LeadershipMinion.Logical.Data.Services
         {
             try
             {
-                if (model.DiscordUser is IUser user)
+                try
                 {
-                    // Try Direct Message the user with a notification about the assignment.
-                    await user.SendMessageAsync(model.Message);
+                    if (model.DiscordUser is not null && model.DiscordUser is IUser genericUser)
+                    {
+                        await genericUser.SendMessageAsync(model.Message);
 
-                    return false;
-                }
-                //await discordUser.SendMessageAsync(
-                //    $"Hello Guardian. You're successfully signed up for {clanName}. " +
-                //    $"Please await patiently for an admin to proceed your request. " +
-                //    $"Applying for more clans will not speed up the process.");
+                        return false;
+                    }
 
-                throw new Exception($"Something went wrong while sending a dm to user.");
-            }
-            catch (HttpException httpEx)
-            {
-                // Check for Privacy Settings Discord Code.
-                if (httpEx.DiscordCode == 50007)
-                {
+                    var socketUser = _discordClient.GetUser(model.DiscordUserId);
+
+                    if (socketUser is not null)
+                    {
+                        await socketUser.SendMessageAsync(model.Message);
+
+                        return false;
+                    }
+
+                    _logger.LogWarning($"User <{model.DiscordUserId}> couldn't be notified. Was not found.");
                     return true;
                 }
+                catch (HttpException httpEx)
+                {
+                    // Check for Privacy Settings Discord Code.
+                    if (httpEx.DiscordCode == 50007)
+                    {
+                        return true;
+                    }
 
-                _logger.LogError(httpEx, httpEx.Message);
+                    _logger.LogError(httpEx, httpEx.Message);
 
-                return true;
+                    return true;
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError($"Unknown Error occurred while notifying user.");
 
                 return true;
             }
