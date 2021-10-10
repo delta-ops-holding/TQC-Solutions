@@ -80,7 +80,7 @@ namespace LeadershipMinion.Core
                     }
 
                     // New Caller
-                    await _applicationHandler.CreateApplicationAsync(socketReaction, currentUser);
+                    await _applicationHandler.HandleApplicationAsync(socketReaction, currentUser);
 
                     // Cleanup Process.
                     // Get or download the user cache from the Server.

@@ -30,21 +30,21 @@ namespace LeadershipMinion.Logical.Data.Services
         {
             try
             {
-                if (model.DiscordUser is IUser discordUser)
+                if (model.DiscordUser is not null)
                 {
                     // Get the role to ping.
-                    string pingRole = _clanService.GetMentionRoleByClanName(model.Clan);
+                    string pingRole = _clanService.GetMentionRoleByClanName(model.Application.AppliedToClan);
 
                     // Get Channel object by channel id.
                     IMessageChannel messageChannel = _discordClient.GetChannel(_botConfiguration.StaffChannel) as IMessageChannel;
 
                     // Check if the pinged role is empty.
-                    pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{model.Clan}>" : pingRole;
+                    pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{model.Application.AppliedToClan}>" : pingRole;
 
                     Embed embeddedMessage = CreateEmbed(model);
 
                     // Send embedded message to admins.
-                    await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{discordUser.Id}>", embed: embeddedMessage);
+                    await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: embeddedMessage);
                 }
             }
             catch (Exception ex)
@@ -57,44 +57,39 @@ namespace LeadershipMinion.Logical.Data.Services
         {
             try
             {
-                try
+                model.Message = $"Hello Guardian. You're successfully signed up for {model.Application.AppliedToClan}. " +
+                    $"Please await patiently for an admin to proceed your request. " +
+                    $"Applying for more clans will not speed up the process.";
+
+                if (model.DiscordUser is not null)
                 {
-                    if (model.DiscordUser is not null && model.DiscordUser is IUser genericUser)
-                    {
-                        await genericUser.SendMessageAsync(model.Message);
+                    await model.DiscordUser.SendMessageAsync(model.Message);
 
-                        return false;
-                    }
-
-                    var socketUser = _discordClient.GetUser(model.DiscordUserId);
-
-                    if (socketUser is not null)
-                    {
-                        await socketUser.SendMessageAsync(model.Message);
-
-                        return false;
-                    }
-
-                    _logger.LogWarning($"User <{model.DiscordUserId}> couldn't be notified. Was not found.");
-                    return true;
+                    return false;
                 }
-                catch (HttpException httpEx)
+
+                var socketUser = _discordClient.GetUser(model.Application.DiscordUserId);
+
+                if (socketUser is not null)
                 {
-                    // Check for Privacy Settings Discord Code.
-                    if (httpEx.DiscordCode == 50007)
-                    {
-                        return true;
-                    }
+                    await socketUser.SendMessageAsync(model.Message);
 
-                    _logger.LogError(httpEx, httpEx.Message);
-
-                    return true;
+                    return false;
                 }
+
+                _logger.LogWarning($"User <{model.Application.DiscordUserId}> couldn't be notified. Was not found.");
+                return true;
             }
-            catch (Exception)
+            catch (HttpException httpEx)
             {
-                _logger.LogError($"Unknown Error occurred while notifying user.");
+                // Check for Privacy Settings Discord Code.
+                if (httpEx.DiscordCode == 50007)
+                {
+                    _logger.LogWarning($"User <{model.Application.DiscordUserId}> couldn't receive DM due to privacy settings.");
+                    return true;
+                }
 
+                _logger.LogError(httpEx, $"Error occurred while notifying user; Code <{httpEx.DiscordCode}>, detailed message: {httpEx.Message} - reason: {httpEx.Reason}");
                 return true;
             }
         }
@@ -108,20 +103,22 @@ namespace LeadershipMinion.Logical.Data.Services
                 Description = model.Message
             };
 
+            var clan = model.Application.AppliedToClan;
+
             // Switch on provided platform identifier.
-            switch (model.ClanPlatform)
+            switch (model.Application.ClanAssociatedWithPlatform)
             {
                 case ClanPlatform.PC:
                     embedMessage.Color = Color.Red;
-                    embedMessage.WithFooter($"{model.Clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
                     break;
                 case ClanPlatform.PSN:
                     embedMessage.Color = Color.Blue;
-                    embedMessage.WithFooter($"{model.Clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
                     break;
                 case ClanPlatform.XBOX:
                     embedMessage.Color = Color.Green;
-                    embedMessage.WithFooter($"{model.Clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
+                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
                     break;
             }
 

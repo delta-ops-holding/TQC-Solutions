@@ -29,72 +29,73 @@ namespace LeadershipMinion.Logical.Data.Handlers
             _notificationService = notificationService;
         }
 
-        public async Task CreateApplicationAsync(SocketReaction appliedBy, IUser userWhoReacted)
+        public async Task HandleApplicationAsync(SocketReaction messageReaction, IUser discordUser)
         {
-            if (UserIsSpecifiedAndUserWhoReactedIsNotNull(appliedBy, userWhoReacted))
+            if (UserIsSpecifiedAndUserWhoReactedIsNotNull(messageReaction, discordUser))
             {
                 DateTimeOffset currentDateTimeOffset = DateTimeOffset.UtcNow;
 
-                var emote = appliedBy.Emote as Emote;
+                var emote = messageReaction.Emote as Emote;
                 var clanName = _clanService.GetClanNameByEmoteId(emote.Id);
-                var platform = _clanService.GetClanPlatformByChannelId(appliedBy.Channel.Id);
+                var platform = _clanService.GetClanPlatformByChannelId(messageReaction.Channel.Id);
 
-                if (ApplicantHasCooldown(userWhoReacted, currentDateTimeOffset))
+                if (ApplicantHasCooldown(discordUser, currentDateTimeOffset))
                 {
-                    var existingApplication = _applicationsUnderCooldown.FirstOrDefault(u => u.DiscordUserId == userWhoReacted.Id);
-                    string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
+                    await HandleApplicationUnderCooldownAsync(discordUser);
 
-                    var model = new MessageModel(message, platform, existingApplication.AppliedToClan, userWhoReacted, userWhoReacted.Id);
-                    var hasPrivacy = await _notificationService.NotifyUserAsync(model);
-
-                    var logMessage = $"Guardian <{userWhoReacted.Id}> attempted to apply to more than one clan, while being on cooldown.";
-
-                    if (hasPrivacy)
-                    {
-                        _logger.LogWarning($"{logMessage} User was not notified due to privacy settings.");
-                        return;
-                    }
-
-                    _logger.LogInformation($"{logMessage} User was notified.");
-                    return;
+                    await Task.CompletedTask;
                 }
 
-                var newApplication = new ApplicationModel(userWhoReacted.Id, currentDateTimeOffset, clanName, platform);
-                _applicationsUnderCooldown.Push(newApplication);
+                await CreateApplicationAsync(discordUser, currentDateTimeOffset, clanName, platform);
 
-                var messageModel = new MessageModel("", platform, clanName, userWhoReacted, userWhoReacted.Id);
-
-                _logger.LogInformation($"Guardian <{userWhoReacted.Id}> applied to join {clanName}.");
-                await SendApplicationAsync(messageModel);
-
-                return;
+                await Task.CompletedTask;
             }
 
-            _logger.LogWarning($"User {appliedBy.User.Value.Id} was either not specified or the reaction object was null.");
+            _logger.LogWarning($"User {messageReaction.User.Value.Id} was either not specified or the reaction object was null.");
         }
 
-        internal async Task SendApplicationAsync(MessageModel model)
+        private async Task CreateApplicationAsync(IUser discordUser, DateTimeOffset currentDateTimeOffset, Enums.Clan clanName, Enums.ClanPlatform platform)
         {
-            try
+            var newApplication = new ApplicationModel(discordUser.Id, currentDateTimeOffset, clanName, platform);
+
+            _applicationsUnderCooldown.Push(newApplication);
+
+            var messageModel = new MessageModel("", discordUser, newApplication);
+
+            _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanName}.");
+
+            bool hasPrivacy = await _notificationService.NotifyUserAsync(messageModel);
+
+            messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian.";
+            if (hasPrivacy)
             {
-                if (model.DiscordUser is IUser discordUser)
-                {
-                    model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message has also been sent to the Guardian."; ;
-
-                    bool userHasPrivacySettingsOn = await _notificationService.NotifyUserAsync(model);
-
-                    if (userHasPrivacySettingsOn)
-                    {
-                        model.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {model.Clan}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
-                    }
-
-                    await _notificationService.NotifyStaffsAsync(model);
-                }
+                messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
             }
-            catch (Exception ex)
+
+            await _notificationService.NotifyStaffsAsync(messageModel);
+        }
+
+        private async Task HandleApplicationUnderCooldownAsync(IUser discordUser)
+        {
+            var existingApplication = _applicationsUnderCooldown.FirstOrDefault(app => app.DiscordUserId == discordUser.Id);
+
+            string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
+
+            var model = new MessageModel(message, discordUser, existingApplication);
+
+            var hasPrivacy = await _notificationService.NotifyUserAsync(model);
+
+            var logMessage = $"Guardian <{discordUser.Id}> attempted to apply to more than one clan, while being on cooldown.";
+
+            if (hasPrivacy)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogWarning($"{logMessage} User was not notified due to privacy settings.");
+                
+                await Task.CompletedTask;
             }
+
+            _logger.LogInformation($"{logMessage} User was notified.");
+            await Task.CompletedTask;
         }
 
         private static bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction appliedBy, IUser userWhoReacted)

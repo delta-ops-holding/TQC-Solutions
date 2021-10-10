@@ -52,7 +52,7 @@ namespace LeadershipMinion
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
-                ExclusiveBulkDelete = false
+                ExclusiveBulkDelete = true
             };
 
             // Get Bot Configuration.

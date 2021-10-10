@@ -12,6 +12,6 @@ namespace LeadershipMinion.Logical.Data.Abstractions
         /// <param name="reactionAdded">A Websocket-based object from Discord.</param>
         /// <param name="userWhoReacted">A generic user, of who reacted to the message.</param>
         /// <returns>A Task representing the process asynchronously.</returns>
-        Task CreateApplicationAsync(SocketReaction reactionAdded, IUser userWhoReacted);
+        Task HandleApplicationAsync(SocketReaction reactionAdded, IUser userWhoReacted);
     }
 }
