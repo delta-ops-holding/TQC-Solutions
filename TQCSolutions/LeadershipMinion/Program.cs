@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using LeadershipMinion.Logical.Models;
 
 namespace LeadershipMinion
 {
@@ -59,12 +60,16 @@ namespace LeadershipMinion
             var botConfiguration = configuration.GetSection(ConstantHelper.BOT_CONFIGURATION_SECTION_NAME).Get<BotConfiguration>();
 
             services.AddSingleton(new DiscordSocketClient(discordSocketConfiguration));
-            services.AddSingleton<IBotConfiguration>(botConfiguration);
-            services.AddTransient<IClanService, ClanService>();
-            services.AddTransient<INotificationService, NotificationService>();
-            services.AddSingleton<IApplicationHandler, ApplicationHandler>();
-            services.AddTransient<IStartupService, StartupService>();
-        }
 
+            services.AddSingleton<IBotConfiguration>(botConfiguration);
+
+            services.AddSingleton<RuntimeHelper<ApplicationModel>>();
+
+            services.AddScoped<IClanService, ClanService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IApplicationHandler, ApplicationHandler>();
+
+            services.AddSingleton<IStartupService, StartupService>();
+        }
     }
 }

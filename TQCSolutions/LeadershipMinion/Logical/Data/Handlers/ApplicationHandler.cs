@@ -19,14 +19,14 @@ namespace LeadershipMinion.Logical.Data.Handlers
         private readonly IClanService _clanService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<ApplicationHandler> _logger;
+        private readonly RuntimeHelper<ApplicationModel> _runtimeHelper;
 
-        private static readonly Stack<ApplicationModel> _applicationsUnderCooldown = new(100);
-
-        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService)
+        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService, RuntimeHelper<ApplicationModel> runtimeHelper)
         {
             _clanService = clanService;
             _logger = logger;
             _notificationService = notificationService;
+            _runtimeHelper = runtimeHelper;
         }
 
         public async Task HandleApplicationAsync(SocketReaction messageReaction, IUser discordUser)
@@ -58,7 +58,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
         {
             var newApplication = new ApplicationModel(discordUser.Id, currentDateTimeOffset, clanName, platform);
 
-            _applicationsUnderCooldown.Push(newApplication);
+            _runtimeHelper.Applications.Push(newApplication);
 
             var messageModel = new MessageModel("", discordUser, newApplication);
 
@@ -77,7 +77,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
 
         private async Task HandleApplicationUnderCooldownAsync(IUser discordUser)
         {
-            var existingApplication = _applicationsUnderCooldown.FirstOrDefault(app => app.DiscordUserId == discordUser.Id);
+            var existingApplication = _runtimeHelper.Applications.FirstOrDefault(app => app.DiscordUserId == discordUser.Id);
 
             string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
 
@@ -98,17 +98,17 @@ namespace LeadershipMinion.Logical.Data.Handlers
             await Task.CompletedTask;
         }
 
-        private static bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction appliedBy, IUser userWhoReacted)
+        private bool ApplicantHasCooldown(IUser userWhoReacted, DateTimeOffset currentDateTimeOffset)
         {
-            return appliedBy.User.IsSpecified && userWhoReacted is not null;
-        }
-
-        private static bool ApplicantHasCooldown(IUser userWhoReacted, DateTimeOffset currentDateTimeOffset)
-        {
-            return _applicationsUnderCooldown.Any(
+            return _runtimeHelper.Applications.Any(
                                 u => u.DiscordUserId == userWhoReacted.Id &&
                                 (currentDateTimeOffset - u.RegistrationDate)
                                 .TotalHours <= ConstantHelper.APPLICATION_COOLDOWN_FROM_HOURS);
+        }
+
+        private bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction appliedBy, IUser userWhoReacted)
+        {
+            return appliedBy.User.IsSpecified && userWhoReacted is not null;
         }
 
         private void CleanApplicationsByInternal()
