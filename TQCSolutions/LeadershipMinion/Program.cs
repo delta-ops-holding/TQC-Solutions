@@ -9,11 +9,10 @@ using LeadershipMinion.Logical.Data.Handlers;
 using LeadershipMinion.Logical.Data.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using LeadershipMinion.Logical.Models;
+using Discord.Rest;
 
 namespace LeadershipMinion
 {
@@ -53,13 +52,15 @@ namespace LeadershipMinion
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
-                ExclusiveBulkDelete = true
+                GatewayIntents = GatewayIntents.All
+                //ExclusiveBulkDelete = true
             };
 
             // Get Bot Configuration.
             var botConfiguration = configuration.GetSection(ConstantHelper.BOT_CONFIGURATION_SECTION_NAME).Get<BotConfiguration>();
 
             services.AddSingleton(new DiscordSocketClient(discordSocketConfiguration));
+            services.AddSingleton<DiscordRestClient>();
 
             services.AddSingleton<IBotConfiguration>(botConfiguration);
 

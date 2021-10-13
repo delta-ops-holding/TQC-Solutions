@@ -48,10 +48,10 @@ namespace LeadershipMinion.Core
         /// <br>ReactionAdded Event Handler for <see cref="DiscordSocketClient"/>.</br>
         /// </summary>
         /// <param name="cacheUserMessage"></param>
-        /// <param name="socketMessageChannel"></param>
+        /// <param name="messageChannel"></param>
         /// <param name="socketReaction"></param>
         /// <returns>A Task representing the asynchronous process.</returns>
-        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, ISocketMessageChannel socketMessageChannel, SocketReaction socketReaction)
+        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheUserMessage, Cacheable<IMessageChannel, ulong> messageChannel, SocketReaction socketReaction)
         {
             _ = Task.Run(async () =>
             {

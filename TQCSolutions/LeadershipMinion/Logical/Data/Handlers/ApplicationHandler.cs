@@ -29,29 +29,27 @@ namespace LeadershipMinion.Logical.Data.Handlers
             _runtimeHelper = runtimeHelper;
         }
 
-        public async Task HandleApplicationAsync(SocketReaction messageReaction, IUser discordUser)
+        public async Task HandleApplicationAsync(SocketReaction socketReaction, IUser discordUser)
         {
-            if (UserIsSpecifiedAndUserWhoReactedIsNotNull(messageReaction, discordUser))
+            if (UserIsSpecifiedAndUserWhoReactedIsNotNull(socketReaction, discordUser))
             {
                 DateTimeOffset currentDateTimeOffset = DateTimeOffset.UtcNow;
 
-                var emote = messageReaction.Emote as Emote;
+                var emote = socketReaction.Emote as Emote;
                 var clanName = _clanService.GetClanNameByEmoteId(emote.Id);
-                var platform = _clanService.GetClanPlatformByChannelId(messageReaction.Channel.Id);
+                var platform = _clanService.GetClanPlatformByChannelId(socketReaction.Channel.Id);
 
                 if (ApplicantHasCooldown(discordUser, currentDateTimeOffset))
                 {
                     await HandleApplicationUnderCooldownAsync(discordUser);
-
-                    await Task.CompletedTask;
+                    return;
                 }
 
                 await CreateApplicationAsync(discordUser, currentDateTimeOffset, clanName, platform);
-
-                await Task.CompletedTask;
+                return;
             }
 
-            _logger.LogWarning($"User {messageReaction.User.Value.Id} was either not specified or the reaction object was null.");
+            _logger.LogError($"Reaction {nameof(socketReaction)} or User {nameof(discordUser)} was either null or not defined.");
         }
 
         private async Task CreateApplicationAsync(IUser discordUser, DateTimeOffset currentDateTimeOffset, Enums.Clan clanName, Enums.ClanPlatform platform)
@@ -106,9 +104,9 @@ namespace LeadershipMinion.Logical.Data.Handlers
                                 .TotalHours <= ConstantHelper.APPLICATION_COOLDOWN_FROM_HOURS);
         }
 
-        private bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction appliedBy, IUser userWhoReacted)
+        private bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction socketReaction, IUser userWhoReacted)
         {
-            return appliedBy.User.IsSpecified && userWhoReacted is not null;
+            return socketReaction.User.IsSpecified && userWhoReacted is not null;
         }
 
         private void CleanApplicationsByInternal()
