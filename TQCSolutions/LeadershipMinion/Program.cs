@@ -64,7 +64,7 @@ namespace LeadershipMinion
 
             services.AddSingleton<IBotConfiguration>(botConfiguration);
 
-            services.AddSingleton<RuntimeHelper<ApplicationModel>>();
+            services.AddSingleton<RuntimeHelper>();
 
             services.AddScoped<IClanService, ClanService>();
             services.AddScoped<INotificationService, NotificationService>();

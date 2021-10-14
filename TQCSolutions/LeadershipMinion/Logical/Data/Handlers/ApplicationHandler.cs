@@ -19,9 +19,9 @@ namespace LeadershipMinion.Logical.Data.Handlers
         private readonly IClanService _clanService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<ApplicationHandler> _logger;
-        private readonly RuntimeHelper<ApplicationModel> _runtimeHelper;
+        private readonly RuntimeHelper _runtimeHelper;
 
-        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService, RuntimeHelper<ApplicationModel> runtimeHelper)
+        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService, RuntimeHelper runtimeHelper)
         {
             _clanService = clanService;
             _logger = logger;
@@ -39,7 +39,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 var clanName = _clanService.GetClanNameByEmoteId(emote.Id);
                 var platform = _clanService.GetClanPlatformByChannelId(socketReaction.Channel.Id);
 
-                if (ApplicantHasCooldown(discordUser, currentDateTimeOffset))
+                if (_runtimeHelper.ApplicantHasCooldown(discordUser.Id, currentDateTimeOffset))
                 {
                     await HandleApplicationUnderCooldownAsync(discordUser);
                     return;
@@ -56,90 +56,60 @@ namespace LeadershipMinion.Logical.Data.Handlers
         {
             var newApplication = new ApplicationModel(discordUser.Id, currentDateTimeOffset, clanName, platform);
 
-            _runtimeHelper.Applications.Push(newApplication);
+            //_runtimeHelper.Applications.Push(newApplication);
+            var applicantApplied = _runtimeHelper.AddClanApplication(newApplication);
 
-            var messageModel = new MessageModel("", discordUser, newApplication);
-
-            _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanName}.");
-
-            bool hasPrivacy = await _notificationService.NotifyUserAsync(messageModel);
-
-            messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian.";
-            if (hasPrivacy)
+            if (applicantApplied)
             {
-                messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                var messageModel = new MessageModel("", discordUser, newApplication);
+
+                _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanName}.");
+                bool hasPrivacy = await _notificationService.NotifyUserAsync(messageModel);
+
+                messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian.";
+                if (hasPrivacy)
+                {
+                    messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                }
+
+                await _notificationService.NotifyStaffsAsync(messageModel);
+                return;
             }
 
-            await _notificationService.NotifyStaffsAsync(messageModel);
+            _logger.LogWarning($"Couldn't create application <{discordUser.Id}>.");
         }
 
         private async Task HandleApplicationUnderCooldownAsync(IUser discordUser)
         {
-            var existingApplication = _runtimeHelper.Applications.FirstOrDefault(app => app.DiscordUserId == discordUser.Id);
+            //var existingApplication = _runtimeHelper.Applications.FirstOrDefault(app => app.DiscordUserId == discordUser.Id);
+            var existingApplication = _runtimeHelper.GetExistingClanApplication(discordUser.Id);
 
-            string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
-
-            var model = new MessageModel(message, discordUser, existingApplication);
-
-            var hasPrivacy = await _notificationService.NotifyUserAsync(model);
-
-            var logMessage = $"Guardian <{discordUser.Id}> attempted to apply to more than one clan, while being on cooldown.";
-
-            if (hasPrivacy)
+            if (existingApplication is not null)
             {
-                _logger.LogWarning($"{logMessage} User was not notified due to privacy settings.");
-                
-                await Task.CompletedTask;
+                string message = $"Guardian. Be patient. You've already applied to join {existingApplication.AppliedToClan}. Please wait for it to proceed.";
+
+                var model = new MessageModel(message, discordUser, existingApplication);
+
+                var hasPrivacy = await _notificationService.NotifyUserAsync(model);
+
+                var logMessage = $"Guardian <{discordUser.Id}> attempted to apply to more than one clan, while being on cooldown.";
+
+                if (hasPrivacy)
+                {
+                    _logger.LogWarning($"{logMessage} User was not notified due to privacy settings.");
+                    return;
+                }
+
+                _logger.LogInformation($"{logMessage} User was notified.");
+                return;
             }
 
-            _logger.LogInformation($"{logMessage} User was notified.");
-            await Task.CompletedTask;
-        }
-
-        private bool ApplicantHasCooldown(IUser userWhoReacted, DateTimeOffset currentDateTimeOffset)
-        {
-            return _runtimeHelper.Applications.Any(
-                                u => u.DiscordUserId == userWhoReacted.Id &&
-                                (currentDateTimeOffset - u.RegistrationDate)
-                                .TotalHours <= ConstantHelper.APPLICATION_COOLDOWN_FROM_HOURS);
+            _logger.LogWarning($"Couldn't retrieve existing application <{discordUser.Id}>, or it simply didn't exist anymore.");
         }
 
         private bool UserIsSpecifiedAndUserWhoReactedIsNotNull(SocketReaction socketReaction, IUser userWhoReacted)
         {
             return socketReaction.User.IsSpecified && userWhoReacted is not null;
-        }
-
-        private void CleanApplicationsByInternal()
-        {
-            //_logger.LogDebug("Cleaning applications..");
-
-            //_ = Task.Run(() =>
-            //{
-            //    while (!_applicationsUnderCooldown.Any())
-            //    {
-            //        _logger.LogDebug($"No applications found.");
-            //        Task.Delay(TimeSpan.FromMinutes(TRY_AGAIN_TIMER));
-            //    }
-
-            //    do
-            //    {
-            //        _logger.LogDebug($"Applications under CD: <{_applicationsUnderCooldown.Count}>.");
-
-            //        for(int i = 0; i < _applicationsUnderCooldown.Count; i++)
-            //        {
-            //            if (_applicationsUnderCooldown[i].RegistrationDate < DateTimeOffset.UtcNow)
-            //            {
-            //                _applicationsUnderCooldown.Remove(_applicationsUnderCooldown[i]);
-            //            }
-            //        }
-
-            //        _logger.LogDebug($"Cleaned Applications under CD: <{_applicationsUnderCooldown.Count}>.");
-
-            //    } while (_applicationsUnderCooldown is not null && _applicationsUnderCooldown.Any());
-
-            //    Task.Delay(TimeSpan.FromMinutes(CLEAN_INTERVAL));
-            //    CleanApplicationsByInternal();
-            //});
         }
     }
 }

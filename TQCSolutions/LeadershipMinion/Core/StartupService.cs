@@ -6,9 +6,7 @@ using LeadershipMinion.Core.Helpers;
 using LeadershipMinion.Logical.Data.Abstractions;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace LeadershipMinion.Core
@@ -89,6 +87,7 @@ namespace LeadershipMinion.Core
                     if (userMessage is not null)
                     {
                         await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                        return;
                     }
                 }
             });
@@ -133,7 +132,6 @@ namespace LeadershipMinion.Core
                 async () =>
                 {
                     // Set Game Status on Ready.
-                    _logger.LogInformation("Setting game as status..");
                     await _discordClient.SetGameAsync(_botStatusVersion, type: ActivityType.Playing);
 
                     // Run Funny Facts to be displayed as status.

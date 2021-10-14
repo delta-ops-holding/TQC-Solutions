@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LeadershipMinion.Core.Helpers
+﻿namespace LeadershipMinion.Core.Helpers
 {
     public static class ConstantHelper
     {
@@ -12,5 +6,6 @@ namespace LeadershipMinion.Core.Helpers
         public const string BOT_CONFIGURATION_SECTION_NAME = "BotConfiguration";
         public const int GAME_ACTIVITY_COOLDOWN_FROM_SECONDS = 30;
         public const int APPLICATION_COOLDOWN_FROM_HOURS = 24;
+        public const int APPLICATION_DICTIONARY_CAPACITY = 100;
     }
 }
