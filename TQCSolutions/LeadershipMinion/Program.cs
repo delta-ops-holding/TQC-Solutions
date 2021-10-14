@@ -52,7 +52,13 @@ namespace LeadershipMinion
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
-                GatewayIntents = GatewayIntents.All
+                //GatewayIntents = GatewayIntents.All
+                GatewayIntents = 
+                    GatewayIntents.DirectMessageReactions | 
+                    GatewayIntents.GuildMessageReactions |
+                    GatewayIntents.GuildPresences | 
+                    GatewayIntents.Guilds | 
+                    GatewayIntents.GuildMembers
                 //ExclusiveBulkDelete = true
             };
 
