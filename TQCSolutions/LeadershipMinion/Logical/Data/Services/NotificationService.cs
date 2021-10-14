@@ -60,10 +60,6 @@ namespace LeadershipMinion.Logical.Data.Services
         {
             try
             {
-                model.Message = $"Hello Guardian. You're successfully signed up for {model.Application.AppliedToClan}. " +
-                    $"Please await patiently for an admin to proceed your request. " +
-                    $"Applying for more clans will not speed up the process.";
-
                 if (model.DiscordUser is not null)
                 {
                     await model.DiscordUser.SendMessageAsync(model.Message);

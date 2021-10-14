@@ -61,7 +61,11 @@ namespace LeadershipMinion.Logical.Data.Handlers
 
             if (applicantApplied)
             {
-                var messageModel = new MessageModel("", discordUser, newApplication);
+                var message = $"Hello Guardian. You're successfully signed up for {clanName}. " +
+                    $"Please await patiently for an admin to proceed your request. " +
+                    $"Applying for more clans will not speed up the process.";
+
+                var messageModel = new MessageModel(message, discordUser, newApplication);
 
                 _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanName}.");
                 bool hasPrivacy = await _notificationService.NotifyUserAsync(messageModel);

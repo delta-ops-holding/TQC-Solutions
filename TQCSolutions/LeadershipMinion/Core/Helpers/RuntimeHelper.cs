@@ -22,11 +22,9 @@ namespace LeadershipMinion.Core.Helpers
         {
             _logger = logger;
 
-            InvokeCleanApplicationDataByInterval(
+            Task.Run(() => InvokeCleanApplicationDataByInterval(
                 TimeSpan.FromHours(1),
-                _tokenSource.Token)
-                .GetAwaiter()
-                .GetResult();
+                _tokenSource.Token));
         }
 
         private readonly Stack<ApplicationModel> Applications = new(100);
