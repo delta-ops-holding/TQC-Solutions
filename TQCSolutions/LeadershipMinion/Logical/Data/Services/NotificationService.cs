@@ -35,6 +35,8 @@ namespace LeadershipMinion.Logical.Data.Services
             {
                 if (model.DiscordUser is not null)
                 {
+                    _logger.LogDebug($"Notifying Staff with clan application for {model.Application.AppliedToClan}.");
+
                     // Get the role to ping.
                     string pingRole = _clanService.GetMentionRoleByClanName(model.Application.AppliedToClan);
 
@@ -48,7 +50,11 @@ namespace LeadershipMinion.Logical.Data.Services
 
                     // Send embedded message to admins.
                     await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: embeddedMessage);
+
+                    return;
                 }
+
+                _logger.LogWarning("Staff were not notified with message, due to user being null.");
             }
             catch (Exception ex)
             {
@@ -62,6 +68,8 @@ namespace LeadershipMinion.Logical.Data.Services
             {
                 if (model.DiscordUser is not null)
                 {
+                    _logger.LogDebug($"Notifying User <{model.DiscordUser.Id}> in DM's");
+
                     await model.DiscordUser.SendMessageAsync(model.Message);
                     return false;
                 }
@@ -69,6 +77,7 @@ namespace LeadershipMinion.Logical.Data.Services
                 var socketUser = _discordClient.GetUser(model.Application.DiscordUserId);
                 if (socketUser is not null)
                 {
+                    _logger.LogDebug($"Notifying user <{socketUser.Id}> in DM's");
                     await socketUser.SendMessageAsync(model.Message);
                     return false;
                 }
@@ -76,6 +85,7 @@ namespace LeadershipMinion.Logical.Data.Services
                 var restUser = await _discordRestClient.GetUserAsync(model.DiscordUser.Id);
                 if (restUser is not null)
                 {
+                    _logger.LogDebug($"Notifying user <{restUser.Id}> in DM's");
                     await restUser.SendMessageAsync(model.Message);
                     return false;
                 }
@@ -99,6 +109,8 @@ namespace LeadershipMinion.Logical.Data.Services
 
         internal Embed CreateEmbed(MessageModel model)
         {
+            _logger.LogDebug($"Creating message embed for <{model.DiscordUser.Id}>.");
+
             // Create new Embed Builder.
             var embedMessage = new EmbedBuilder()
             {

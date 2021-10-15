@@ -11,7 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
-using LeadershipMinion.Logical.Models;
 using Discord.Rest;
 
 namespace LeadershipMinion
@@ -54,10 +53,12 @@ namespace LeadershipMinion
                 AlwaysDownloadUsers = true,
                 //GatewayIntents = GatewayIntents.All
                 GatewayIntents = 
+                    GatewayIntents.GuildMessages |
+                    GatewayIntents.DirectMessages |
                     GatewayIntents.DirectMessageReactions | 
                     GatewayIntents.GuildMessageReactions |
-                    GatewayIntents.GuildPresences | 
                     GatewayIntents.Guilds | 
+                    GatewayIntents.GuildPresences | 
                     GatewayIntents.GuildMembers
                 //ExclusiveBulkDelete = true
             };

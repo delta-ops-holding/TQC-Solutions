@@ -72,7 +72,7 @@ namespace LeadershipMinion.Core
                     if (currentUser.Roles.Any(r => r.Id.Equals(_botConfiguration.StaffRole)))
                     {
                         string message = $"Leadership assigned reaction <{socketReaction.Emote.Name}> to message.";
-                        _logger.LogInformation($"{message}");
+                        _logger.LogDebug($"{message}");
 
                         return;
                     }
@@ -103,7 +103,7 @@ namespace LeadershipMinion.Core
         /// <returns>A Task representing the asynchronous process.</returns>
         private Task GuildAvailable(SocketGuild guild)
         {
-            _logger.LogInformation($"{guild.Name} is now available!");
+            _logger.LogDebug($"{guild.Name} is now available!");
 
             return Task.CompletedTask;
         }
@@ -116,7 +116,7 @@ namespace LeadershipMinion.Core
         /// <returns>A Task representing the asynchronous process.</returns>
         private Task GuildMembersDownloaded(SocketGuild guild)
         {
-            _logger.LogInformation($"Cached Offline Users from {guild.Name}!");
+            _logger.LogDebug($"Cached Offline Users from {guild.Name}!");
 
             return Task.CompletedTask;
         }
@@ -160,7 +160,7 @@ namespace LeadershipMinion.Core
                         switch (logMessage.Exception)
                         {
                             case GatewayReconnectException:
-                                _logger.LogWarning("Discord requested a server reconnect.");
+                                _logger.LogDebug("Discord requested a server reconnect.");
                                 await RestartConnectionAsync();
                                 break;
                             case WebSocketClosedException:
@@ -214,12 +214,12 @@ namespace LeadershipMinion.Core
             _ = Task.Run(
                 async () =>
                 {
-                    _logger.LogInformation("Downloading Guild Members..");
+                    _logger.LogDebug("Downloading Guild Members..");
 
                     await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
                     int count = _discordClient.Guilds.Sum(g => g.Users.Count);
 
-                    _logger.LogInformation($"Finished Download. Cached => {count} users.");
+                    _logger.LogDebug($"Finished Download. Cached => {count} users.");
                 });
 
             return Task.CompletedTask;

@@ -74,11 +74,13 @@ namespace LeadershipMinion.Core.Helpers
 
         private async Task InvokeCleanApplicationDataByInterval(TimeSpan interval, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Started application cleaner..");
+            _logger.LogInformation($"Started application cleaner with interval of {interval.TotalHours} hours.");
             while (true)
             {
                 if (!_clanApplications.IsEmpty)
                 {
+                    _logger.LogDebug($"Cleaning applications; looking at {_clanApplications.Count} registered applications.");
+
                     var todaysDate = DateTimeOffset.UtcNow;
 
                     foreach (var application in _clanApplications)
@@ -103,6 +105,8 @@ namespace LeadershipMinion.Core.Helpers
                             }
                         }
                     }
+
+                    _logger.LogDebug($"Finished cleaning applications; looking at {_clanApplications.Count} registered applications.");
                 }
 
                 Task t = Task.Delay(interval, cancellationToken);
