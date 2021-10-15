@@ -23,12 +23,15 @@ namespace LeadershipMinion.Core.Helpers
             _logger = logger;
 
             Task.Run(() => InvokeCleanApplicationDataByInterval(
-                TimeSpan.FromHours(1),
+                TimeSpan.FromHours(ConstantHelper.CLEAN_APPLICATIONS_INTERVAL),
                 _tokenSource.Token));
         }
 
-        private readonly Stack<ApplicationModel> Applications = new(100);
-
+        /// <summary>
+        /// Add a clan application.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>True if the application was added, otherwise false.</returns>
         public bool AddClanApplication(ApplicationModel model)
         {
             try
@@ -45,6 +48,11 @@ namespace LeadershipMinion.Core.Helpers
             }
         }
 
+        /// <summary>
+        /// Gets an existing clan applications.
+        /// </summary>
+        /// <param name="applicantKey"></param>
+        /// <returns>An existing <see cref="ApplicationModel"/> if it's found, otherwise null.</returns>
         public ApplicationModel GetExistingClanApplication(ulong applicantKey)
         {
             try
@@ -64,12 +72,21 @@ namespace LeadershipMinion.Core.Helpers
             }
         }
 
+        /// <summary>
+        /// Checks whether the given applicant has an application under cooldown.
+        /// </summary>
+        /// <param name="applicantKey"></param>
+        /// <param name="currentDate"></param>
+        /// <returns>True if under cooldown, otherwise false.</returns>
         public bool ApplicantHasCooldown(ulong applicantKey, DateTimeOffset currentDate)
         {
-            return _clanApplications.Any(x =>
-            x.Key == applicantKey &&
-            (currentDate - x.Value.RegistrationDate).TotalHours
-            <= ConstantHelper.APPLICATION_COOLDOWN_FROM_HOURS);
+            var hasCooldown = _clanApplications
+                .Any(x =>
+                    x.Key.Equals(applicantKey) &&
+                    (currentDate - x.Value.RegistrationDate).TotalHours <= ConstantHelper.APPLICATION_COOLDOWN
+                );
+
+            return hasCooldown;
         }
 
         private async Task InvokeCleanApplicationDataByInterval(TimeSpan interval, CancellationToken cancellationToken)

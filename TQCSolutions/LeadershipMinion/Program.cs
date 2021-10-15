@@ -51,7 +51,6 @@ namespace LeadershipMinion
                 LogLevel = LogSeverity.Info,
                 MessageCacheSize = 100,
                 AlwaysDownloadUsers = true,
-                //GatewayIntents = GatewayIntents.All
                 GatewayIntents = 
                     GatewayIntents.GuildMessages |
                     GatewayIntents.DirectMessages |
@@ -60,7 +59,6 @@ namespace LeadershipMinion
                     GatewayIntents.Guilds | 
                     GatewayIntents.GuildPresences | 
                     GatewayIntents.GuildMembers
-                //ExclusiveBulkDelete = true
             };
 
             // Get Bot Configuration.

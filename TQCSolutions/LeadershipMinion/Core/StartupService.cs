@@ -33,10 +33,11 @@ namespace LeadershipMinion.Core
         public async Task InitializeBotAsync()
         {
             _logger.LogInformation("Starting Services...");
-            InitializeEvents();
 
-            await _discordClient.LoginAsync(TokenType.Bot, _botConfiguration.Token);
-            await _discordClient.StartAsync();
+            // Hook events before starting communication.
+            SubscribeToEvents();
+
+            await StartConnectionWithDiscordAsync();
 
             await Task.Delay(-1);
         }
@@ -77,17 +78,21 @@ namespace LeadershipMinion.Core
                         return;
                     }
 
-                    // New Caller
                     await _applicationHandler.HandleApplicationAsync(socketReaction, currentUser);
 
-                    // Cleanup Process.
-                    // Get or download the user cache from the Server.
-                    IUserMessage userMessage = await GetCachedEntityOrDownloadItAsync(cacheUserMessage);
-
-                    if (userMessage is not null)
+                    try
                     {
-                        await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
-                        return;
+                        var userMessage = await cacheUserMessage.GetOrDownloadAsync();
+
+                        if (userMessage is not null)
+                        {
+                            await userMessage.RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                            return;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogError("Error while attempting to remove the reaction after process.");
                     }
                 }
             });
@@ -138,11 +143,16 @@ namespace LeadershipMinion.Core
                     //RunFunFactsRoulette();
 
                     // Download all Guild users on Ready.
-                    await DownloadGuildMembersAsync();
+                    _logger.LogDebug("Downloading Guild Members..");
+
+                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
+                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
+
+                    _logger.LogDebug($"Finished Download. Cached => {count} users.");
                 });
 
             return Task.CompletedTask;
-        }        
+        }
 
         /// <summary>
         /// Log Event Handler for <see cref="DiscordSocketClient"/>.
@@ -155,20 +165,45 @@ namespace LeadershipMinion.Core
             _ = Task.Run(
                 async () =>
                 {
+                    if (logMessage.Message.Contains("Unknown Dispatch"))
+                    {
+                        return;
+                    }
+
                     try
                     {
                         switch (logMessage.Exception)
                         {
-                            case GatewayReconnectException:
-                                _logger.LogDebug("Discord requested a server reconnect.");
+                            case GatewayReconnectException reconnectException:
+                                _logger.LogDebug($"Discord requested a server reconnect; reason: {reconnectException.Message}");
                                 await RestartConnectionAsync();
                                 break;
-                            case WebSocketClosedException:
-                                _logger.LogWarning("Discord closed my connection, attempting to restart system.");
+                            case WebSocketClosedException closedException:
+                                _logger.LogWarning($"Discord closed my connection, attempting to restart system. Reason: {closedException.Reason}");
                                 await RestartConnectionAsync();
                                 break;
                             default:
-                                _logger.LogInformation(logMessage.Message);
+                                switch (logMessage.Severity)
+                                {
+                                    case LogSeverity.Critical:
+                                        _logger.LogCritical(logMessage.Message);
+                                        break;
+                                    case LogSeverity.Error:
+                                        _logger.LogError(logMessage.Message);
+                                        break;
+                                    case LogSeverity.Warning:
+                                        _logger.LogWarning(logMessage.Message);
+                                        break;
+                                    case LogSeverity.Info:
+                                        _logger.LogInformation(logMessage.Message);
+                                        break;
+                                    case LogSeverity.Verbose:
+                                        _logger.LogTrace(logMessage.Message);
+                                        break;
+                                    case LogSeverity.Debug:
+                                        _logger.LogDebug(logMessage.Message);
+                                        break;
+                                }
                                 break;
                         }
                     }
@@ -179,53 +214,24 @@ namespace LeadershipMinion.Core
                 });
 
             return Task.CompletedTask;
-        }                                                                                                                                    
+        }
 
-        internal async Task RestartConnectionAsync()
+        private async Task StartConnectionWithDiscordAsync()
         {
-            _logger.LogInformation("Restarting Services...");
+            await _discordClient.LoginAsync(TokenType.Bot, _botConfiguration.Token);
+            await _discordClient.StartAsync();
+        }
+
+        private async Task RestartConnectionAsync()
+        {
+            _logger.LogInformation("Restarting Connection...");
             await _discordClient.LogoutAsync();
-            DisposeEvents();
             _logger.LogInformation("Logout Successfull.");
 
-            await InitializeBotAsync();
+            await StartConnectionWithDiscordAsync();
         }
 
-        internal async Task<IUserMessage> GetCachedEntityOrDownloadItAsync(Cacheable<IUserMessage, ulong> cacheUserMessage)
-        {
-            try
-            {
-                return await cacheUserMessage.GetOrDownloadAsync();
-            }
-            catch (HttpException httpEx)
-            {
-                _logger.LogError(httpEx, $"Cannot cache message {cacheUserMessage.Id} from a user account.");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"The message is deleted and is not in the cache.");
-                return null;
-            }
-        }
-
-        internal Task DownloadGuildMembersAsync()
-        {
-            _ = Task.Run(
-                async () =>
-                {
-                    _logger.LogDebug("Downloading Guild Members..");
-
-                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
-                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
-
-                    _logger.LogDebug($"Finished Download. Cached => {count} users.");
-                });
-
-            return Task.CompletedTask;
-        }
-
-        internal void RunFunFactsRoulette()
+        private void RunFunFactsRoulette()
         {
             _ = Task.Run(
                 async () =>
@@ -240,32 +246,23 @@ namespace LeadershipMinion.Core
                         var selectedFact = funFacts.ElementAt<string>(rnd.Next(0, funFacts.Count));
                         await _discordClient.SetGameAsync($"{_botStatusVersion} - {selectedFact}", type: ActivityType.Playing);
 
-                        await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN_FROM_SECONDS));
+                        await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN));
                     } while (loopFunFacts);
                 });
         }
 
-        internal void InitializeEvents()
+        private void SubscribeToEvents()
         {
-            // Enable Client Logging.
             _discordClient.Log += ClientLog;
-
-            // Observe available guilds.
             _discordClient.GuildAvailable += GuildAvailable;
-
-            // Observe when offline Guild Members are downloaded.
             _discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
-
-            // Observe whenever a reaction is added to a message.
             _discordClient.ReactionAdded += ReactionAdded;
-
-            // Observe whenever the client is ready.
             _discordClient.Ready += Ready;
 
-            _logger.LogInformation("Events successfully initalized.");
+            _logger.LogInformation("Events successfully subscribed.");
         }
 
-        internal void DisposeEvents()
+        private void UnsubsribeToEvents()
         {
             _discordClient.Log -= ClientLog;
             _discordClient.Ready -= Ready;
@@ -273,7 +270,7 @@ namespace LeadershipMinion.Core
             _discordClient.GuildAvailable -= GuildAvailable;
             _discordClient.ReactionAdded -= ReactionAdded;
 
-            _logger.LogInformation("Events successfully disposed.");
+            _logger.LogInformation("Events successfully unsubscribed.");
         }
     }
 }

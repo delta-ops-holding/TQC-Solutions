@@ -29,6 +29,11 @@ namespace LeadershipMinion.Logical.Data.Services
             _clanService = clanService;
         }
 
+        /// <summary>
+        /// Sends an embedded message to a specific channel.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>A task representing the asynchronous process, representing a notifcation being sent to the staff.</returns>
         public async Task NotifyStaffsAsync(MessageModel model)
         {
             try
@@ -49,7 +54,7 @@ namespace LeadershipMinion.Logical.Data.Services
                     Embed embeddedMessage = CreateEmbed(model);
 
                     // Send embedded message to admins.
-                    await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: embeddedMessage);
+                    var sentMsg = await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: embeddedMessage);
 
                     return;
                 }
@@ -62,6 +67,11 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
+        /// <summary>
+        /// Sends a direct message to a user.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>A task representing the asynchronous process, representing a notifcation being sent to the user.</returns>
         public async Task<bool> NotifyUserAsync(MessageModel model)
         {
             try
@@ -107,7 +117,7 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
-        internal Embed CreateEmbed(MessageModel model)
+        private Embed CreateEmbed(MessageModel model)
         {
             _logger.LogDebug($"Creating message embed for <{model.DiscordUser.Id}>.");
 
