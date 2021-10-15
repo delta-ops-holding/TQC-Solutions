@@ -254,8 +254,8 @@ namespace LeadershipMinion.Core
         private void SubscribeToEvents()
         {
             _discordClient.Log += ClientLog;
-            _discordClient.GuildAvailable += GuildAvailable;
-            _discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
+            //_discordClient.GuildAvailable += GuildAvailable;
+            //_discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
             _discordClient.ReactionAdded += ReactionAdded;
             _discordClient.Ready += Ready;
 
@@ -265,10 +265,10 @@ namespace LeadershipMinion.Core
         private void UnsubsribeToEvents()
         {
             _discordClient.Log -= ClientLog;
-            _discordClient.Ready -= Ready;
-            _discordClient.GuildMembersDownloaded -= GuildMembersDownloaded;
-            _discordClient.GuildAvailable -= GuildAvailable;
+            //_discordClient.GuildMembersDownloaded -= GuildMembersDownloaded;
+            //_discordClient.GuildAvailable -= GuildAvailable;
             _discordClient.ReactionAdded -= ReactionAdded;
+            _discordClient.Ready -= Ready;
 
             _logger.LogInformation("Events successfully unsubscribed.");
         }
