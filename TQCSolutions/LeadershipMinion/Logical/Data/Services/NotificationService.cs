@@ -17,16 +17,18 @@ namespace LeadershipMinion.Logical.Data.Services
         private readonly DiscordSocketClient _discordClient;
         private readonly DiscordRestClient _discordRestClient;
         private readonly ILogger<NotificationService> _logger;
-        private readonly IBotConfiguration _botConfiguration;
+        private readonly IBasicConfiguration _basicConfiguration;
         private readonly IClanService _clanService;
+        private readonly IEmbedService _embedService;
 
-        public NotificationService(DiscordSocketClient discordClient, DiscordRestClient discordRestClient, ILogger<NotificationService> logger, IBotConfiguration botConfiguration, IClanService clanService)
+        public NotificationService(DiscordSocketClient discordClient, DiscordRestClient discordRestClient, ILogger<NotificationService> logger, IBasicConfiguration basicConfiguration, IClanService clanService, IEmbedService embedService)
         {
             _discordClient = discordClient;
             _discordRestClient = discordRestClient;
             _logger = logger;
-            _botConfiguration = botConfiguration;
+            _basicConfiguration = basicConfiguration;
             _clanService = clanService;
+            _embedService = embedService;
         }
 
         /// <summary>
@@ -46,15 +48,13 @@ namespace LeadershipMinion.Logical.Data.Services
                     string pingRole = _clanService.GetMentionRoleByClanName(model.Application.AppliedToClan);
 
                     // Get Channel object by channel id.
-                    IMessageChannel messageChannel = _discordClient.GetChannel(_botConfiguration.StaffChannel) as IMessageChannel;
+                    IMessageChannel messageChannel = _discordClient.GetChannel(_basicConfiguration.StaffChannel) as IMessageChannel;
 
                     // Check if the pinged role is empty.
                     pingRole = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{model.Application.AppliedToClan}>" : pingRole;
 
-                    Embed embeddedMessage = CreateEmbed(model);
-
                     // Send embedded message to admins.
-                    var sentMsg = await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: embeddedMessage);
+                    var sentMsg = await messageChannel.SendMessageAsync(text: $"{pingRole}! Welcome, <@{model.DiscordUser.Id}>", embed: _embedService.BeautifyMessage(model));
 
                     return;
                 }
@@ -115,39 +115,6 @@ namespace LeadershipMinion.Logical.Data.Services
                 _logger.LogError(httpEx, $"Error occurred while notifying user; Code <{httpEx.DiscordCode}>, detailed message: {httpEx.Message} - reason: {httpEx.Reason}");
                 return true;
             }
-        }
-
-        private Embed CreateEmbed(MessageModel model)
-        {
-            _logger.LogDebug($"Creating message embed for <{model.DiscordUser.Id}>.");
-
-            // Create new Embed Builder.
-            var embedMessage = new EmbedBuilder()
-            {
-                Title = "New Clan Application Arrived!",
-                Description = model.Message
-            };
-
-            var clan = model.Application.AppliedToClan;
-
-            // Switch on provided platform identifier.
-            switch (model.Application.ClanAssociatedWithPlatform)
-            {
-                case ClanPlatform.PC:
-                    embedMessage.Color = Color.Red;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
-                    break;
-                case ClanPlatform.PSN:
-                    embedMessage.Color = Color.Blue;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
-                    break;
-                case ClanPlatform.XBOX:
-                    embedMessage.Color = Color.Green;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
-                    break;
-            }
-
-            return embedMessage.Build();
         }
     }
 }

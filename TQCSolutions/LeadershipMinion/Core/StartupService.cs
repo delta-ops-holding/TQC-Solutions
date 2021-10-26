@@ -16,13 +16,15 @@ namespace LeadershipMinion.Core
         private readonly string _botStatusVersion;
 
         private readonly IBotConfiguration _botConfiguration;
+        private readonly IBasicConfiguration _basicConfiguration;
         private readonly ILogger<StartupService> _logger;
         private readonly IApplicationHandler _applicationHandler;
         private readonly DiscordSocketClient _discordClient;
 
-        public StartupService(IBotConfiguration botConfiguration, ILogger<StartupService> logger, DiscordSocketClient discordClient, IApplicationHandler applicationHandler)
+        public StartupService(IBotConfiguration botConfiguration, ILogger<StartupService> logger, DiscordSocketClient discordClient, IApplicationHandler applicationHandler, IBasicConfiguration basicConfiguration)
         {
             _botConfiguration = botConfiguration;
+            _basicConfiguration = basicConfiguration;
             _logger = logger;
             _discordClient = discordClient;
 
@@ -60,17 +62,17 @@ namespace LeadershipMinion.Core
                 }
 
                 // Debug Mode:
-                if (socketReaction.Channel.Id.Equals(_botConfiguration.DebugChannel))
+                if (socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
                 {
                     _logger.LogDebug("Working as intentional.");
                     return;
                 }
 
                 // If the socket reaction, is from any of the filtered channels.
-                if (_botConfiguration.Channels.Contains(socketReaction.Channel.Id))
+                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id))
                 {
                     // If the user has any roles from the filter.
-                    if (currentUser.Roles.Any(r => r.Id.Equals(_botConfiguration.StaffRole)))
+                    if (currentUser.Roles.Any(r => r.Id.Equals(_basicConfiguration.StaffRole)))
                     {
                         string message = $"Leadership assigned reaction <{socketReaction.Emote.Name}> to message.";
                         _logger.LogDebug($"{message}");
@@ -233,22 +235,22 @@ namespace LeadershipMinion.Core
 
         private void RunFunFactsRoulette()
         {
-            _ = Task.Run(
-                async () =>
-                {
-                    _logger.LogInformation("Running Fun Facts Roulette.");
-                    var loopFunFacts = true;
+            //_ = Task.Run(
+            //    async () =>
+            //    {
+            //        _logger.LogInformation("Running Fun Facts Roulette.");
+            //        var loopFunFacts = true;
 
-                    do
-                    {
-                        var funFacts = _botConfiguration.FunFacts;
-                        var rnd = new Random();
-                        var selectedFact = funFacts.ElementAt<string>(rnd.Next(0, funFacts.Count));
-                        await _discordClient.SetGameAsync($"{_botStatusVersion} - {selectedFact}", type: ActivityType.Playing);
+            //        do
+            //        {
+            //            var funFacts = _botConfiguration.FunFacts;
+            //            var rnd = new Random();
+            //            var selectedFact = funFacts.ElementAt<string>(rnd.Next(0, funFacts.Count));
+            //            await _discordClient.SetGameAsync($"{_botStatusVersion} - {selectedFact}", type: ActivityType.Playing);
 
-                        await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN));
-                    } while (loopFunFacts);
-                });
+            //            await Task.Delay(TimeSpan.FromSeconds(ConstantHelper.GAME_ACTIVITY_COOLDOWN));
+            //        } while (loopFunFacts);
+            //    });
         }
 
         private void SubscribeToEvents()
