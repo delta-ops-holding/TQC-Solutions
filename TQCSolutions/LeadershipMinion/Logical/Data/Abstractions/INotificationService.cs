@@ -1,12 +1,10 @@
-﻿using Discord;
-using LeadershipMinion.Logical.Enums;
-using LeadershipMinion.Logical.Models;
+﻿using LeadershipMinion.Logical.Models;
 using System.Threading.Tasks;
 
 namespace LeadershipMinion.Logical.Data.Abstractions
 {
     /// <summary>
-    /// Represents a generic Notification Service, used to notify.
+    /// Represents a generic Notification Service.
     /// </summary>
     public interface INotificationService
     {

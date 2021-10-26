@@ -1,16 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LeadershipMinion.Logical.Enums
+﻿namespace LeadershipMinion.Logical.Enums
 {
+    /// <summary>
+    /// Represents an environment that systems runs in.
+    /// </summary>
+    public enum SystemEnvironment
+    {
+        Debug,
+        Test,
+        Development,
+        Production
+    }
+
+    /// <summary>
+    /// Defines a list of predefined custom discord embed colors.
+    /// </summary>
     public enum CustomDiscordEmbedColor
     {
         Lavender
     }
 
+    /// <summary>
+    /// Represents the current clan.
+    /// </summary>
     public enum Clan
     {
         Undefined,
@@ -19,6 +30,9 @@ namespace LeadershipMinion.Logical.Enums
         EPHEMERΔ, SHΔDOW, QUΔNTUM
     }
 
+    /// <summary>
+    /// Represents a unique platform for a unique object.
+    /// </summary>
     public enum ClanPlatform
     {
         Undefined,

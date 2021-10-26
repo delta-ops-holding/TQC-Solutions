@@ -2,6 +2,9 @@
 
 namespace LeadershipMinion.Logical.Models
 {
+    /// <summary>
+    /// Reprents a model for message objects.
+    /// </summary>
     public class MessageModel
     {
         public MessageModel(string message, IUser discordUser, ApplicationModel application)
@@ -9,6 +12,12 @@ namespace LeadershipMinion.Logical.Models
             Message = message;
             DiscordUser = discordUser;
             Application = application;
+        }
+
+        public MessageModel(string message, IUser discordUser)
+        {
+            Message = message;
+            DiscordUser = discordUser;
         }
 
         public string Message { get; set; }

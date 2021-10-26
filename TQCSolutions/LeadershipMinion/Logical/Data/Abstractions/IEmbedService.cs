@@ -3,6 +3,9 @@ using LeadershipMinion.Logical.Models;
 
 namespace LeadershipMinion.Logical.Data.Abstractions
 {
+    /// <summary>
+    /// Represents a generic Embed Service.
+    /// </summary>
     public interface IEmbedService
     {
         /// <summary>

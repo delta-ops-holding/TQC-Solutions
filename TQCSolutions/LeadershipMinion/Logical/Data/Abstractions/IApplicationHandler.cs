@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace LeadershipMinion.Logical.Data.Abstractions
 {
+    /// <summary>
+    /// Represents a generic Application Handler.
+    /// </summary>
     public interface IApplicationHandler
     {
         /// <summary>
