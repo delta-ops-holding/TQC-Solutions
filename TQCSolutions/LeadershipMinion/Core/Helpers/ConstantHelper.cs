@@ -5,7 +5,7 @@
         public const string AUTHENTICATION_TOKEN = "TOKEN";
         public const string BOT_CONFIGURATION_SECTION = "Bot";
         public const string BASIC_CONFIGURATION_SECTION = "Basic";
-        public const string CLAN_CONFIGURATION_SECTION = "Clans";
+        public const string CLAN_CONFIGURATION_SECTION = "Basic:Clans";
 
         /// <summary>
         /// Represents an integer that defines the cooldown in seconds.

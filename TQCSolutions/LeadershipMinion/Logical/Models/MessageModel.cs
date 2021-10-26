@@ -1,5 +1,4 @@
 ﻿using Discord;
-using LeadershipMinion.Logical.Enums;
 
 namespace LeadershipMinion.Logical.Models
 {
