@@ -15,9 +15,17 @@ namespace LeadershipMinion.Logical.Models
             ClanAssociatedWithPlatform = clanAssociatedWithPlatform;
         }
 
+        public ApplicationModel(ulong discordUserId, DateTimeOffset registrationDate, ClanDataModel clanData)
+        {
+            DiscordUserId = discordUserId;
+            RegistrationDate = registrationDate;
+            ClanData = clanData;
+        }
+
         public ulong DiscordUserId { get; set; }
         public DateTimeOffset RegistrationDate { get; set; }
         public Clan AppliedToClan { get; set; }
         public ClanPlatform ClanAssociatedWithPlatform { get; set; }
+        public ClanDataModel ClanData { get; set; }
     }
 }

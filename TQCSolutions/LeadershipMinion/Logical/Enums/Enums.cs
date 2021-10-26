@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace LeadershipMinion.Logical.Enums
 {
+    public enum CustomDiscordEmbedColor
+    {
+        Lavender
+    }
+
     public enum Clan
     {
         Undefined,
