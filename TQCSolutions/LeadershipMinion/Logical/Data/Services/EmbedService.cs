@@ -17,27 +17,29 @@ namespace LeadershipMinion.Logical.Data.Services
             {
                 Title = "New Clan Application Arrived!",
                 Description = model.Message,
-                Color = GenerateCustomEmbedColor(CustomDiscordEmbedColor.Lavender)
+                Color = GenerateCustomEmbedColor(CustomDiscordEmbedColor.Lavender),
             };
 
-            var clan = model.Application.AppliedToClan;
+            embedMessage.WithFooter(nameof(model.Application.ClanData.Name), model.Application.ClanData.Icon);
+
+            //var clan = model.Application.AppliedToClan;
 
             // Switch on provided platform identifier.
-            switch (model.Application.ClanAssociatedWithPlatform)
-            {
-                case ClanPlatform.PC:
-                    embedMessage.Color = Color.Red;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
-                    break;
-                case ClanPlatform.PSN:
-                    embedMessage.Color = Color.Blue;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
-                    break;
-                case ClanPlatform.XBOX:
-                    embedMessage.Color = Color.Green;
-                    embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
-                    break;
-            }
+            //switch (model.Application.ClanAssociatedWithPlatform)
+            //{
+            //    case ClanPlatform.PC:
+            //        embedMessage.Color = Color.Red;
+            //        embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1").WithCurrentTimestamp();
+            //        break;
+            //    case ClanPlatform.PSN:
+            //        embedMessage.Color = Color.Blue;
+            //        embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1").WithCurrentTimestamp();
+            //        break;
+            //    case ClanPlatform.XBOX:
+            //        embedMessage.Color = Color.Green;
+            //        embedMessage.WithFooter($"{clan}", "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1").WithCurrentTimestamp();
+            //        break;
+            //}
 
             return embedMessage.Build();
         }

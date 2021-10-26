@@ -16,17 +16,19 @@ namespace LeadershipMinion.Logical.Data.Handlers
         private const int CLEAN_INTERVAL = 5;
         private const int TRY_AGAIN_TIMER = 1;
 
+        private readonly IClanConfiguration _clanConfiguration;
         private readonly IClanService _clanService;
         private readonly INotificationService _notificationService;
         private readonly ILogger<ApplicationHandler> _logger;
         private readonly RuntimeHelper _runtimeHelper;
 
-        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService, RuntimeHelper runtimeHelper)
+        public ApplicationHandler(IClanService clanService, ILogger<ApplicationHandler> logger, INotificationService notificationService, RuntimeHelper runtimeHelper, IClanConfiguration clanConfiguration)
         {
             _clanService = clanService;
             _logger = logger;
             _notificationService = notificationService;
             _runtimeHelper = runtimeHelper;
+            _clanConfiguration = clanConfiguration;
         }
 
         public async Task HandleApplicationAsync(SocketReaction socketReaction, IUser discordUser)
@@ -36,8 +38,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 DateTimeOffset currentDateTimeOffset = DateTimeOffset.UtcNow;
 
                 var emote = socketReaction.Emote as Emote;
-                var clanName = _clanService.GetClanNameByEmoteId(emote.Id);
-                var platform = _clanService.GetClanPlatformByChannelId(socketReaction.Channel.Id);
+                var clan = _clanConfiguration.Clans.Find(c => c.EmoteId.Equals(emote.Id));
 
                 if (_runtimeHelper.ApplicantHasCooldown(discordUser.Id, currentDateTimeOffset))
                 {
@@ -45,35 +46,35 @@ namespace LeadershipMinion.Logical.Data.Handlers
                     return;
                 }
 
-                await CreateApplicationAsync(discordUser, currentDateTimeOffset, clanName, platform);
+                await CreateApplicationAsync(discordUser, currentDateTimeOffset, clan);
                 return;
             }
 
             _logger.LogError($"Reaction {nameof(socketReaction)} or User {nameof(discordUser)} was either null or not defined.");
         }
 
-        private async Task CreateApplicationAsync(IUser discordUser, DateTimeOffset currentDateTimeOffset, Enums.Clan clanName, Enums.ClanPlatform platform)
+        private async Task CreateApplicationAsync(IUser discordUser, DateTimeOffset currentDateTimeOffset, ClanDataModel clanData)
         {
-            var newApplication = new ApplicationModel(discordUser.Id, currentDateTimeOffset, clanName, platform);
+            var newApplication = new ApplicationModel(discordUser.Id, currentDateTimeOffset, clanData);
 
             //_runtimeHelper.Applications.Push(newApplication);
             var applicantApplied = _runtimeHelper.AddClanApplication(newApplication);
 
             if (applicantApplied)
             {
-                var message = $"Hello Guardian. You're successfully signed up for {clanName}. " +
+                var message = $"Hello Guardian. You're successfully signed up for {clanData.Name}. " +
                     $"Please await patiently for an admin to proceed your request. " +
                     $"Applying for more clans will not speed up the process.";
 
                 var messageModel = new MessageModel(message, discordUser, newApplication);
 
-                _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanName}.");
+                _logger.LogInformation($"Guardian <{discordUser.Id}> applied to join {clanData.Name}.");
                 bool hasPrivacy = await _notificationService.NotifyUserAsync(messageModel);
 
-                messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message has also been sent to the Guardian.";
+                messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanData.Name}. Confirmation message has also been sent to the Guardian.";
                 if (hasPrivacy)
                 {
-                    messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanName}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
+                    messageModel.Message = $"{discordUser.Username}#{discordUser.Discriminator}, registered themself for joining {clanData.Name}. Confirmation message could not be sent to the Guardian, due to privacy settings.";
                 }
 
                 await _notificationService.NotifyStaffsAsync(messageModel);

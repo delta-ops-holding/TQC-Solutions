@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using LeadershipMinion.Core.Abstractions;
 using LeadershipMinion.Core.Helpers;
 using LeadershipMinion.Logical.Data.Abstractions;
+using LeadershipMinion.Logical.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -27,9 +28,9 @@ namespace LeadershipMinion.Core
             _basicConfiguration = basicConfiguration;
             _logger = logger;
             _discordClient = discordClient;
+            _applicationHandler = applicationHandler;
 
             _botStatusVersion = $"On {_botConfiguration.Version}-{_botConfiguration.Status}";
-            _applicationHandler = applicationHandler;
         }
 
         public async Task InitializeBotAsync()
@@ -62,21 +63,18 @@ namespace LeadershipMinion.Core
                 }
 
                 // Debug Mode:
-                if (socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
-                {
-                    _logger.LogDebug("Working as intentional.");
-                    return;
-                }
+                //if (socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
+                //{
+                //    await (await cacheUserMessage.GetOrDownloadAsync()).RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
+                //    return;
+                //}
 
                 // If the socket reaction, is from any of the filtered channels.
-                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id))
+                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id) || socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
                 {
                     // If the user has any roles from the filter.
                     if (currentUser.Roles.Any(r => r.Id.Equals(_basicConfiguration.StaffRole)))
                     {
-                        string message = $"Leadership assigned reaction <{socketReaction.Emote.Name}> to message.";
-                        _logger.LogDebug($"{message}");
-
                         return;
                     }
 
@@ -145,12 +143,12 @@ namespace LeadershipMinion.Core
                     //RunFunFactsRoulette();
 
                     // Download all Guild users on Ready.
-                    _logger.LogDebug("Downloading Guild Members..");
+                    //_logger.LogDebug("Downloading Guild Members..");
 
                     await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
                     int count = _discordClient.Guilds.Sum(g => g.Users.Count);
 
-                    _logger.LogDebug($"Finished Download. Cached => {count} users.");
+                    //_logger.LogDebug($"Finished Download. Cached => {count} users.");
                 });
 
             return Task.CompletedTask;
@@ -167,7 +165,7 @@ namespace LeadershipMinion.Core
             _ = Task.Run(
                 async () =>
                 {
-                    if (logMessage.Message.Contains("Unknown Dispatch"))
+                    if (logMessage.Message.Contains("Unknown Dispatch") ||logMessage.Message.Contains("Unknown Channel"))
                     {
                         return;
                     }
@@ -177,11 +175,11 @@ namespace LeadershipMinion.Core
                         switch (logMessage.Exception)
                         {
                             case GatewayReconnectException reconnectException:
-                                _logger.LogDebug($"Discord requested a server reconnect; reason: {reconnectException.Message}");
+                                _logger.LogInformation($"Discord requested a server reconnect; reason: {reconnectException.Message}");
                                 await RestartConnectionAsync();
                                 break;
                             case WebSocketClosedException closedException:
-                                _logger.LogWarning($"Discord closed my connection, attempting to restart system. Reason: {closedException.Reason}");
+                                _logger.LogInformation($"Discord closed my connection, attempting to restart system. Reason: {closedException.Reason}");
                                 await RestartConnectionAsync();
                                 break;
                             default:

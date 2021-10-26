@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Discord.Rest;
+using LeadershipMinion.Logical.Models;
+using System.Collections.Generic;
 
 namespace LeadershipMinion
 {
@@ -41,6 +43,7 @@ namespace LeadershipMinion
             configuration
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.{envName ?? "Production"}.json", optional: true)
+                .AddJsonFile("clandata.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)

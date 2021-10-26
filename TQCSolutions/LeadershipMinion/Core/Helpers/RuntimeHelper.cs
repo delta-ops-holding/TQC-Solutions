@@ -22,9 +22,9 @@ namespace LeadershipMinion.Core.Helpers
         {
             _logger = logger;
 
-            Task.Run(() => InvokeCleanApplicationDataByInterval(
-                TimeSpan.FromHours(ConstantHelper.CLEAN_APPLICATIONS_INTERVAL),
-                _tokenSource.Token));
+            //Task.Run(() => InvokeCleanApplicationDataByInterval(
+            //    TimeSpan.FromHours(ConstantHelper.CLEAN_APPLICATIONS_INTERVAL),
+            //    _tokenSource.Token));
         }
 
         /// <summary>
