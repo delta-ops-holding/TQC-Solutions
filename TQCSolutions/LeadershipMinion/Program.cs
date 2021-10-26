@@ -62,15 +62,19 @@ namespace LeadershipMinion
             };
 
             // Get Bot Configuration.
-            var botConfiguration = configuration.GetSection(ConstantHelper.BOT_CONFIGURATION_SECTION_NAME).Get<BotConfiguration>();
+            var botConfiguration = configuration.GetSection(ConstantHelper.BOT_CONFIGURATION_SECTION).Get<BotConfiguration>();
+            var basicConfiguration = configuration.GetSection(ConstantHelper.BASIC_CONFIGURATION_SECTION).Get<BasicConfiguration>();
+            var clanConfiguration = configuration.GetSection(ConstantHelper.CLAN_CONFIGURATION_SECTION).Get<ClanConfiguration>();
 
             services.AddSingleton(new DiscordSocketClient(discordSocketConfiguration));
             services.AddSingleton<DiscordRestClient>();
 
             services.AddSingleton<IBotConfiguration>(botConfiguration);
+            services.AddSingleton<IBasicConfiguration>(basicConfiguration);
+            services.AddSingleton<IClanConfiguration>(clanConfiguration);
 
             services.AddSingleton<RuntimeHelper>();
-
+            services.AddScoped<IEmbedService, EmbedService>();
             services.AddScoped<IClanService, ClanService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IApplicationHandler, ApplicationHandler>();
