@@ -2,9 +2,8 @@
 using Discord.Net;
 using Discord.WebSocket;
 using LeadershipMinion.Core.Abstractions;
-using LeadershipMinion.Core.Helpers;
 using LeadershipMinion.Logical.Data.Abstractions;
-using LeadershipMinion.Logical.Models;
+using LeadershipMinion.Logical.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -36,13 +35,28 @@ namespace LeadershipMinion.Core
         public async Task InitializeBotAsync()
         {
             _logger.LogInformation("Starting Services...");
-
-            // Hook events before starting communication.
             SubscribeToEvents();
-
             await StartConnectionWithDiscordAsync();
 
             await Task.Delay(-1);
+        }
+
+        /// <summary>
+        /// Fired when guild data has finished downloading.
+        /// <br>Ready Event Handler for <see cref="DiscordSocketClient"/>.</br>
+        /// </summary>
+        /// <returns>A Task representing the asynchronous process.</returns>
+        private Task Ready()
+        {
+            _ = Task.Run(
+                async () =>
+                {
+                    await _discordClient.SetGameAsync(_botStatusVersion, type: ActivityType.Playing);
+
+                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
+                });
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -62,17 +76,8 @@ namespace LeadershipMinion.Core
                     currentUser = _discordClient.GetUser(socketReaction.UserId) as SocketGuildUser;
                 }
 
-                // Debug Mode:
-                //if (socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
-                //{
-                //    await (await cacheUserMessage.GetOrDownloadAsync()).RemoveReactionAsync(socketReaction.Emote, socketReaction.UserId);
-                //    return;
-                //}
-
-                // If the socket reaction, is from any of the filtered channels.
-                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id) || socketReaction.Channel.Id.Equals(_basicConfiguration.DebugChannel))
+                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id) || _basicConfiguration.Environment == SystemEnvironment.Debug)
                 {
-                    // If the user has any roles from the filter.
                     if (currentUser.Roles.Any(r => r.Id.Equals(_basicConfiguration.StaffRole)))
                     {
                         return;
@@ -96,60 +101,6 @@ namespace LeadershipMinion.Core
                     }
                 }
             });
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Fired when a guild becomes available.
-        /// <br>GuildAvailable Event Handler for <see cref="DiscordSocketClient"/>.</br>
-        /// </summary>
-        /// <param name="guild"></param>
-        /// <returns>A Task representing the asynchronous process.</returns>
-        private Task GuildAvailable(SocketGuild guild)
-        {
-            _logger.LogDebug($"{guild.Name} is now available!");
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Fired when offline guild members are downloaded.
-        /// <br>GuildMembersDownloaded Event Handler for <see cref="DiscordSocketClient"/>.</br>
-        /// </summary>
-        /// <param name="guild"></param>
-        /// <returns>A Task representing the asynchronous process.</returns>
-        private Task GuildMembersDownloaded(SocketGuild guild)
-        {
-            _logger.LogDebug($"Cached Offline Users from {guild.Name}!");
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Fired when guild data has finished downloading.
-        /// <br>Ready Event Handler for <see cref="DiscordSocketClient"/>.</br>
-        /// </summary>
-        /// <returns>A Task representing the asynchronous process.</returns>
-        private Task Ready()
-        {
-            _ = Task.Run(
-                async () =>
-                {
-                    // Set Game Status on Ready.
-                    await _discordClient.SetGameAsync(_botStatusVersion, type: ActivityType.Playing);
-
-                    // Run Funny Facts to be displayed as status.
-                    //RunFunFactsRoulette();
-
-                    // Download all Guild users on Ready.
-                    //_logger.LogDebug("Downloading Guild Members..");
-
-                    await Task.WhenAll(_discordClient.Guilds.Select(g => g.DownloadUsersAsync()));
-                    int count = _discordClient.Guilds.Sum(g => g.Users.Count);
-
-                    //_logger.LogDebug($"Finished Download. Cached => {count} users.");
-                });
 
             return Task.CompletedTask;
         }
@@ -254,23 +205,10 @@ namespace LeadershipMinion.Core
         private void SubscribeToEvents()
         {
             _discordClient.Log += ClientLog;
-            //_discordClient.GuildAvailable += GuildAvailable;
-            //_discordClient.GuildMembersDownloaded += GuildMembersDownloaded;
             _discordClient.ReactionAdded += ReactionAdded;
             _discordClient.Ready += Ready;
 
             _logger.LogInformation("Events successfully subscribed.");
-        }
-
-        private void UnsubsribeToEvents()
-        {
-            _discordClient.Log -= ClientLog;
-            //_discordClient.GuildMembersDownloaded -= GuildMembersDownloaded;
-            //_discordClient.GuildAvailable -= GuildAvailable;
-            _discordClient.ReactionAdded -= ReactionAdded;
-            _discordClient.Ready -= Ready;
-
-            _logger.LogInformation("Events successfully unsubscribed.");
         }
     }
 }

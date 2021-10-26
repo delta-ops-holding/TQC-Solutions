@@ -12,48 +12,47 @@ using System.Threading.Tasks;
 
 namespace LeadershipMinion.Logical.Data.Services
 {
+    /// <summary>
+    /// A class that notifies different types of clients.
+    /// </summary>
     public class NotificationService : INotificationService
     {
         private readonly DiscordSocketClient _discordClient;
         private readonly DiscordRestClient _discordRestClient;
         private readonly ILogger<NotificationService> _logger;
         private readonly IBasicConfiguration _basicConfiguration;
-        private readonly IClanService _clanService;
         private readonly IEmbedService _embedService;
 
-        public NotificationService(DiscordSocketClient discordClient, DiscordRestClient discordRestClient, ILogger<NotificationService> logger, IBasicConfiguration basicConfiguration, IClanService clanService, IEmbedService embedService)
+        public NotificationService(DiscordSocketClient discordClient, DiscordRestClient discordRestClient, ILogger<NotificationService> logger, IBasicConfiguration basicConfiguration, IEmbedService embedService)
         {
             _discordClient = discordClient;
             _discordRestClient = discordRestClient;
             _logger = logger;
             _basicConfiguration = basicConfiguration;
-            _clanService = clanService;
             _embedService = embedService;
         }
 
-        /// <summary>
-        /// Sends an embedded message to a specific channel.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns>A task representing the asynchronous process, representing a notifcation being sent to the staff.</returns>
         public async Task NotifyStaffsAsync(MessageModel model)
         {
             try
             {
                 if (model.DiscordUser is not null)
                 {
-                    // Get the role to ping.
-                    //string pingRole = _clanService.GetMentionRoleByClanName(model.Application.AppliedToClan);
+                    IMessageChannel channel = (_basicConfiguration.Environment == SystemEnvironment.Debug)
+                        ? _discordClient.GetChannel(_basicConfiguration.DebugChannel) as IMessageChannel
+                        : _discordClient.GetChannel(_basicConfiguration.StaffChannel) as IMessageChannel;
 
-                    // Get Channel object by channel id.
-                    IMessageChannel messageChannel = _discordClient.GetChannel(_basicConfiguration.StaffChannel) as IMessageChannel;
-
-                    // Check if the pinged role is empty.
                     string pingRole = $"<@&{model.Application.ClanData.MentionRoleId}>";
                     string ping = string.IsNullOrEmpty(pingRole) ? $"Could not find Role for <{model.Application.ClanData.Name}>" : pingRole;
 
-                    // Send embedded message to admins.
-                    var sentMsg = await messageChannel.SendMessageAsync(text: $"{ping}! Welcome, <@{model.DiscordUser.Id}>", embed: _embedService.BeautifyMessage(model));
+                    string msg = $"{ping}! Welcome, <@{model.DiscordUser.Id}>";
+
+                    if (_basicConfiguration.Environment == SystemEnvironment.Debug)
+                    {
+                        msg = $"This is a demo, but Hello, <@{model.DiscordUser.Id}>";
+                    }
+
+                    var sentMsg = await channel.SendMessageAsync(text: msg, embed: _embedService.BeautifyMessage(model));
 
                     return;
                 }
@@ -66,11 +65,6 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
-        /// <summary>
-        /// Sends a direct message to a user.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns>A task representing the asynchronous process, representing a notifcation being sent to the user.</returns>
         public async Task<bool> NotifyUserAsync(MessageModel model)
         {
             try

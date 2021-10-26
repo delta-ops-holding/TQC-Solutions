@@ -1,4 +1,5 @@
 ﻿using LeadershipMinion.Core.Abstractions;
+using LeadershipMinion.Logical.Enums;
 using System.Collections.Generic;
 
 namespace LeadershipMinion.Core.Configurations
@@ -10,5 +11,6 @@ namespace LeadershipMinion.Core.Configurations
         public ulong DebugChannel { get; set; }
         public List<ulong> ApplicationChannels { get; set; }
         public List<string> FunFacts { get; set; }
+        public SystemEnvironment Environment { get; set; }
     }
 }

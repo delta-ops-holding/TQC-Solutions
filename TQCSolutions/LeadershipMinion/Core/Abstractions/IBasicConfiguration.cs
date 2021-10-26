@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using LeadershipMinion.Logical.Enums;
+using System.Collections.Generic;
 
 namespace LeadershipMinion.Core.Abstractions
 {
     public interface IBasicConfiguration
     {
-        List<ulong> ApplicationChannels { get; set; }
-        ulong DebugChannel { get; set; }
-        List<string> FunFacts { get; set; }
-        ulong StaffChannel { get; set; }
-        ulong StaffRole { get; set; }
+        List<ulong> ApplicationChannels { get; }
+        ulong DebugChannel { get; }
+        List<string> FunFacts { get; }
+        ulong StaffChannel { get; }
+        ulong StaffRole { get; }
+        public SystemEnvironment Environment { get; }
     }
 }

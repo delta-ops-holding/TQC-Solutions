@@ -12,8 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Discord.Rest;
-using LeadershipMinion.Logical.Models;
-using System.Collections.Generic;
 
 namespace LeadershipMinion
 {
@@ -78,7 +76,6 @@ namespace LeadershipMinion
 
             services.AddSingleton<RuntimeHelper>();
             services.AddScoped<IEmbedService, EmbedService>();
-            services.AddScoped<IClanService, ClanService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IApplicationHandler, ApplicationHandler>();
 

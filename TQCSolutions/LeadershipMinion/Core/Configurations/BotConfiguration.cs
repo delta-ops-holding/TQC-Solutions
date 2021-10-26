@@ -1,6 +1,7 @@
 ﻿using LeadershipMinion.Core.Abstractions;
 using LeadershipMinion.Core.Helpers;
 using System;
+
 namespace LeadershipMinion.Core.Configurations
 {
     public class BotConfiguration : IBotConfiguration

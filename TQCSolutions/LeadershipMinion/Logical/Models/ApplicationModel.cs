@@ -3,17 +3,11 @@ using System;
 
 namespace LeadershipMinion.Logical.Models
 {
+    /// <summary>
+    /// Represents a model for applications.
+    /// </summary>
     public class ApplicationModel
     {
-        [Obsolete]
-        public ApplicationModel(ulong discordUserId, DateTimeOffset registrationDate, Clan appliedToClan, ClanPlatform clanAssociatedWithPlatform)
-        {
-            DiscordUserId = discordUserId;
-            RegistrationDate = registrationDate;
-            AppliedToClan = appliedToClan;
-            ClanAssociatedWithPlatform = clanAssociatedWithPlatform;
-        }
-
         public ApplicationModel(ulong discordUserId, DateTimeOffset registrationDate, ClanDataModel clanData)
         {
             DiscordUserId = discordUserId;
@@ -24,10 +18,5 @@ namespace LeadershipMinion.Logical.Models
         public ulong DiscordUserId { get; set; }
         public DateTimeOffset RegistrationDate { get; set; }
         public ClanDataModel ClanData { get; set; }
-
-        [Obsolete]
-        public Clan AppliedToClan { get; set; }
-        [Obsolete]
-        public ClanPlatform ClanAssociatedWithPlatform { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace LeadershipMinion.Core.Helpers
     public class RuntimeHelper
     {
         private readonly ConcurrentDictionary<ulong, ApplicationModel> _clanApplications = new();
-        private readonly CancellationTokenSource _tokenSource = new();
+        //private readonly CancellationTokenSource _tokenSource = new();
         private readonly ILogger<RuntimeHelper> _logger;
 
         public RuntimeHelper(ILogger<RuntimeHelper> logger)
