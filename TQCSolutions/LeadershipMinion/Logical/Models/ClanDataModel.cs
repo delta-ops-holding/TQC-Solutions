@@ -7,6 +7,7 @@
         public ulong MentionRoleId { get; set; }
         public string Name { get; set; }
         public string Platform { get; set; }
-        public string IconURL { get; set; }
+        public string Icon { get; set; }
+        public bool Disabled { get; set; }
     }
 }
