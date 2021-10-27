@@ -26,7 +26,7 @@ namespace LeadershipMinion
             await startupService.InitializeBotAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((hostingContext, configuration) =>
                 {
@@ -37,14 +37,14 @@ namespace LeadershipMinion
                     ConfigureServices(service, context.Configuration);
                 });
 
-        public static void BuildConfiguration(string envName, IConfigurationBuilder configuration) =>
+        private static void BuildConfiguration(string envName, IConfigurationBuilder configuration) =>
             configuration
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.{envName ?? "Production"}.json", optional: true)
                 .AddJsonFile("clandata.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
-        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             // Create a configuration for the Discord Bot.
             var discordSocketConfiguration = new DiscordSocketConfig

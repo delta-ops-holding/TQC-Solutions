@@ -1,5 +1,4 @@
-﻿using LeadershipMinion.Logical.Enums;
-using System;
+﻿using System;
 
 namespace LeadershipMinion.Logical.Models
 {
