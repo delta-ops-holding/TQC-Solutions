@@ -6,6 +6,7 @@ using LeadershipMinion.Logical.Data.Abstractions;
 using LeadershipMinion.Logical.Enums;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -76,9 +77,9 @@ namespace LeadershipMinion.Core
                     currentUser = _discordClient.GetUser(socketReaction.UserId) as SocketGuildUser;
                 }
 
-                if (_basicConfiguration.ApplicationChannels.Contains(socketReaction.Channel.Id) || _basicConfiguration.Environment == SystemEnvironment.Debug)
+                if (ContainsFilteredChannel(socketReaction.Channel.Id) || IsDebugEnvironment())
                 {
-                    if (currentUser.Roles.Any(r => r.Id.Equals(_basicConfiguration.StaffRole)))
+                    if (UserHasFilteredRole(currentUser.Roles) || currentUser.IsBot)
                     {
                         return;
                     }
@@ -116,7 +117,7 @@ namespace LeadershipMinion.Core
             _ = Task.Run(
                 async () =>
                 {
-                    if (logMessage.Message.Contains("Unknown Dispatch") ||logMessage.Message.Contains("Unknown Channel"))
+                    if (ContainsFilteredMessages(logMessage.Message, "Unknown Dispatch", "Unknown Channel"))
                     {
                         return;
                     }
@@ -180,6 +181,39 @@ namespace LeadershipMinion.Core
             _logger.LogInformation("Logout Successfull.");
 
             await StartConnectionWithDiscordAsync();
+        }
+
+        private bool ContainsFilteredMessages(string message, params string[] filters)
+        {
+            if (filters.Length is 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < filters.Length; i++)
+            {
+                if (message.Contains(filters[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool ContainsFilteredChannel(ulong channelId)
+        {
+            return _basicConfiguration.ApplicationChannels.Contains(channelId);
+        }
+
+        private bool UserHasFilteredRole(IReadOnlyCollection<SocketRole> userRoles)
+        {
+            return userRoles.Any(r => r.Id.Equals(_basicConfiguration.StaffRole));
+        }
+
+        private bool IsDebugEnvironment()
+        {
+            return _basicConfiguration.Environment == SystemEnvironment.Debug;
         }
 
         private void RunFunFactsRoulette()
