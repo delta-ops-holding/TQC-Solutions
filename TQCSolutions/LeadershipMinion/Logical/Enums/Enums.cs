@@ -38,6 +38,7 @@
         Undefined,
         PC,
         PSN,
-        XBOX
+        XBOX,
+        CROSS
     }
 }

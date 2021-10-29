@@ -46,7 +46,8 @@ namespace LeadershipMinion.Logical.Data.Services
             ClanPlatform.PC => "https://cdn.discordapp.com/emojis/641432631715561473.png?v=1",
             ClanPlatform.PSN => "https://cdn.discordapp.com/emojis/551501319177895958.png?v=1",
             ClanPlatform.XBOX => "https://cdn.discordapp.com/emojis/551501460202979328.png?v=1",
-            _ => throw new ArgumentOutOfRangeException(nameof(platform), platform, null)
+            ClanPlatform.CROSS => "https://cdn.discordapp.com/emojis/616051721008971786.png?size=96",
+            _ => "https://cdn.discordapp.com/emojis/903676869973516308.png?size=96"
         };
 
         private static string GetClanNameAsReadable(Clan clan) => clan switch
