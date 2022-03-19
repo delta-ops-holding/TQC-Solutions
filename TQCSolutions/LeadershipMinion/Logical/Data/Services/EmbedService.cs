@@ -27,7 +27,7 @@ namespace LeadershipMinion.Logical.Data.Services
                 },
                 Footer = new EmbedFooterBuilder()
                 {
-                    Text = GetClanNameAsReadable(model.Application.ClanData.Name),
+                    Text = model.Application.ClanData.Name,
                     IconUrl = GetThumbnailByPlatform(model.Application.ClanData.Platform)
                 }
             };
