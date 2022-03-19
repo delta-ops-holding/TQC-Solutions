@@ -16,6 +16,6 @@ namespace LeadershipMinion.Core.Configurations
         public string CommandPrefix { get; set; }
         public string Version { get; set; }
         public string Status { get; set; }
-        public string Token { get { return _token; } }
+        public string Token { get; set; }
     }
 }
