@@ -94,7 +94,7 @@ namespace LeadershipMinion.Logical.Data.Services
             catch (HttpException httpEx)
             {
                 // Check for Privacy Settings Discord Code.
-                if (httpEx.DiscordCode == 50007)
+                if (httpEx.DiscordCode == DiscordErrorCode.CannotSendMessageToUser)
                 {
                     return true;
                 }
