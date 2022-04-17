@@ -37,12 +37,14 @@ namespace LeadershipMinion.Core.Helpers
             {
                 return _clanApplications.TryAdd(model.DiscordUserId, model);
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException e)
             {
+                _logger.LogError(e, $"Failed to add App to list, key is null\n{model}");
                 return false;
             }
-            catch (OverflowException)
+            catch (OverflowException e)
             {
+                _logger.LogError(e, "Failed to add App to list, _clanApplications triggered OverflowException");
                 return false;
             }
         }
@@ -86,6 +88,19 @@ namespace LeadershipMinion.Core.Helpers
                 );
 
             return hasCooldown;
+        }
+
+
+        public bool RemoveApplication(ulong applicantKey)
+        {
+            var removed = _clanApplications.TryRemove(applicantKey, out var app);
+
+            if (removed) 
+            {
+                _logger.LogDebug($"Removed {applicantKey} from  _clanApplications");
+            }
+
+            return removed;
         }
 
         private async Task InvokeCleanApplicationDataByInterval(TimeSpan interval, CancellationToken cancellationToken)

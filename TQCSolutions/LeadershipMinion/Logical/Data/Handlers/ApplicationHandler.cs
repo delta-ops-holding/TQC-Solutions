@@ -83,6 +83,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                 }
 
                 await _notificationService.NotifyStaffsAsync(messageModel);
+                _runtimeHelper.RemoveApplication(newApplication.DiscordUserId);
                 return;
             }
 
