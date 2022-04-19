@@ -53,6 +53,7 @@ namespace LeadershipMinion.Logical.Data.Handlers
                     return;
                 }
 
+                _runtimeHelper.RemoveApplication(discordUser.Id);
                 await CreateApplicationAsync(discordUser, currentDateTimeOffset, clan);
                 return;
             }

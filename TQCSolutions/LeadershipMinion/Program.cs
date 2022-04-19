@@ -10,6 +10,7 @@ using LeadershipMinion.Logical.Data.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Discord.Rest;
 
@@ -35,14 +36,20 @@ namespace LeadershipMinion
                 .ConfigureServices((context, service) =>
                 {
                     ConfigureServices(service, context.Configuration);
+                })
+                .ConfigureLogging(logging => {
+                    logging
+                    .AddConsole()
+                    // .AddJsonConsole()
+                    .SetMinimumLevel(LogLevel.Trace);
                 });
-
         private static void BuildConfiguration(string envName, IConfigurationBuilder configuration) =>
             configuration
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.{envName ?? "Production"}.json", optional: true)
                 .AddJsonFile("clandata.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables();
+                .AddEnvironmentVariables()
+                .Build();
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
