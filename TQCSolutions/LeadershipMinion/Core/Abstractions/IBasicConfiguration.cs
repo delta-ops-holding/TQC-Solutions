@@ -9,6 +9,7 @@ namespace LeadershipMinion.Core.Abstractions
         ulong DebugChannel { get; }
         List<string> FunFacts { get; }
         ulong StaffChannel { get; }
+        ulong CalBotId { get; }
         ulong StaffRole { get; }
         public SystemEnvironment Environment { get; }
     }

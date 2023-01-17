@@ -12,5 +12,6 @@ namespace LeadershipMinion.Core.Configurations
         public List<ulong> ApplicationChannels { get; set; }
         public List<string> FunFacts { get; set; }
         public SystemEnvironment Environment { get; set; }
+        public ulong CalBotId { get; set; }
     }
 }
