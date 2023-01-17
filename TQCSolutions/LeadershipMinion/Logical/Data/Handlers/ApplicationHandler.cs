@@ -26,6 +26,10 @@ namespace LeadershipMinion.Logical.Data.Handlers
             _runtimeHelper = runtimeHelper;
             _clanConfiguration = clanConfiguration;
         }
+        public async Task HandleCalBotMsgAsync(SocketMessage message, string PingStr)
+        {
+            await _notificationService.CalBotGhostPingAsync(message, PingStr);
+        }
 
         public async Task HandleApplicationAsync(SocketReaction socketReaction, IUser discordUser)
         {

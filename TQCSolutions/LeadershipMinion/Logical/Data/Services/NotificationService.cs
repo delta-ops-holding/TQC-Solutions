@@ -65,6 +65,20 @@ namespace LeadershipMinion.Logical.Data.Services
             }
         }
 
+        public async Task CalBotGhostPingAsync(SocketMessage message, string PingID)
+        {
+            try
+            {
+                var sentMsg = await message.Channel.SendMessageAsync(text: PingID);
+                await sentMsg.DeleteAsync();
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+        }
+
         public async Task<bool> NotifyUserAsync(MessageModel model)
         {
             try

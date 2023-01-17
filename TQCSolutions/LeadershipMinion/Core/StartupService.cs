@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LeadershipMinion.Core
@@ -60,6 +61,23 @@ namespace LeadershipMinion.Core
             return Task.CompletedTask;
         }
 
+        
+        private Task MessageReceived(SocketMessage message)
+        {
+            _ = Task.Run(async () =>
+            {
+                if (message.Author.Id == _basicConfiguration.CalBotId)
+                {
+                    string PingRegexPattern = @"\b<@\d+>\b";
+                    Match m = Regex.Match(message.Embeds.First().Description, PingRegexPattern);
+                    if (m.Success)
+                    {
+                        await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
+                    }
+                }
+            });
+            return Task.CompletedTask;
+        }
         /// <summary>
         /// Fired when a reaction is added to a message.
         /// <br>ReactionAdded Event Handler for <see cref="DiscordSocketClient"/>.</br>
@@ -240,6 +258,7 @@ namespace LeadershipMinion.Core
         {
             _discordClient.Log += ClientLog;
             _discordClient.ReactionAdded += ReactionAdded;
+            _discordClient.MessageReceived += MessageReceived;
             _discordClient.Ready += Ready;
 
             _logger.LogInformation("Events successfully subscribed.");

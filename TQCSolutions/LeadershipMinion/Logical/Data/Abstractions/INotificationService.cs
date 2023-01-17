@@ -1,5 +1,6 @@
 ﻿using LeadershipMinion.Logical.Models;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 
 namespace LeadershipMinion.Logical.Data.Abstractions
 {
@@ -21,5 +22,6 @@ namespace LeadershipMinion.Logical.Data.Abstractions
         /// <param name="model"></param>
         /// <returns>True if user has privacy settings on, otherwise false.</returns>
         Task<bool> NotifyUserAsync(MessageModel model);
+        Task CalBotGhostPingAsync(SocketMessage message, string PingStr);
     }
 }
