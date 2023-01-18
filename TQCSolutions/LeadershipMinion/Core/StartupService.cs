@@ -70,10 +70,9 @@ namespace LeadershipMinion.Core
                 {
                     string PingRegexPattern = @"<@\d+>";
                     Match m = Regex.Match(message.Embeds.First().Description, PingRegexPattern);
-                    await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
                     if (m.Success)
                     {
-                        /// await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
+                        await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
                     }
                 }
             });
