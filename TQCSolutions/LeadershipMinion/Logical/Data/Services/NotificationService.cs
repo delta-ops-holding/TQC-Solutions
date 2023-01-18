@@ -70,7 +70,7 @@ namespace LeadershipMinion.Logical.Data.Services
             try
             {
                 var sentMsg = await message.Channel.SendMessageAsync(text: PingID);
-                await sentMsg.DeleteAsync();
+                //await sentMsg.DeleteAsync();
                 return;
             }
             catch (Exception ex)
