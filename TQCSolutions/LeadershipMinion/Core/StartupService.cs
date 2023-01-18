@@ -68,7 +68,7 @@ namespace LeadershipMinion.Core
             {
                 if (message.Author.Id == _basicConfiguration.CalBotId)
                 {
-                    string PingRegexPattern = @"\b<@\d+>\b";
+                    string PingRegexPattern = @"<@\d+>";
                     Match m = Regex.Match(message.Embeds.First().Description, PingRegexPattern);
                     await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
                     if (m.Success)
