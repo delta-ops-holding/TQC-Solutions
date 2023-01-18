@@ -72,7 +72,9 @@ namespace LeadershipMinion.Core
                     Match m = Regex.Match(message.Embeds.First().Description, PingRegexPattern);
                     if (m.Success)
                     {
-                        await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
+                        /// await _applicationHandler.HandleCalBotMsgAsync(message, m.Value);
+                        await _applicationHandler.HandleCalBotMsgAsync(message, message.Embeds.First().Description);
+
                     }
                 }
             });
