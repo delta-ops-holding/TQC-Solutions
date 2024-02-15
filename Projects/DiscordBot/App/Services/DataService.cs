@@ -48,6 +48,7 @@ namespace DiscordBot.Services
                 //783506022370246726 => Clan.EPHEMERΔ,
                 783506171499774005 => Clan.SHΔDOW,
                 849017066739859520 => Clan.QUΔNTUM,
+                1207461905447395448 => Clan.ΔSTRAL,
                 _ => Clan.Undefined,
             };
         }
@@ -75,6 +76,7 @@ namespace DiscordBot.Services
                 //Clan.EPHEMERΔ => "<@&694675786111647814>",
                 Clan.SHΔDOW => "<@&725837886427234354>",
                 Clan.QUΔNTUM => "<@&848288604341272621>",
+                Clan.ΔSTRAL => "<@&1178045652052234362>",
                 _ => Clan.Undefined.ToString(),
             };
         }

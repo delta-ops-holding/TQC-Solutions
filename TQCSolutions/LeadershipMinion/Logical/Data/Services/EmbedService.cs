@@ -67,6 +67,7 @@ namespace LeadershipMinion.Logical.Data.Services
             Clan.SHΔDOW => nameof(Clan.SHΔDOW),
             Clan.CHΔOS => nameof(Clan.CHΔOS),
             Clan.QUΔNTUM => nameof(Clan.QUΔNTUM),
+            Clan.ΔSTRAL => nameof(Clan.ΔSTRAL),
             _ => throw new ArgumentOutOfRangeException(nameof(clan), clan, null)
         };
     }
