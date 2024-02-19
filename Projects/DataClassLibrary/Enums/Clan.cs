@@ -8,6 +8,6 @@
         Undefined,
         TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL, MΔJESTIC,
         DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL, IMMORTΔL,
-        EPHEMERΔ, SHΔDOW, QUΔNTUM, ΔSTRAL
+        EPHEMERΔ, SHΔDOW, QUΔNTUM
     }
 }
