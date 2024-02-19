@@ -27,7 +27,7 @@
         Undefined,
         TRΔNSIENT, TENΔCITY, ΔEGIS, ETHEREΔL, CELESTIΔL, MΔJESTIC,
         DEFIΔNCE, VIGILΔNT, TRΔNQUILITY, ETERNΔL, IMMORTΔL,
-        EPHEMERΔ, SHΔDOW, CHΔOS, QUΔNTUM
+        EPHEMERΔ, SHΔDOW, CHΔOS, QUΔNTUM, ΔSTRAL
     }
 
     /// <summary>
